@@ -1,0 +1,240 @@
+from datetime import date, timedelta
+from flask import Flask, jsonify, request, render_template
+from werkzeug.exceptions import HTTPException
+from models import Plant, CareSchedule, ActionLog
+
+VALID_CARE_TYPES = {'watering', 'fertilizing', 'repotting'}
+UPDATABLE_PLANT_FIELDS = {'name', 'species', 'location'}
+
+
+class PlantAppManager:
+    def __init__(self):
+        self.app = Flask(__name__, template_folder='templates', static_folder='static')
+        self.plants = {}
+        self.schedules = {}
+        self.logs = {}
+
+        self.app.register_error_handler(HTTPException, self._handle_http_exception)
+        self._register_routes()
+
+    def _handle_http_exception(self, e):
+        if request.path.startswith('/api/'):
+            return jsonify({'error': e.description}), e.code
+        return e
+
+    def _next_due_date(self, plant, schedule, plant_logs):
+        relevant = [l for l in plant_logs if l.care_type == schedule.care_type]
+        if relevant:
+            last = max(relevant, key=lambda l: l.performed_at)
+            base = date.fromisoformat(last.performed_at)
+        else:
+            base = date.fromisoformat(plant.created_at)
+        return base + timedelta(days=schedule.interval_days)
+
+    def _plant_status(self, plant_id):
+        plant = self.plants[plant_id]
+        plant_schedules = [s for s in self.schedules.values() if s.plant_id == plant_id]
+        plant_logs = [l for l in self.logs.values() if l.plant_id == plant_id]
+        today = date.today()
+        status = 'ok'
+        for sched in plant_schedules:
+            nd = self._next_due_date(plant, sched, plant_logs)
+            days = (nd - today).days
+            if days < 0:
+                return 'overdue'
+            if days <= 3:
+                status = 'soon'
+        return status
+
+    def _register_routes(self):
+        @self.app.route('/')
+        def index():
+            return render_template('index.html')
+
+        @self.app.route('/api/plants', methods=['GET'])
+        def get_plants():
+            result = []
+            for plant in self.plants.values():
+                d = plant.to_dict()
+                d['status'] = self._plant_status(plant.id)
+                result.append(d)
+            return jsonify(result), 200
+
+        @self.app.route('/api/plants', methods=['POST'])
+        def create_plant():
+            data = request.get_json()
+            if not data:
+                return jsonify({'error': 'Request body required'}), 400
+            missing = [f for f in ('name', 'species', 'location') if f not in data]
+            if missing:
+                return jsonify({'error': f'Missing required fields: {missing}'}), 400
+            plant = Plant(
+                name=data['name'],
+                species=data['species'],
+                location=data['location'],
+                created_at=data.get('created_at'),
+            )
+            self.plants[plant.id] = plant
+            d = plant.to_dict()
+            d['status'] = self._plant_status(plant.id)
+            return jsonify(d), 201
+
+        @self.app.route('/api/plants/<int:plant_id>', methods=['GET'])
+        def get_plant(plant_id):
+            plant = self.plants.get(plant_id)
+            if not plant:
+                return jsonify({'error': 'Plant not found'}), 404
+            d = plant.to_dict()
+            d['status'] = self._plant_status(plant_id)
+            d['schedules'] = [s.to_dict() for s in self.schedules.values() if s.plant_id == plant_id]
+            return jsonify(d), 200
+
+        @self.app.route('/api/plants/<int:plant_id>', methods=['PUT'])
+        def update_plant(plant_id):
+            plant = self.plants.get(plant_id)
+            if not plant:
+                return jsonify({'error': 'Plant not found'}), 404
+            data = request.get_json()
+            if data is None:
+                return jsonify({'error': 'Invalid or missing JSON body'}), 400
+            invalid = [k for k in data if k not in UPDATABLE_PLANT_FIELDS]
+            if invalid:
+                return jsonify({'error': f'Invalid fields: {invalid}'}), 400
+            for field in UPDATABLE_PLANT_FIELDS:
+                if field in data:
+                    setattr(plant, field, data[field])
+            d = plant.to_dict()
+            d['status'] = self._plant_status(plant_id)
+            return jsonify(d), 200
+
+        @self.app.route('/api/plants/<int:plant_id>', methods=['DELETE'])
+        def delete_plant(plant_id):
+            if plant_id not in self.plants:
+                return jsonify({'error': 'Plant not found'}), 404
+            del self.plants[plant_id]
+            for sid in [sid for sid, s in self.schedules.items() if s.plant_id == plant_id]:
+                del self.schedules[sid]
+            for lid in [lid for lid, l in self.logs.items() if l.plant_id == plant_id]:
+                del self.logs[lid]
+            return '', 204
+
+        @self.app.route('/api/plants/<int:plant_id>/schedules', methods=['GET'])
+        def get_schedules(plant_id):
+            if plant_id not in self.plants:
+                return jsonify({'error': 'Plant not found'}), 404
+            return jsonify([s.to_dict() for s in self.schedules.values() if s.plant_id == plant_id]), 200
+
+        @self.app.route('/api/plants/<int:plant_id>/schedules', methods=['POST'])
+        def create_or_update_schedule(plant_id):
+            if plant_id not in self.plants:
+                return jsonify({'error': 'Plant not found'}), 404
+            data = request.get_json()
+            if not data:
+                return jsonify({'error': 'Request body required'}), 400
+            care_type = data.get('care_type')
+            interval_days = data.get('interval_days')
+            if not care_type or interval_days is None:
+                return jsonify({'error': 'care_type and interval_days are required'}), 400
+            if care_type not in VALID_CARE_TYPES:
+                return jsonify({'error': f'care_type must be one of {sorted(VALID_CARE_TYPES)}'}), 400
+            if isinstance(interval_days, bool) or not isinstance(interval_days, int) or interval_days < 1:
+                return jsonify({'error': 'interval_days must be a positive integer'}), 400
+            existing = next(
+                (s for s in self.schedules.values() if s.plant_id == plant_id and s.care_type == care_type),
+                None,
+            )
+            if existing:
+                existing.interval_days = interval_days
+                return jsonify(existing.to_dict()), 201
+            sched = CareSchedule(plant_id=plant_id, care_type=care_type, interval_days=interval_days)
+            self.schedules[sched.id] = sched
+            return jsonify(sched.to_dict()), 201
+
+        @self.app.route('/api/plants/<int:plant_id>/schedules/<care_type>', methods=['DELETE'])
+        def delete_schedule(plant_id, care_type):
+            sched = next(
+                (s for s in self.schedules.values() if s.plant_id == plant_id and s.care_type == care_type),
+                None,
+            )
+            if not sched:
+                return jsonify({'error': 'Schedule not found'}), 404
+            del self.schedules[sched.id]
+            return '', 204
+
+        @self.app.route('/api/plants/<int:plant_id>/logs', methods=['GET'])
+        def get_logs(plant_id):
+            if plant_id not in self.plants:
+                return jsonify({'error': 'Plant not found'}), 404
+            result = sorted(
+                [l.to_dict() for l in self.logs.values() if l.plant_id == plant_id],
+                key=lambda l: l['performed_at'],
+                reverse=True,
+            )
+            return jsonify(result), 200
+
+        @self.app.route('/api/plants/<int:plant_id>/logs', methods=['POST'])
+        def create_log(plant_id):
+            if plant_id not in self.plants:
+                return jsonify({'error': 'Plant not found'}), 404
+            data = request.get_json()
+            if not data:
+                return jsonify({'error': 'Request body required'}), 400
+            if not data.get('care_type'):
+                return jsonify({'error': 'care_type is required'}), 400
+            log = ActionLog(
+                plant_id=plant_id,
+                care_type=data['care_type'],
+                performed_at=data.get('performed_at'),
+                notes=data.get('notes') or '',
+            )
+            self.logs[log.id] = log
+            return jsonify(log.to_dict()), 201
+
+        @self.app.route('/api/plants/<int:plant_id>/next-actions', methods=['GET'])
+        def get_next_actions(plant_id):
+            plant = self.plants.get(plant_id)
+            if not plant:
+                return jsonify({'error': 'Plant not found'}), 404
+            plant_schedules = [s for s in self.schedules.values() if s.plant_id == plant_id]
+            plant_logs = [l for l in self.logs.values() if l.plant_id == plant_id]
+            today = date.today()
+            result = []
+            for sched in plant_schedules:
+                nd = self._next_due_date(plant, sched, plant_logs)
+                days_until = (nd - today).days
+                result.append({
+                    'care_type': sched.care_type,
+                    'interval_days': sched.interval_days,
+                    'next_due': nd.isoformat(),
+                    'days_until': days_until,
+                    'overdue': days_until < 0,
+                })
+            result.sort(key=lambda x: x['days_until'])
+            return jsonify(result), 200
+
+        @self.app.route('/api/overdue', methods=['GET'])
+        def get_overdue():
+            today = date.today()
+            result = []
+            for plant in self.plants.values():
+                plant_schedules = [s for s in self.schedules.values() if s.plant_id == plant.id]
+                plant_logs = [l for l in self.logs.values() if l.plant_id == plant.id]
+                for sched in plant_schedules:
+                    nd = self._next_due_date(plant, sched, plant_logs)
+                    days_until = (nd - today).days
+                    if days_until < 0:
+                        result.append({
+                            'plant_id': plant.id,
+                            'plant_name': plant.name,
+                            'plant_location': plant.location,
+                            'care_type': sched.care_type,
+                            'next_due': nd.isoformat(),
+                            'days_overdue': -days_until,
+                        })
+            result.sort(key=lambda x: x['days_overdue'], reverse=True)
+            return jsonify(result), 200
+
+if __name__ == '__main__':  # pragma: no cover
+    manager = PlantAppManager()
+    app = manager.app
+    app.run(debug=True, host='127.0.0.1', port=5000)

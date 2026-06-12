@@ -1,0 +1,119 @@
+stages:
+  - test
+  - deploy
+
+test:
+  stage: test
+  image: python:3.13-slim
+  before_script:
+    - pip install -r requirements.txt
+  script:
+    - pytest --junitxml=junit.xml
+  artifacts:
+    when: always
+    reports:
+      junit: junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+    paths:
+      - coverage.xml
+  coverage: '/TOTAL.*\s+(\d+%)$/'
+
+pages:
+  stage: deploy
+  image:
+    name: plantuml/plantuml:latest
+    entrypoint: [""]
+  needs: []
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq --no-install-recommends git
+    - git fetch --all --prune
+  script:
+    - mkdir -p public/diagrams
+    # Render PNGs for every branch into public/diagrams/<safe-branch-name>/
+    - |
+      for branch in $(git branch -r | grep -v '\->' | sed 's|.*origin/||'); do
+        safe=$(printf '%s' "$branch" | tr '/' '-')
+        outdir="public/diagrams/$safe"
+        mkdir -p "$outdir" /tmp/src
+        git archive "origin/$branch" -- diagrams/ 2>/dev/null \
+          | tar -x -C /tmp/src/ 2>/dev/null || true
+        for f in /tmp/src/diagrams/*.puml; do
+          [ -f "$f" ] || continue
+          java -jar /opt/plantuml.jar -tpng -o "$PWD/$outdir" "$f"
+        done
+        printf '%s' "$branch" > "$outdir/.branch"
+        rm -rf /tmp/src
+      done
+    # Build branch→PNG index as JSON and generate index.html
+    - |
+      json='{'
+      sep=''
+      for outdir in public/diagrams/*/; do
+        [ -f "${outdir}.branch" ] || continue
+        branch=$(cat "${outdir}.branch")
+        safe=$(basename "$outdir")
+        pngs=''
+        psep=''
+        for png in "${outdir}"*.png; do
+          [ -f "$png" ] || continue
+          pngs="${pngs}${psep}\"$(basename "$png")\""
+          psep=','
+        done
+        json="${json}${sep}\"${branch}\":{\"safe\":\"${safe}\",\"pngs\":[${pngs}]}"
+        sep=','
+      done
+      json="${json}}"
+      cat > public/index.html << HTMLEOF
+      <!DOCTYPE html>
+      <html lang="de">
+      <head>
+        <meta charset="utf-8">
+        <title>Diagrams</title>
+        <style>
+          body { font-family: sans-serif; max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+          h1 { border-bottom: 2px solid #333; padding-bottom: .5rem; }
+          h2 { color: #444; margin-top: 2rem; }
+          label { font-weight: bold; margin-right: .5rem; }
+          select { font-size: 1rem; padding: .3rem .5rem; margin-bottom: 1.5rem; }
+          img { max-width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: .5rem; display: block; margin-top: .5rem; }
+          section { margin-bottom: 2rem; }
+          .empty { color: #888; font-style: italic; }
+        </style>
+      </head>
+      <body>
+        <h1>Diagrams</h1>
+        <label for="branch">Branch:</label>
+        <select id="branch"></select>
+        <div id="diagrams"></div>
+        <script>
+          var data = ${json};
+          var sel = document.getElementById('branch');
+          var div = document.getElementById('diagrams');
+          Object.keys(data).sort().forEach(function(b) {
+            var o = document.createElement('option');
+            o.value = b; o.textContent = b; sel.appendChild(o);
+          });
+          function render(b) {
+            var info = data[b];
+            if (!info || !info.pngs.length) {
+              div.innerHTML = '<p class="empty">No diagrams in this branch.</p>';
+              return;
+            }
+            div.innerHTML = info.pngs.map(function(p) {
+              return '<section><h2>' + p.replace(/\.png$/, '') + '</h2>' +
+                '<img src="diagrams/' + info.safe + '/' + p + '" alt="' + p + '"></section>';
+            }).join('');
+          }
+          sel.addEventListener('change', function() { render(sel.value); });
+          if (sel.options.length) render(sel.options[0].value);
+        </script>
+      </body>
+      </html>
+      HTMLEOF
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

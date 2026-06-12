@@ -1,0 +1,344 @@
+namespace: software-engineering-muc.dai/semester/sose2026/modularbeit-teil-2
+
+project_name: modularbeit-teil-2
+starter_code: git@gitlab.lrz.de:hm/teaching/muc.dai/software-engineering/uebungen/sose2026/modularbeit-teil-2
+per: 
+  - group
+access_level: maintainer
+access_level_group: reporter
+squash_commit_history: False
+branches:
+  - main
+  - feature-frontend-login
+enable_ci: True
+delete_commit_history: True # If true, all branches of the resulting repo will have only one commit with the latest code of the branch 
+
+labels:
+  - name: Type::Bug
+    color: | 
+      #dc143c
+  - name: Type::User Story
+    color: | 
+      #6699cc
+  - name: AI Usage Doc
+    color: |
+      #cc338b
+
+milestones:
+  - title: Sprint 1
+    start_date: | 
+      2026-05-01
+    due_date: |
+      2026-05-15
+  - title: Sprint 2
+    start_date: |
+      2026-05-18
+    due_date: |
+      2026-05-29
+  - title: Sprint 3
+    start_date: |
+      2026-06-12
+    due_date: |
+      2026-06-26
+
+boards:
+  - name: Sprint Backlog
+    board_list:
+      milestone: Sprint 3
+
+issues:
+  - title: "As a new user, I want to register with a username and password."
+    labels: "Type::User Story"
+    milestone: "Sprint 3"
+    weight: 5
+    description: |
+      ## User Story
+
+      **As a** new user,
+      **I want to** register with a username and password,
+      **So that** I can create a personal account and manage my own plants.
+
+      ### Acceptance Criteria
+
+      1. A POST request to `/api/auth/register` with valid username and password creates a new user.
+      2. The response contains `id` and `username`, but never the password or its hash.
+      3. Registering with an already taken username returns `409 Conflict`.
+      4. Missing or empty `username` or `password` returns `400 Bad Request`.
+      5. Passwords are stored as a secure hash. Plaintext is never persisted.
+      6. A username that exceeds the maximum length returns `400 Bad Request`.
+      7. A password that does not meet the minimum length requirement returns `400 Bad Request`.
+      8. A request body that is not valid JSON returns `400 Bad Request`.
+      9. A username containing forbidden characters returns `400 Bad Request`.
+
+      ### Technical Requirements
+
+      - `POST /api/auth/register`
+      - Request body: `{ "username": "alice", "password": "geheim" }`
+      - Success: `201 Created` → `{ "id": 1, "username": "alice" }`
+
+      ### Error Cases
+
+      | Scenario                              | Status Code               | Response Body                                                              |
+      |---------------------------------------|---------------------------|----------------------------------------------------------------------------|
+      | Username already taken                | `409 Conflict`            | `{"error": "Username is already taken."}`                                  |
+      | `username` field missing              | `400 Bad Request`         | `{"error": "Field 'username' is required."}`                               |
+      | `password` field missing              | `400 Bad Request`         | `{"error": "Field 'password' is required."}`                               |
+      | `username` is empty string            | `400 Bad Request`         | `{"error": "Field 'username' must not be empty."}`                         |
+      | `password` is empty string            | `400 Bad Request`         | `{"error": "Field 'password' must not be empty."}`                         |
+      | `username` exceeds maximum length     | `400 Bad Request`         | `{"error": "Field 'username' must not exceed 50 characters."}`             |
+      | `password` below minimum length       | `400 Bad Request`         | `{"error": "Field 'password' must be at least 8 characters long."}`        |
+      | `username` contains invalid characters| `400 Bad Request`         | `{"error": "Field 'username' may only contain letters, digits, and underscores."}`|
+      | Request body is not valid JSON        | `400 Bad Request`         | `{"error": "Request body must be valid JSON."}`                            |
+      | `Content-Type` header is not JSON     | `415 Unsupported Media Type` | `{"error": "Content-Type must be 'application/json'."}`                 |
+      | Unexpected server-side error          | `500 Internal Server Error` | `{"error": "An unexpected error occurred. Please try again later."}`     |
+
+      ### Tasks
+
+      - [ ] Implement `User` model with `id`, `username`, `password` (hashed)
+      - [ ] Implement class `AuthenticationService` providing amongst others the function `AuthenticationService.get_password_hash()`. 
+            Use the functions `generate_password_hash` and `check_password_hash` provided by the library
+            `werkzeug.security` (installed with flask).
+      - [ ] Implement `POST /api/auth/register` endpoint with all error cases
+      - [ ] Ensure password hash is never included in any response
+      - [ ] Validate `username`: required, non-empty, max 50 characters, alphanumeric + underscores only
+      - [ ] Validate `password`: required, non-empty, minimum 8 characters
+      - [ ] Return `409 Conflict` for duplicate usernames
+      - [ ] Return `415 Unsupported Media Type` if `Content-Type` is not `application/json`
+      - [ ] Handle JSON parse errors with `400 Bad Request`
+      - [ ] Add a generic `500 Internal Server Error` fallback handler
+      - [ ] Write tests for all error cases
+
+      ### Important Hint
+
+      You will find a description on why password hashing is important and how to implement it in the file `passwort_hashing.md`.
+      Read this file first before doing anything else for this user story!
+
+  - title: "As a registered user, I want to log in with my username and password."
+    labels: "Type::User Story"
+    milestone: "Sprint 3"
+    weight: 5
+    description: |
+      ## User Story
+
+      **As a** registered user,
+      **I want to** log in with my username and password,
+      **So that** I receive a JWT token to access protected endpoints.
+
+      ### Acceptance Criteria
+
+      1. A POST request to `/api/auth/login` with correct credentials returns a JWT token.
+      2. An unknown username and a wrong password both return the same `401 Unauthorized` response (no information leakage).
+      3. Missing or empty fields return `400 Bad Request`.
+      4. The JWT contains claims `sub` (user ID as string), `iat`, and `exp` (valid for 1 hour).
+      5. A request body that is not valid JSON returns `400 Bad Request`.
+      6. A request without `Content-Type: application/json` returns `415 Unsupported Media Type`.
+
+      ### Technical Requirements
+
+      - `POST /api/auth/login`
+      - Request body: `{ "username": "alice", "password": "geheim" }`
+      - Success: `200 OK` → `{ "access_token": "<JWT>" }`
+
+      ### Error Cases
+
+      | Scenario                          | Status Code                  | Response Body                                                                    |
+      |-----------------------------------|------------------------------|----------------------------------------------------------------------------------|
+      | Unknown username                  | `401 Unauthorized`           | `{"error": "Invalid username or password."}`                                     |
+      | Wrong password                    | `401 Unauthorized`           | `{"error": "Invalid username or password."}`                                     |
+      | `username` field missing          | `400 Bad Request`            | `{"error": "Field 'username' is required."}`                                     |
+      | `password` field missing          | `400 Bad Request`            | `{"error": "Field 'password' is required."}`                                     |
+      | `username` is empty string        | `400 Bad Request`            | `{"error": "Field 'username' must not be empty."}`                               |
+      | `password` is empty string        | `400 Bad Request`            | `{"error": "Field 'password' must not be empty."}`                               |
+      | Request body is not valid JSON    | `400 Bad Request`            | `{"error": "Request body must be valid JSON."}`                                  |
+      | `Content-Type` header is not JSON | `415 Unsupported Media Type` | `{"error": "Content-Type must be 'application/json'."}`                          |
+      | Unexpected server-side error      | `500 Internal Server Error`  | `{"error": "An unexpected error occurred. Please try again later."}`             |
+
+      ### Security Notes
+
+      - The `401` response message is intentionally identical for both unknown username and wrong password
+        to prevent username enumeration attacks.
+      - The JWT secret must never appear in logs or error responses.
+      - Note: Usually one has to take care that timing of the `401` response must be consistent regardless of whether the username exists.
+        This allows preventing timing attacks. In our simple project, you don't need to take care of the timing, but be aware for the future
+        that this is a possible attack vector.
+
+      ### Tasks
+
+      - [ ] Implement `AuthenticationService.verify_password()`
+      - [ ] Implement `AuthenticationService.create_token()` with `sub`, `iat`, `exp`
+      - [ ] Implement `AuthenticationService.verify_token()` returning `None` for invalid/expired tokens
+      - [ ] Implement `POST /api/auth/login` endpoint with unified error message for wrong credentials
+      - [ ] Validate `username` and `password`: required and non-empty
+      - [ ] Return identical `401` body for unknown username and wrong password
+      - [ ] Return `415 Unsupported Media Type` if `Content-Type` is not `application/json`
+      - [ ] Handle JSON parse errors with `400 Bad Request`
+      - [ ] Handle JWT generation failures gracefully with `503 Service Unavailable`
+      - [ ] Add a generic `500 Internal Server Error` fallback handler
+      - [ ] Write tests for all error cases
+
+      ### Important Hint
+
+      You will find a description on why password hashing is important and how to implement it in the file `passwort_hashing.md`.
+      Read this file first before doing anything else for this user story!
+
+  - title: "As a logged-in user, I want my plant data to be accessible only to me."
+    labels: "Type::User Story"
+    milestone: "Sprint 3"
+    weight: 5
+    description: |
+      ## User Story
+
+      **As a** logged-in user,
+      **I want to** manage only my own plants and have them accessible only to me,
+      **So that** my data is kept private and separate from other users.
+
+      ### Acceptance Criteria
+
+      1. All plant-related endpoints require a valid JWT, provided as `Authorization: Bearer <token>`.
+      2. A request with a missing, invalid, or expired token returns `401 Unauthorized`.
+      3. `POST /api/plants` assigns ownership from the authenticated user's JWT — never from the request body.
+      4. `GET /api/plants` returns only the plants belonging to the authenticated user.
+      5. `GET /api/overdue` returns only overdue actions for the authenticated user's plants.
+      6. All endpoints operating on a specific plant return `404 Not Found` if the plant does not exist
+        or belongs to another user — the response is identical in both cases to prevent ID enumeration.
+
+      ### Protected Endpoints
+
+      | Endpoint                                 | Methods          |
+      |------------------------------------------|------------------|
+      | `/api/plants`                            | GET, POST        |
+      | `/api/plants/<id>`                       | GET, PUT, DELETE |
+      | `/api/plants/<id>/schedules`             | GET, POST        |
+      | `/api/plants/<id>/schedules/<care_type>` | DELETE           |
+      | `/api/plants/<id>/logs`                  | GET, POST        |
+      | `/api/plants/<id>/next-actions`          | GET              |
+      | `/api/overdue`                           | GET              |
+
+      ### Error Cases
+
+      | Scenario                               | Status Code                 | Response Body                                              |
+      |----------------------------------------|-----------------------------|------------------------------------------------------------|
+      | `Authorization` header missing         | `401 Unauthorized`          | `{"error": "Authentication required."}`                    |
+      | Token invalid, malformed, or expired   | `401 Unauthorized`          | `{"error": "Invalid or expired token."}`                   |
+      | Plant not found or belongs to another user | `404 Not Found`         | `{"error": "Plant not found."}`                            |
+      | `user_id` supplied in POST request body | `400 Bad Request`          | `{"error": "Field 'user_id' must not be set manually."}`   |
+      | Request body missing required fields   | `400 Bad Request`           | `{"error": "Field '<field>' is required."}`                |
+      | Unexpected server-side error           | `500 Internal Server Error` | `{"error": "An unexpected error occurred. Please try again later."}` |
+
+      ### Security Notes
+
+      - `user_id` is always derived from the verified JWT — it is never accepted from the request body.
+        A request body containing `user_id` is rejected with `400 Bad Request`.
+      - The `404` response is intentionally identical for both non-existent and foreign plants
+        to prevent attackers from inferring valid plant IDs via differing status codes.
+
+      ### Tasks
+
+      - [ ] Add `user_id` attribute to the `Plant` model
+      - [ ] Protect all plant-related endpoints so they require a valid JWT
+      - [ ] Extract `user_id` from JWT in `POST /api/plants`; reject requests that supply `user_id` in the body
+      - [ ] Filter plants by `user_id` in `GET /api/plants` and `GET /api/overdue`
+      - [ ] Add ownership check returning `404` for missing or foreign plants on all `<id>`-based endpoints
+      - [ ] Write tests for missing, invalid, and expired tokens on each protected endpoint
+      - [ ] Write tests for foreign plant access and manual `user_id` injection attempts
+      - [ ] Create sequence diagrams for valid and invalid `GET /api/plants/<id>` requests
+
+  - title: "As a developer, I want to introduce the Repository Pattern with in-memory storage."
+    labels: "Type::User Story"
+    milestone: "Sprint 3"
+    weight: 8
+    description: |
+      ## User Story
+
+      **As a** developer,
+      **I want to** introduce the Repository Pattern with in-memory implementations for all data access,
+      **So that** storage logic is decoupled from route logic, the application is testable in isolation,
+      and the storage backend can be swapped without changing application code.
+
+      ### Acceptance Criteria
+
+      1. Each entity (`Plant`, `CareSchedule`, `ActionLog`, `User`) has a dedicated abstract base class defining its repository interface.
+      2. Each interface has a concrete `InMemory…Repository`, e.g., `InMemoryPlantRepository`, `InMemoryCareScheduleRepository`, ..., implementation backed by plain Python dicts or lists.
+      3. The data in the `InMemory…Repository` must not be persistent, i.e., data is living, e.g., in a dict in the RAM, but not stored on the disk.
+      4. All route functions in `app.py` access data exclusively through repository methods, never through raw dicts or lists.
+      5. The `_next_id` class variable is removed from all model classes; ID assignment is the sole responsibility of the repository's `save()` method.
+      6. All existing tests pass using `InMemory…Repository` instances
+
+      ### Technical Requirements
+
+      Minimum interface for `PlantRepository`:
+
+      | Method | Return type | Description |
+      |---|---|---|
+      | `save(plant)` | `None` | Create or update a plant |
+      | `get_by_id(plant_id)` | `Plant \| None` | Find by ID |
+      | `find_by_user(user_id)` | `list[Plant]` | All plants of a user |
+      | `delete(plant_id)` | `None` | Delete by ID |
+
+      Analogous interfaces for `CareScheduleRepository`, `ActionLogRepository`, and `UserRepository`.
+
+      ### Tasks
+
+      - [ ] Define individual abstract base classes for all four repositories in `repositories.py`
+      - [ ] Remove `_next_id` from all model classes; add optional `id=None` constructor parameter
+      - [ ] Implement `InMemory…Repository` for all four entities in `in_memory_repositories.py`
+      - [ ] Update `app.py` to use repository instances and remove all direct dict/list accesses
+      - [ ] Update `conftest.py` to inject `InMemory…Repository` instances
+
+
+  - title: "As a developer, I want to persist data in JSON files via Json…Repository."
+    labels: "Type::User Story"
+    milestone: "Sprint 3"
+    weight: 5
+    description: |
+      ## User Story
+
+      **As a** developer,
+      **I want to** implement `Json…Repository` classes that read from and write to JSON files,
+      **So that** application data survives a server restart without changing any application or test code.
+
+      ### Acceptance Criteria
+
+      1. A `Json…Repository` exists for each entity (`Plant`, `CareSchedule`, `ActionLog`, `User`), each implementing the corresponding abstract repository interface from the previous story.
+      2. Each repository reads its data from a dedicated JSON file on startup and writes back on every mutating operation (`save`, `delete`).
+      3. Data survives a server restart: objects stored in one process are readable in a subsequent process.
+      4. If the JSON file does not exist yet, the repository starts with an empty dataset and creates the file on the first write.
+      5. The `__main__` block in `app.py` uses `Json…Repository` instances pointing to `data/*.json`.
+      6. Note: All tests continue to use `InMemory…Repository` except the tests written for the `Json…Repository` classes.
+
+      ### Technical Requirements
+
+      Possible Production startup:
+      ```python
+      if __name__ == '__main__':  # pragma: no cover
+          manager = PlantAppManager(
+            JsonPlantRepository('data/plants.json'),
+            JsonCareScheduleRepository('data/schedules.json'),
+            JsonActionLogRepository('data/logs.json'),
+            JsonUserRepository('data/users.json')
+          )
+          app = manager.app
+          app.run(debug=True, host='127.0.0.1', port=5000)
+      ```
+
+      Possible Test startup:
+      ```python
+      @pytest.fixture
+      def client():
+          manager = PlantAppManager(
+            InMemoryPlantRepository(),
+            InMemoryCareScheduleRepository(),
+            InMemoryActionLogRepository(),
+            InMemoryUserRepository()
+          )
+          manager.app.config['TESTING'] = True
+          with manager.app.test_client() as c:
+              yield c
+      ```
+
+      ### Tasks
+
+      - [ ] Implement `Json…Repository` for all four entities in `json_repositories.py`
+      - [ ] Ensure each repository creates the target file if it does not exist
+      - [ ] Update the `__main__` block in `app.py` to use `Json…Repository` instances
+      - [ ] Add `data/` to `.gitignore` to avoid committing runtime data files
