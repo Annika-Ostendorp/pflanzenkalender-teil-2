@@ -69,3 +69,27 @@ def test_save_updates_existing_plant():
     repo.save(plant)
     assert len(repo.find_all()) == 1
     assert repo.get_by_id(plant.id).name == 'New'
+
+
+def test_find_all_returns_empty_list_when_no_plants():
+    repo = InMemoryPlantRepository()
+    assert repo.find_all() == []
+
+
+def test_find_by_user_returns_empty_when_no_match():
+    repo = InMemoryPlantRepository()
+    repo.save(Plant(name='A', species='B', location='C', user_id=1))
+    assert repo.find_by_user(999) == []
+
+
+def test_find_by_plant_and_care_type_returns_correct_schedule():
+    repo = InMemoryCareScheduleRepository()
+    s = CareSchedule(plant_id=1, care_type='watering', interval_days=7)
+    repo.save(s)
+    result = repo.find_by_plant_and_care_type(1, 'watering')
+    assert result is s
+
+
+def test_find_by_plant_and_care_type_returns_none_when_missing():
+    repo = InMemoryCareScheduleRepository()
+    assert repo.find_by_plant_and_care_type(1, 'watering') is None
