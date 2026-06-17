@@ -94,6 +94,13 @@ class ActionLog {
   +notes: str
 }
 
+class User {
+  +id: int | None
+  +username: str
+  +password_hash: str
+}
+
+
 ' ── Dependency Inversion: Manager → abstract interfaces ──
 PlantAppManager --> PlantRepository
 PlantAppManager --> CareScheduleRepository
