@@ -168,3 +168,18 @@ def test_register_invalid_content_type(client): # wenn Content-Type-Header nicht
     assert response.status_code == 415 # Falsches Format, kein JSON content_type --> Statuscode 415 zurückgegeben?
     assert "error" in data # 'error' muss in Server-Antwort drin sein
     assert data["error"] == "Content-Type must be 'application/json'." # entspricht die Fehlermeldung exakt dieser Syntax?
+
+
+def test_register_unexpected_server_error(client): # unvorhergesehenen Systemabsturz simulisieren --> 500 Internal Server Error
+    payload = {
+        "username": ["Ungültiger", "Benutzername"], # hier auf einmal ungültiger Datentyp für username -> Liste und kein string wird gesendet
+        "password": "meinsicherespasswort123"
+    }
+
+    response = client.post("/api/auth/register", json = payload)
+    data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 500 # Server stürzt ab, wegen ungültigem Datentyp --> Statuscode 500 zurückgegeben?
+    assert "error" in data # 'error' muss in Server-Antwort drin sein
+    assert data["error"] == "An unexpected error occured. Please try again later." # entspricht die Fehlermeldung exakt dieser Syntax?
