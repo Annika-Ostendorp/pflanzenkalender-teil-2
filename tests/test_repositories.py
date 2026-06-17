@@ -105,3 +105,25 @@ def test_find_by_username_returns_user():
 def test_find_by_username_returns_none_when_missing():
     repo = InMemoryUserRepository()
     assert repo.find_by_username('nobody') is None
+
+
+# ── InMemoryCareScheduleRepository ──────────────────────────────
+
+def test_care_schedule_save_assigns_id():
+    repo = InMemoryCareScheduleRepository()
+    s = CareSchedule(plant_id=1, care_type='watering', interval_days=7)
+    repo.save(s)
+    assert s.id == 1
+
+    
+def test_care_schedule_find_by_plant_returns_schedules():
+    repo = InMemoryCareScheduleRepository()
+    s = CareSchedule(plant_id=1, care_type='watering', interval_days=7)
+    repo.save(s)
+    assert repo.find_by_plant(1) == [s]
+
+
+def test_care_schedule_find_by_plant_returns_empty_when_no_match():
+    repo = InMemoryCareScheduleRepository()
+    repo.save(CareSchedule(plant_id=1, care_type='watering', interval_days=7))
+    assert repo.find_by_plant(999) == []
