@@ -1,0 +1,20 @@
+@startuml user_registration
+skin rose
+skinparam style strictuml
+
+class User {
+    + id : int / None
+    + username : str
+    - password : str
+
+    + __init__(id: int / None, username: str, password: str)
+}
+
+class AuthenticationService {
+    + {static} get_password_hash(password: str) : str
+}
+
+'AuthenticationService hängt von User ab --> speichert ja nicht dauerhaft User-Objekte in sich ab, sondern bekommt in Methoden nur temporär'
+'ein Passwort oder User übergeben für Berechnung von Hash --> deshalb schwächere From einer Abhängigkeit (gestrichelter Pfeil)'
+AuthenticationService ..> User
+@enduml
