@@ -93,3 +93,15 @@ def test_find_by_plant_and_care_type_returns_correct_schedule():
 def test_find_by_plant_and_care_type_returns_none_when_missing():
     repo = InMemoryCareScheduleRepository()
     assert repo.find_by_plant_and_care_type(1, 'watering') is None
+
+
+def test_find_by_username_returns_user():
+    repo = InMemoryUserRepository()
+    user = User(username='alice', password_hash='hash123')
+    repo.save(user)
+    assert repo.find_by_username('alice') is user
+
+
+def test_find_by_username_returns_none_when_missing():
+    repo = InMemoryUserRepository()
+    assert repo.find_by_username('nobody') is None
