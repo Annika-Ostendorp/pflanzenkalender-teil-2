@@ -48,3 +48,17 @@ def test_register_missing_username(client): # wenn "username" komplett in Payloa
     assert response.status_code == 400 # Pflichtfeld "username" fehlt --> Statuscode 400 zurückgegeben?
     assert "error" in data # 'error' muss in Server-Antwort drin sein
     assert data["error"] == "Field 'username' is required." # entspricht die Fehlermeldung exakt dieser Syntax?
+
+
+def test_register_missing_password(client): # gleiche Logik wie vorhin --> diesmal fehlt "password" in Payload
+    payload = {
+        "username": "Annika"
+    }
+
+    response = client.post("/api/auth/register", json = payload)
+    data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 400 # Pflichtfeld "password" fehlt --> Statuscode 400 zurückgegeben?
+    assert "error" in data # 'error' muss in Server-Antwort wieder drin sein
+    assert data["error"] == "Field 'password' is required." # entspricht die Fehlermeldung exakt dieser Syntax?
