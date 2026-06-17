@@ -148,3 +148,25 @@ def test_action_log_find_by_plant_returns_empty_when_no_match():
     repo = InMemoryActionLogRepository()
     repo.save(ActionLog(plant_id=1, care_type='watering'))
     assert repo.find_by_plant(999) == []
+
+
+# ── InMemoryUserRepository ───────────────────────────────────────
+
+def test_user_save_assigns_id():
+    repo = InMemoryUserRepository()
+    user = User(username='alice', password_hash='hash123')
+    repo.save(user)
+    assert user.id == 1
+
+
+def test_user_get_by_id_returns_none_when_missing():
+    repo = InMemoryUserRepository()
+    assert repo.get_by_id(999) is None
+
+
+def test_user_delete_removes_user():
+    repo = InMemoryUserRepository()
+    user = User(username='alice', password_hash='hash123')
+    repo.save(user)
+    repo.delete(user.id)
+    assert repo.get_by_id(user.id) is None
