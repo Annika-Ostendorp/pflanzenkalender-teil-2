@@ -152,4 +152,19 @@ def test_register_invalid_json_body(client): # Request-Body kein gültiges JSON 
     # Überprüfungen
     assert response.status_code == 400 # Struktur stimmt nicht --> ungültiges JSON --> Statuscode 400 zurückgegeben?
     assert "error" in data # 'error' muss in Server-Antwort drin sein
-    assert data["error"] == "Content-Type must be 'application/json'."
+    assert data["error"] == "Request Body must be valid JSON." # entspricht die Fehlermeldung exakt dieser Syntax?
+
+
+def test_register_invalid_content_type(client): # wenn Content-Type-Header nicht application/json ist --> 415 Unsupported Media Type
+    payload = {
+        "username": "Annika",
+        "password": "passwort123"
+    }
+
+    response = client.post("/api/auth/register", data = str(payload), content_type = "text/plain") # hier ist falscher Header --> valider JSON-String, aber eben mit text/plain als Header
+    data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 415 # Falsches Format, kein JSON content_type --> Statuscode 415 zurückgegeben?
+    assert "error" in data # 'error' muss in Server-Antwort drin sein
+    assert data["error"] == "Content-Type must be 'application/json'." # entspricht die Fehlermeldung exakt dieser Syntax?
