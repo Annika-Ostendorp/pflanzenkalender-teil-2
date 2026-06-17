@@ -19,3 +19,14 @@ note top right
 end note
 
 
+class PlantAppManager {
+  +plant_repo: PlantRepository
+  +schedule_repo: CareScheduleRepository
+  +log_repo: ActionLogRepository
+  +user_repo: UserRepository
+}
+
+
+
+
+@enduml
