@@ -1,0 +1,21 @@
+@startuml repository-pattern
+skinparam classAttributeIconSize 0
+skinparam classFontSize 11
+skinparam nodesep 30
+skinparam ranksep 25
+top to bottom direction
+
+
+note top right
+  Für die User Story „Repository Pattern mit In-Memory-Speicher"
+  halte ich ein Klassendiagramm für sinnvoll, weil hier
+  ausschließlich strukturelle Änderungen eingeführt werden:
+  abstrakte Basisklassen (Interfaces) und konkrete
+  In-Memory-Implementierungen. Dependency Inversion:
+  PlantAppManager kennt nur die abstrakten Interfaces,
+  nicht die konkreten InMemory-Klassen. Ein Sequenz- oder
+  Aktivitätsdiagramm wäre unpassend, da kein neuer
+  Prozessablauf, sondern neue Struktur modelliert wird.
+end note
+
+
