@@ -133,5 +133,21 @@ InMemoryActionLogRepository -[hidden]down- ActionLog
 UserRepository -[hidden]down- InMemoryUserRepository
 InMemoryUserRepository -[hidden]down- User
 
+note as N1
+Für diese User Story habe ich ein Klassendiagramm gewählt,
+weil hier vor allem die Struktur des Codes verändert wird.
+
+Die User Story führt abstrakte Repository-Klassen und konkrete
+InMemory-Implementierungen ein. Das Diagramm zeigt, dass
+PlantAppManager nur von den abstrakten Repository-Klassen abhängt
+und nicht direkt von den InMemory-Klassen.
+
+Außerdem wird sichtbar, dass die ID-Vergabe nicht mehr in den
+Modellklassen liegt, sondern in der save()-Methode der Repositories.
+
+Ein Sequenz- oder Aktivitätsdiagramm wäre hier weniger passend,
+weil kein neuer Ablauf modelliert wird, sondern neue Klassen und
+ihre Beziehungen.
+end note
 
 @enduml
