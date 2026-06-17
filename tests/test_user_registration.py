@@ -139,3 +139,17 @@ def test_register_username_invalid_characters(client): # wenn Username ungültig
     assert response.status_code == 400 # ungültiges Sonderzeichen in Username --> 400 Bad Request zurückgegeben?
     assert "error" in data # ist 'error' in Dictionary aus Antwort enthalten?
     assert data["error"] == "Field 'username' may only contain letters, digits, and underscores." # entspricht die Fehlermeldung exakt dieser Syntax?
+
+
+def test_register_invalid_json_body(client): # Request-Body kein gültiges JSON --> 400 Bad Request
+    invalid_json = "{username: Annika}" # ungültiges JSON --> fehlende Anführungszeichen
+
+    response = client.post("/api/auth/register", data = invalid_json, content_type = "application/json") # nicht json=..., da das ein Python-Dictionary direkt in ein valides JSON umwandelt
+                                                                                                         # stattdessen invalid JSON als data übergeben und content_type manuell auf JSON simulieren, obwohl es ja nicht stimmt
+
+    data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 400 # Struktur stimmt nicht --> ungültiges JSON --> Statuscode 400 zurückgegeben?
+    assert "error" in data # 'error' muss in Server-Antwort drin sein
+    assert data["error"] == "Content-Type must be 'application/json'."
