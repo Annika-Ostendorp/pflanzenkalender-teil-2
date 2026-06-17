@@ -109,3 +109,18 @@ def test_register_username_too_long(client): # Username darf Maximumlänge von 5
     assert response.status_code == 400 # Maximumlänge überschritten --> Statuscode 400 zurückgegeben?
     assert "error" in data # 'error' muss in Server-Antwort drin sein
     assert data["error"] == "Field 'username' must not exceed 50 characters." # entspricht die Fehlermeldung exakt dieser Syntax?
+
+
+def test_register_password_too_short(client): # Passwort muss länger als 8 Zeichen sein --> sonst 400 Bad Request
+    payload = {
+        "username": "Annika",
+        "password": "bla123" # Passwort zu kurz mit nur 6 Zeichen
+    }
+
+    response = client.post("/api/auth/register", json = payload)
+    data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 400 # Minimumlänge unterschritten --> Statuscode 400 zurückgegeben?
+    assert "error" in data # 'error' muss in Server-Antwort drin sein
+    assert data["error"] == "Field 'password' must be at least 8 characters long." # entspricht die Fehlermeldung exakt dieser Syntax?
