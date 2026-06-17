@@ -45,4 +45,28 @@ abstract class UserRepository {
   {abstract} +find_by_username(username: str): User | None
   {abstract} +delete(user_id: int): None
 }
+
+class InMemoryPlantRepository {
+  -_store: dict
+  -_next_id: int
+}
+
+
+class InMemoryCareScheduleRepository {
+  -_store: dict
+  -_next_id: int
+}
+
+
+class InMemoryActionLogRepository {
+  -_store: dict
+  -_next_id: int
+}
+
+class InMemoryUserRepository {
+  -_store: dict
+  -_next_id: int
+}
+
+
 @enduml
