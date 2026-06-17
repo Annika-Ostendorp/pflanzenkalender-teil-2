@@ -92,3 +92,20 @@ def test_register_empty_password(client): # Übergebenes Passwort darf auch kein
     assert response.status_code == 400 # Leerer String für "password" ist nicht erlaubt --> Statuscode 400 zurückgegeben?
     assert "error" in data # 'error' muss in Server-Antwort drin sein
     assert data["error"] == "Field 'password' must not be empty." # entspricht die Fehlermeldung exakt dieser Syntax?
+
+
+def test_register_username_too_long(client): # Username darf Maximumlänge von 50 Zeichen nicht überschreiten --> sonst 400 Bad Request
+    sehr_langer_Benutzername = "abc" * 50 # überschreitet sicher die geforderte Maximumlänge eines Benutzernamens
+
+    payload = {
+        "username": sehr_langer_Benutzername,
+        "password": "meintollespasswort"
+    }
+
+    response = client.post("/api/auth/register", json = payload)
+    data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 400 # Maximumlänge überschritten --> Statuscode 400 zurückgegeben?
+    assert "error" in data # 'error' muss in Server-Antwort drin sein
+    assert data["error"] == "Field 'username' must not exceed 50 characters." # entspricht die Fehlermeldung exakt dieser Syntax?
