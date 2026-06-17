@@ -127,3 +127,24 @@ def test_care_schedule_find_by_plant_returns_empty_when_no_match():
     repo = InMemoryCareScheduleRepository()
     repo.save(CareSchedule(plant_id=1, care_type='watering', interval_days=7))
     assert repo.find_by_plant(999) == []
+
+# ── InMemoryActionLogRepository ──────────────────────────────────
+
+def test_action_log_save_assigns_id():
+    repo = InMemoryActionLogRepository()
+    log = ActionLog(plant_id=1, care_type='watering')
+    repo.save(log)
+    assert log.id == 1
+
+
+def test_action_log_find_by_plant_returns_logs():
+    repo = InMemoryActionLogRepository()
+    log = ActionLog(plant_id=1, care_type='watering')
+    repo.save(log)
+    assert repo.find_by_plant(1) == [log]
+
+
+def test_action_log_find_by_plant_returns_empty_when_no_match():
+    repo = InMemoryActionLogRepository()
+    repo.save(ActionLog(plant_id=1, care_type='watering'))
+    assert repo.find_by_plant(999) == []
