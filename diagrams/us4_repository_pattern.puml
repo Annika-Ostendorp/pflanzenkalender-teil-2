@@ -13,11 +13,36 @@ class PlantAppManager {
   +user_repo: UserRepository
 }
 
+
 abstract class PlantRepository {
   {abstract} +save(plant: Plant): None
   {abstract} +get_by_id(plant_id: int): Plant | None
   {abstract} +find_all(): List[Plant]
   {abstract} +find_by_user(user_id: int): List[Plant]
   {abstract} +delete(plant_id: int): None
+}
+
+
+abstract class CareScheduleRepository {
+  {abstract} +save(schedule: CareSchedule): None
+  {abstract} +get_by_id(schedule_id: int): CareSchedule | None
+  {abstract} +find_by_plant(plant_id: int): List[CareSchedule]
+  {abstract} +find_by_plant_and_care_type(plant_id: int, care_type: str): CareSchedule | None
+  {abstract} +delete(schedule_id: int): None
+}
+
+
+abstract class ActionLogRepository {
+  {abstract} +save(log: ActionLog): None
+  {abstract} +get_by_id(log_id: int): ActionLog | None
+  {abstract} +find_by_plant(plant_id: int): List[ActionLog]
+  {abstract} +delete(log_id: int): None
+}
+
+abstract class UserRepository {
+  {abstract} +save(user: User): None
+  {abstract} +get_by_id(user_id: int): User | None
+  {abstract} +find_by_username(username: str): User | None
+  {abstract} +delete(user_id: int): None
 }
 @enduml
