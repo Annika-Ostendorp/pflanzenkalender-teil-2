@@ -77,3 +77,18 @@ def test_register_empty_username(client): # Übergebener Username darf kein leer
     assert response.status_code == 400 # Leerer String für "username" ist nicht erlaubt --> Statuscode 400 zurückgegeben?
     assert "error" in data # 'error' muss in Server-Antwort drin sein
     assert data["error"] == "Field 'username' must not be empty." # entspricht die Fehlermeldung exakt dieser Syntax?
+
+
+def test_register_empty_password(client): # Übergebenes Passwort darf auch kein leerer String sein --> sonst 400 Bad Request
+    payload = {
+        "username": "Bob",
+        "password": ""
+    }
+
+    response = client.post("/api/auth/register", json = payload)
+    data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 400 # Leerer String für "password" ist nicht erlaubt --> Statuscode 400 zurückgegeben?
+    assert "error" in data # 'error' muss in Server-Antwort drin sein
+    assert data["error"] == "Field 'password' must not be empty." # entspricht die Fehlermeldung exakt dieser Syntax?
