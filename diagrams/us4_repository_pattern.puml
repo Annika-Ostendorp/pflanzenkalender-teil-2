@@ -114,5 +114,24 @@ CareScheduleRepository ..> CareSchedule : returns
 ActionLogRepository ..> ActionLog : returns
 UserRepository ..> User : returns
 
+' ── Column layout (left → right) ─────────────────────────
+PlantRepository -[hidden]right- CareScheduleRepository
+CareScheduleRepository -[hidden]right- ActionLogRepository
+ActionLogRepository -[hidden]right- UserRepository
+InMemoryPlantRepository -[hidden]right- InMemoryCareScheduleRepository
+InMemoryCareScheduleRepository -[hidden]right- InMemoryActionLogRepository
+InMemoryActionLogRepository -[hidden]right- InMemoryUserRepository
+Plant -[hidden]right- CareSchedule
+CareSchedule -[hidden]right- ActionLog
+ActionLog -[hidden]right- User
+PlantRepository -[hidden]down- InMemoryPlantRepository
+InMemoryPlantRepository -[hidden]down- Plant
+CareScheduleRepository -[hidden]down- InMemoryCareScheduleRepository
+InMemoryCareScheduleRepository -[hidden]down- CareSchedule
+ActionLogRepository -[hidden]down- InMemoryActionLogRepository
+InMemoryActionLogRepository -[hidden]down- ActionLog
+UserRepository -[hidden]down- InMemoryUserRepository
+InMemoryUserRepository -[hidden]down- User
+
 
 @enduml
