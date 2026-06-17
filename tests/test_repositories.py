@@ -1,3 +1,12 @@
+from src.in_memory_repositories import (
+    InMemoryPlantRepository,
+    InMemoryCareScheduleRepository,
+    InMemoryActionLogRepository,
+    InMemoryUserRepository,
+)
+from src.models import Plant, CareSchedule, ActionLog, User
+
+
 def test_save_assigns_id_starting_at_1():
     repo = InMemoryPlantRepository()
     plant = Plant(name='A', species='B', location='C')
@@ -50,3 +59,13 @@ def test_find_by_user_returns_only_matching_plants():
     result = repo.find_by_user(1)
     assert len(result) == 1
     assert result[0] is p1
+
+
+def test_save_updates_existing_plant():
+    repo = InMemoryPlantRepository()
+    plant = Plant(name='Old', species='B', location='C')
+    repo.save(plant)
+    plant.name = 'New'
+    repo.save(plant)
+    assert len(repo.find_all()) == 1
+    assert repo.get_by_id(plant.id).name == 'New'
