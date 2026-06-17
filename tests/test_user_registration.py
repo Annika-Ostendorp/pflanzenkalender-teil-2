@@ -33,3 +33,18 @@ def test_register_duplicate_username(client): # Kann sich nicht mit einem bereit
     assert response.status_code == 409 # Name jetzt doppelt im System --> wurde Statuscode 409 zurückgegeben?
     assert "error" in data # "error" muss in Server-Antwort drin sein
     assert data["error"] == "Username is already taken." # entspricht die Fehlermeldung exakt dieser Syntax?
+
+
+def test_register_missing_username(client): # wenn "username" komplett in Payload fehlt --> 400 Bad Request
+    # hier payload erstellen, der extra kein "username"-Attribut bekommt
+    payload = {
+        "password": "meinpasswort"
+    }
+
+    response = client.post("/api/auth/register", json = payload)
+    data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 400 # Pflichtfeld "username" fehlt --> Statuscode 400 zurückgegeben?
+    assert "error" in data # 'error' muss in Server-Antwort drin sein
+    assert data["error"] == "Field 'username' is required." # entspricht die Fehlermeldung exakt dieser Syntax?
