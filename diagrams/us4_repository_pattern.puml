@@ -94,5 +94,25 @@ class ActionLog {
   +notes: str
 }
 
+' ── Dependency Inversion: Manager → abstract interfaces ──
+PlantAppManager --> PlantRepository
+PlantAppManager --> CareScheduleRepository
+PlantAppManager --> ActionLogRepository
+PlantAppManager --> UserRepository
+
+
+' ── Implementations ─────────────────────────────────────
+PlantRepository <|-- InMemoryPlantRepository
+CareScheduleRepository <|-- InMemoryCareScheduleRepository
+ActionLogRepository <|-- InMemoryActionLogRepository
+UserRepository <|-- InMemoryUserRepository
+
+
+' ── Repository returns domain models ─────────────────────
+PlantRepository ..> Plant : returns
+CareScheduleRepository ..> CareSchedule : returns
+ActionLogRepository ..> ActionLog : returns
+UserRepository ..> User : returns
+
 
 @enduml
