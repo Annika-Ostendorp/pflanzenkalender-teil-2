@@ -124,3 +124,18 @@ def test_register_password_too_short(client): # Passwort muss länger als 8 Zeic
     assert response.status_code == 400 # Minimumlänge unterschritten --> Statuscode 400 zurückgegeben?
     assert "error" in data # 'error' muss in Server-Antwort drin sein
     assert data["error"] == "Field 'password' must be at least 8 characters long." # entspricht die Fehlermeldung exakt dieser Syntax?
+
+
+def test_register_username_invalid_characters(client): # wenn Username ungültige Sonderzeichen enthält --> 400 Bad Request
+    payload = {
+        "username": "Annika#", # darf keine Sonderzeichen enthalten!
+        "password": "sicherespasswort"
+    }
+
+    response = client.post("/api/auth/register", json = payload)
+    data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 400 # ungültiges Sonderzeichen in Username --> 400 Bad Request zurückgegeben?
+    assert "error" in data # ist 'error' in Dictionary aus Antwort enthalten?
+    assert data["error"] == "Field 'username' may only contain letters, digits, and underscores." # entspricht die Fehlermeldung exakt dieser Syntax?
