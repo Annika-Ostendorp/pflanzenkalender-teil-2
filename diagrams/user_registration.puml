@@ -1,5 +1,4 @@
 @startuml user_registration
-skin rose
 skinparam actorStyle awesome
 
 autonumber
@@ -56,10 +55,9 @@ activate Repo
 alt#red Username bereits vergeben
     Repo --> App : ja (Username vergeben)
     App --[#red]> User : 409 Conflict\n{"error": "Username is already taken."}
-end
 
-'Username ist noch nicht registriert'
-else#green Username ist frei -> Registrierung durchführen
+'Username ist frei -> Registrierung durchführen'
+else Username frei
     Repo --> App : nein (Username ist noch nicht registriert)
     deactivate Repo
 
