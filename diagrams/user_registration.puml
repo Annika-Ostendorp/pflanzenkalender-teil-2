@@ -2,16 +2,4 @@
 skin rose
 
 
-
-note top of AuthenticationService
-    Auch die Methode get_password_hash(...) ist hier als statisch markiert, da der AuthenticationService 
-    als Hilfswerkzeug agiert.
-
-    Bezogen auf das Akzeptanzkriterium 5 der User Story ("Plaintext is never persisted.")
-    und die Vorgaben aus der 'password_hashing.md' muss das übergebene Klartext-Passwort sofort bei der Übertragung
-    transformiert werden. Da die Verschlüsselung mittels 'generate_password_hash' keinen eigenen Zustand darstellt, braucht der Service auch keine
-    Objektinstanziierung oder Datenspeicherung.
-    Die Markierung als '{static}' ermöglicht somit eine saubere Trennung zwischen der reinen Sicherheitslogik und der Datenspeicherung des Users.
-endnote
-
 @enduml
