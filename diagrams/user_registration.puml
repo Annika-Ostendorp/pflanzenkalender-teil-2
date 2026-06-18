@@ -55,4 +55,23 @@ alt Alle Validierungen erfolgreich
     Repo --> App : ja (Username vergeben)
     App --> User : 409 Conflict\n{"error": "Username is already taken."}
 end
+
+'Username ist noch nicht registriert'
+alt Username frei -> Passwort hashen & User speichern
+    Repo --> App : nein (Username ist noch nicht registriert)
+    deactivate Repo
+
+    App -> Service : get_password_hash(password)
+    activate Service
+    Service --> App : password_hash
+    deactivate Service
+
+    App -> Repo : save_user(username, password_hash)
+    activate Repo
+    Repo --> App : User-Objekt mit id
+    deactivate Repo
+
+    App --> User : 201 Created\n{"id": 1, "username": "annika"}
+end
+
 @enduml
