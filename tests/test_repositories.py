@@ -169,15 +169,12 @@ def test_action_log_get_by_id_returns_none_when_missing():
     repo = InMemoryActionLogRepository()
     assert repo.get_by_id(999) is None
 
-
-def test_action_log_get_by_id_returns_none_when_missing():
+def test_action_log_get_by_id_returns_log():
     repo = InMemoryActionLogRepository()
-    assert repo.get_by_id(999) is None
+    log = ActionLog(plant_id=1, care_type='watering')
+    repo.save(log)
+    assert repo.get_by_id(log.id) is log
 
-
-def test_action_log_get_by_id_returns_none_when_missing():
-    repo = InMemoryActionLogRepository()
-    assert repo.get_by_id(999) is None
 
 def test_action_log_delete_removes_log():
     repo = InMemoryActionLogRepository()
@@ -207,8 +204,3 @@ def test_user_delete_removes_user():
     assert repo.get_by_id(user.id) is None
 
 
-def test_user_get_by_id_returns_user():
-    repo = InMemoryUserRepository()
-    user = User(username='alice', password_hash='hash123')
-    repo.save(user)
-    assert repo.get_by_id(user.id) is user
