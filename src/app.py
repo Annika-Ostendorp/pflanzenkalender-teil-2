@@ -61,6 +61,9 @@ class PlantAppManager:
         self.schedules = {}
         self.logs = {}
 
+        self.users = {} # Daten simulieren, da Veronika noch an UserRepository-Klasse arbeitet
+        self._user_next_id = 1 # privat, da man diese von außen niemals ändern können sollte! -> ID ist spezifisch
+
         self.app.register_error_handler(HTTPException, self._handle_http_exception)
         self._register_routes()
 
@@ -302,10 +305,21 @@ class PlantAppManager:
                 if password_error:
                     return jsonify({"error": password_error}), 400 # wenn Fehler im Passwort -> abbrechen mit Statuscode 400 Bad Request
                 
+                
+                for user_id in self.users: # jeden Nutzer in Dictionary durchgehen
+                    existing_user = self.users[user_id] # Vergleichsperson nehmen für Duplikatsprüfung -> nacheinander
+
+                    if existing_user.username == username: # falls übergebener username schon in Dictionary --> Duplikat --> 409 Conflict Error
+                        return jsonify({"error": "Username is already taken."}), 409
+                    
+
                 password_hash = AuthenticationService.get_password_hash(password) # password soll niemals unverschlüsselt gespeichert werden! -> hashen
 
-                new_user = User(username, password_hash, id = 1) # Instanz aus User-Klasse erstellen -> für Veronikas Repository zur Übergabe später
-                                                                 # hier ID vergeben, damit Test für erfolgreiche Registrierung von Nutzer funktioniert
+                new_user = User(username, password_hash, id = self._user_next_id) # Instanz aus User-Klasse erstellen -> für Veronikas Repository zur Übergabe später
+                                                                                   # hier ID vergeben, damit Test für erfolgreiche Registrierung von Nutzer funktioniert
+
+                self.users[self._user_next_id] = new_user # neuen User in Dictionary von oben abspeichern
+                self._user_next_id += 1 # und neue ID vergeben
 
                 return jsonify(new_user.to_dict()), 201 # Happy-Path: User wurde erfolgreich erstellt
                                                         # nun Daten nicht mehr händisch eingeben --> implementierte to_dict()-Funktion verwenden, wo Passwort-Hash sicher nie mitgeschickt wird in API-Antwort
