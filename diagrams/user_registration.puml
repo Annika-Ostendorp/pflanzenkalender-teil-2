@@ -1,4 +1,5 @@
 @startuml user_registration
+skin rose
 skinparam actorStyle awesome
 
 autonumber
@@ -13,27 +14,27 @@ User -> App : POST /api/auth/register (Payload)
 activate App
 
 'Strukturelle Error Cases'
-alt Content-Type Header ist nicht 'application/json'
-    App --> User : 415 Unsupported Media Type\n{"error": "Content-Type must be 'application/json'."}
+alt#red Content-Type Header ist nicht 'application/json'
+    App --[#red]> User : 415 Unsupported Media Type\n{"error": "Content-Type must be 'application/json'."}
 
 else Request-Body ist kein gültiges JSON
-    App --> User : 400 Bad Request\n{"error": "Request body must be valid JSON."}
+    App --[#red]> User : 400 Bad Request\n{"error": "Request body must be valid JSON."}
 end
 
 'Fehlende Felder'
-alt 'username' fehlt
-    App --> User : 400 Bad Request\n{"error": "Field 'username' is required."}
+alt#red 'username' fehlt
+    App --[#red]> User : 400 Bad Request\n{"error": "Field 'username' is required."}
 
 else 'password' fehlt
-    App --> User : 400 Bad Request\n{"error": "Field 'password' is required."}
+    App --[#red]> User : 400 Bad Request\n{"error": "Field 'password' is required."}
 end
 
 'Ungültige Felder (leer)'
-alt 'username' ist ein leerer String
-    App --> User : 400 Bad Request\n{"error": "Field 'username' must not be empty."}
+alt#red 'username' ist ein leerer String
+    App --[#red]> User : 400 Bad Request\n{"error": "Field 'username' must not be empty."}
 
 else 'password' ist ein leerer String
-    App --> User : 400 Bad Request\n{"error": "Field 'password' must not be empty."}
+    App --[#red]> User : 400 Bad Request\n{"error": "Field 'password' must not be empty."}
 end
 
 'Inkorrekte Felder (Zeichenlänge unter-/überschritten & Sonderzeichen)'
@@ -81,4 +82,6 @@ note over App
     antwortet das System dann mit:
     500 Internal Server Error\n{"error": "An unexpected error occured. Please try again later."}
 endnote
+
+deactivate App
 @enduml
