@@ -1,5 +1,21 @@
 @startuml user_registration
-skin rose
+skinparam actorStyle awesome
 
+autonumber
+actor "User (Website)" as User
+participant "Plant App" as App
+participant "AuthenticationService" as Service
+database "UserRepository" as Repo
+
+'Daten werden per POST an Server (App) geschickt & verarbeitet'
+User -> App : POST /api/auth/register (Payload)
+activate App
+
+'Strukturelle Error Cases'
+alt Content-Type Header ist nicht 'application/json'
+    App --> User : 415 Unsupported Media Type\n{"error": "Content-Type must be 'application/json'."}
+
+else Request-Body ist kein gültiges JSON
+    App --> User : 400 Bad Request\n{"error": "Request body must be valid JSON."}
 
 @enduml
