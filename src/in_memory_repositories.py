@@ -69,3 +69,12 @@ class InMemoryActionLogRepository(ActionLogRepository):
             log.id = self._next_id
             self._next_id += 1
         self._store[log.id] = log
+
+    def get_by_id(self, log_id):
+        return self._store.get(log_id)
+
+    def find_by_plant(self, plant_id):
+        return [l for l in self._store.values() if l.plant_id == plant_id]
+        
+    def delete(self, log_id):
+        self._store.pop(log_id, None)
