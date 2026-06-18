@@ -70,16 +70,16 @@ end
 
 
 'App stellt Anfrage an Repo, ob Username bereits existiert'
-App -> Repo : existiert_username(username)
+App -> Repo : get_by_username(username)
 activate Repo
     
-alt#red Username bereits vergeben
-    Repo --> App : ja (Username vergeben)
+alt#red Username bereits vergeben (gibt User-Objekt zurück)
+    Repo --> App : user
     App --[#red]> User : 409 Conflict\n{"error": "Username is already taken."}
 
 'Username ist frei -> Registrierung durchführen'
-else Username frei
-    Repo --> App : nein (Username ist noch nicht registriert)
+else Username frei (gibt None zurück)
+    Repo --> App : None
     deactivate Repo
 
     App -> Service : get_password_hash(password)
@@ -87,9 +87,10 @@ else Username frei
     Service --> App : password_hash
     deactivate Service
 
-    App -> Repo : save_user(username, password_hash)
+    'User-Objekt erzeugen und an add()-Funktion übergeben'
+    App -> Repo : add(user)
     activate Repo
-    Repo --> App : User-Objekt mit id
+    Repo --> App : user (mit zugewiesener id)
     deactivate Repo
 
     App --[#green]> User : 201 Created\n{"id": 1, "username": "annika"}
