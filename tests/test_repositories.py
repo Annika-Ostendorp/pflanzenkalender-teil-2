@@ -107,8 +107,6 @@ def test_find_by_username_returns_none_when_missing():
     assert repo.find_by_username('nobody') is None
 
 
-# ── InMemoryCareScheduleRepository ──────────────────────────────
-
 def test_care_schedule_save_assigns_id():
     repo = InMemoryCareScheduleRepository()
     s = CareSchedule(plant_id=1, care_type='watering', interval_days=7)
@@ -128,8 +126,25 @@ def test_care_schedule_find_by_plant_returns_empty_when_no_match():
     repo.save(CareSchedule(plant_id=1, care_type='watering', interval_days=7))
     assert repo.find_by_plant(999) == []
 
-# ── InMemoryActionLogRepository ──────────────────────────────────
+def test_care_schedule_get_by_id_returns_schedule():
+    repo = InMemoryCareScheduleRepository()
+    s = CareSchedule(plant_id=1, care_type='watering', interval_days=7)
+    repo.save(s)
+    assert repo.get_by_id(s.id) is s
 
+def test_care_schedule_get_by_id_returns_none_when_missing():
+    repo = InMemoryCareScheduleRepository()
+    assert repo.get_by_id(999) is None
+
+
+def test_care_schedule_delete_removes_schedule():
+    repo = InMemoryCareScheduleRepository()
+    s = CareSchedule(plant_id=1, care_type='watering', interval_days=7)
+    repo.save(s)
+    repo.delete(s.id)
+    assert repo.get_by_id(s.id) is None
+
+    
 def test_action_log_save_assigns_id():
     repo = InMemoryActionLogRepository()
     log = ActionLog(plant_id=1, care_type='watering')
