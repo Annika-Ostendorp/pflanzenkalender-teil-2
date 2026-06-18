@@ -18,4 +18,17 @@ alt Content-Type Header ist nicht 'application/json'
 else Request-Body ist kein gültiges JSON
     App --> User : 400 Bad Request\n{"error": "Request body must be valid JSON."}
 
+'Fehlende Felder'
+else 'username' fehlt
+    App --> User : 400 Bad Request\n{"error": "Field 'username' is required."}
+
+else 'password' fehlt
+    App --> User : 400 Bad Request\n{"error": "Field 'password' is required."}
+
+'Ungültige Felder (leer)'
+else 'username' ist ein leerer String
+    App --> User : 400 Bad Request\n{"error": "Field 'username' must not be empty."}
+
+else 'password' ist ein leerer String
+    App --> User : 400 Bad Request\n{"error": "Field 'password' must not be empty."}
 @enduml
