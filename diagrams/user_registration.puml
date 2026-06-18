@@ -2,6 +2,7 @@
 skinparam actorStyle awesome
 
 autonumber
+
 actor "User (Website)" as User
 participant "Plant App" as App
 participant "AuthenticationService" as Service
@@ -17,18 +18,41 @@ alt Content-Type Header ist nicht 'application/json'
 
 else Request-Body ist kein gültiges JSON
     App --> User : 400 Bad Request\n{"error": "Request body must be valid JSON."}
+end
 
 'Fehlende Felder'
-else 'username' fehlt
+alt 'username' fehlt
     App --> User : 400 Bad Request\n{"error": "Field 'username' is required."}
 
 else 'password' fehlt
     App --> User : 400 Bad Request\n{"error": "Field 'password' is required."}
+end
 
 'Ungültige Felder (leer)'
-else 'username' ist ein leerer String
+alt 'username' ist ein leerer String
     App --> User : 400 Bad Request\n{"error": "Field 'username' must not be empty."}
 
 else 'password' ist ein leerer String
     App --> User : 400 Bad Request\n{"error": "Field 'password' must not be empty."}
+end
+
+'Inkorrekte Felder (Zeichenlänge unter-/überschritten & Sonderzeichen)'
+alt 'username' zu lang (>50 Zeichen)
+    App --> User : 400 Bad Request\n{"error": "Field 'username' must not exceed 50 characters."}
+
+else 'password' zu kurz (<8 Zeichen)
+    App --> User : 400 Bad Request\n{"error": "Field 'password' must be at least 8 characters long."}
+
+else 'username' enthält Sonderzeichen
+    App --> User : 400 Bad Request\n{"error": "Field 'username' may only contain letters, digits, and underscores."}
+end
+
+'Wenn alle Validierungen erfolgreich sind --> weiter zu Repo
+alt Alle Validierungen erfolgreich
+    'App stellt Anfrage an Repo, ob Username bereits existiert'
+    App -> Repo : existiert_username(username)
+    activate Repo
+    Repo --> App : ja (Username vergeben)
+    App --> User : 409 Conflict\n{"error": "Username is already taken."}
+end
 @enduml
