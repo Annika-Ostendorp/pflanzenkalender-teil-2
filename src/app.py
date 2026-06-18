@@ -14,9 +14,6 @@ def validate_username(username) -> str: # Benutzernamen prüfen nach Vorgaben au
     if username is None:
         return "Field 'username' is required."
     
-    # Typ von username prüfen -> falls kein str -> Error leer/ ungültig
-    if not isinstance(username, str):
-        return "Field 'username' must not be empty."
     
     # username ist str, aber komplett leer
     if username == "":
@@ -38,10 +35,6 @@ def validate_password(password) -> str:
     # Feld fehlt komplett im JSON-Payload
     if password is None:
         return "Field 'password' is required."
-    
-    # wieder Datentyp prüfen -> wenn kein str -> ungültig
-    if not isinstance(password, str):
-        return "Field 'password' must not be empty."
     
     # password ist str, aber komplett leer
     if password == "":
