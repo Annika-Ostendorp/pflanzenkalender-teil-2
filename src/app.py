@@ -288,7 +288,18 @@ class PlantAppManager:
         @self.app.route('/api/auth/register', methods=['POST'])
         def register_user():
             try:
-                payload = request.get_json() # erstmal alle gesendeten Daten holen -> Payload dann Dictionary
+                if not request.is_json: # wenn Content-Type Header kein JSON ist --> 415 Unsupported Media Type Error
+                    return jsonify({"error": "Content-Type must be 'application/json'."}), 415
+                
+                try: # prüfen, ob Request-Body gültiges JSON ist -> falls nicht -> 400 Bad Request Error
+                    payload = request.get_json() # erstmal alle gesendeten Daten holen -> Payload dann Dictionary
+                
+                except Exception:
+                    return jsonify({"error": "Request body must be valid JSON."}), 400
+
+                if payload is None: # falls Body komplett leer -> payload = None -> das aber auch ungültiges JSON -> 400 Bad Request Error
+                    return jsonify({"error": "Request body must be valid JSON."}), 400
+                
 
                 username = payload.get("username") # aus payload-Dictionary jew. Einträge für username & password holen
                 password = payload.get("password")
@@ -324,7 +335,7 @@ class PlantAppManager:
                 return jsonify(new_user.to_dict()), 201 # Happy-Path: User wurde erfolgreich erstellt
                                                         # nun Daten nicht mehr händisch eingeben --> implementierte to_dict()-Funktion verwenden, wo Passwort-Hash sicher nie mitgeschickt wird in API-Antwort
             
-            except Exception: # try-except-Block, um möglichen, unvorhergesehenen Fehler im Code abzufangen und zu behandeln
+            except Exception: # try-except-Block, um möglichen, unvorhergesehenen Fehler im Code abzufangen und zu behandeln -> Rückgabe von 500 Internal Server Error
                 return jsonify({"error": "An unexpected error occurred. Please try again later."}), 500
             
 
