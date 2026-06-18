@@ -16,3 +16,22 @@ class PlantRepository(ABC):
 
     @abstractmethod
     def delete(self, plant_id): ...
+
+
+class CareScheduleRepository(ABC):
+    @abstractmethod
+    def save(self, schedule): ...
+
+    @abstractmethod
+    def get_by_id(self, schedule_id): ...
+
+    @abstractmethod
+    def find_by_plant(self, plant_id): ...
+
+    @abstractmethod
+    def find_by_plant_and_care_type(self, plant_id, care_type): ...
+
+    @abstractmethod
+    def delete(self, schedule_id): ...
+
+
