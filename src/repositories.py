@@ -35,3 +35,17 @@ class CareScheduleRepository(ABC):
     def delete(self, schedule_id): ...
 
 
+class ActionLogRepository(ABC):
+    @abstractmethod
+    def save(self, log): ...
+
+    @abstractmethod
+    def get_by_id(self, log_id): ...
+
+    @abstractmethod
+    def find_by_plant(self, plant_id): ...
+
+    @abstractmethod
+    def delete(self, log_id): ...
+
+
