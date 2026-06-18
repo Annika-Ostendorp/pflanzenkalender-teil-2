@@ -1,12 +1,33 @@
 @startuml user_registration
 skinparam actorStyle awesome
 
-autonumber
-
 actor "User (Website)" as User
 participant "Plant App" as App
 participant "AuthenticationService" as Service
 database "UserRepository" as Repo
+
+note over User, Repo
+    Laut der Theorie (siehe KI-Issue #6) habe ich für die User Story #1 ein **Sequenzdiagramm** gewählt,
+    da es den genauen Ablauf beschreibt, wie ein neuer User registriert wird. Da hier 11 verschiedene Fehlerfälle 
+    nacheinander geprüft werden müssen (wie fehlende Felder, zu kurze Passwörter etc.),
+    hilft dieser Diagrammtyp zu veranschaulichen, in welcher Reihenfolge das System die Daten nacheinander verarbeitet.
+    Ein Klassendiagramm würde hingegen nur die Struktur zeigen, aber hier geht es ja um die Interaktion und die Schnittstellen
+    zwischen User, der App und dem Backend (AuthenticationService & UserRepository).
+
+    Zur konkreten Umsetzung dieser UML-Syntaxelemente (wie die 'alt/else'-Blöcke oder die Farben) habe ich mir die offizielle Website von
+    PlantUML (plantuml.com/de/sequence-diagram) als Hilfe herangezogen.
+endnote
+
+note right of Service
+    Bezogen auf das 5. Akzeptanzkriterium der User Story ("Plaintext is never persisted.")
+    und die Vorgaben aus der 'password_hashing.md' muss das übergebene Klartext-Passwort ja 
+    sofort transformiert werden. Der AuthenticationService dient dabei also als zustandsloses
+    Hilfswerkzeug, das den Passwort-Hash bereitstellt, ohne selbst etwas dauerhaft zu speichern.
+
+    Im Sequenzdiagramm wird zusätzlich durch das gezielte 'activate' und 'deactivate' visuell sichtbar gemacht,
+    dass der Service nur sehr kurz für die Berechnung des Passwort-Hashes aufgerufen wird und keine 
+    dauerhafte Datenspeicherung durchführt.
+endnote
 
 'Daten werden per POST an Server (App) geschickt & verarbeitet'
 User -> App : POST /api/auth/register (Payload)
@@ -78,7 +99,7 @@ end
 note over App
     **Ausnahmebedingung:**
     Sollte während der Verarbeitung der Daten ein unerwarteter Server-Fehler auftreten,
-    antwortet das System dann mit:
+    dann antwortet das System mit:
     500 Internal Server Error\n{"error": "An unexpected error occured. Please try again later."}
 endnote
 
