@@ -1,34 +1,7 @@
 @startuml user_registration
 skin rose
 
-class User {
-    + id : int / None
-    + username : str
-    - password : str
 
-    + __init__(id: int / None, username: str, password: str)
-}
-
-class AuthenticationService {
-    + {static} get_password_hash(password: str) : str
-}
-
-'AuthenticationService hängt von User ab --> speichert ja nicht dauerhaft User-Objekte in sich ab, sondern bekommt in Methoden nur temporär'
-'ein Passwort oder User übergeben für Berechnung von Hash --> deshalb schwächere Form einer Abhängigkeit (gestrichelter Pfeil)'
-AuthenticationService ..> User
-
-note top of User
-    Laut der Theorie (siehe KI-Issue #6) habe ich hier ein Klassendiagramm gewählt, 
-    da der Hauptfokus auf der Architektur liegt, wo durch neue Instanzen (z.B. User oder AuthenticationService)
-    die Struktur des Systems aufgebaut wird.
-
-    Das Attribut 'password' wird dabei bewusst mit der Sichtbarkeit private ('-') markiert, da 
-    diese sensitiven Daten laut User Story gekapselt bleiben und niemals in 
-    API-Responses zurückgegeben werden sollen.
-
-    Zur konkreten Umsetzung dieser UML-Syntaxbestandteile habe ich mir die offizielle
-    Website von PlantUML (plantuml.com/de-dark/class-diagram) als Hilfe herangezogen.
-endnote
 
 note top of AuthenticationService
     Auch die Methode get_password_hash(...) ist hier als statisch markiert, da der AuthenticationService 
