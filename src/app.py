@@ -1,7 +1,8 @@
 from datetime import date, timedelta
 from flask import Flask, jsonify, request, render_template
 from werkzeug.exceptions import HTTPException
-from models import Plant, CareSchedule, ActionLog
+from models import Plant, CareSchedule, ActionLog, User
+from src.auth_service import AuthenticationService
 
 VALID_CARE_TYPES = {'watering', 'fertilizing', 'repotting'}
 UPDATABLE_PLANT_FIELDS = {'name', 'species', 'location'}
@@ -233,6 +234,25 @@ class PlantAppManager:
                         })
             result.sort(key=lambda x: x['days_overdue'], reverse=True)
             return jsonify(result), 200
+        
+        # Endpoint POST /api/auth/register
+        @self.app.route('/api/auth/register', methods=['POST'])
+        def register_user():
+            try:
+                payload = request.get_json() # erstmal alle gesendeten Daten holen -> Payload dann Dictionary
+
+                username = payload.get("username") # aus payload-Dictionary jew. Einträge für username & password holen
+                password = payload.get("password")
+
+                password_hash = AuthenticationService.get_password_hash(password) # password soll niemals unverschlüsselt gespeichert werden! -> hashen
+
+                new_user = User(username, password_hash) # Instanz aus User-Klasse erstellen -> für Veronikas Repository zur Übergabe später
+
+                return jsonify({"id": 1, "username": new_user.username}), 201 # Happy-Path: User wurde erfolgreich erstellt
+            
+            except Exception: # try-except-Block, um möglichen, unvorhergesehenen Fehler im Code abzufangen und zu behandeln
+                return jsonify({"error": "An unexpected error occurred. Please try again later."}), 500
+            
 
 if __name__ == '__main__':  # pragma: no cover
     manager = PlantAppManager()
