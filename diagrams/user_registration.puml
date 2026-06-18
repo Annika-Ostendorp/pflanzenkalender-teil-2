@@ -38,27 +38,28 @@ else 'password' ist ein leerer String
 end
 
 'Inkorrekte Felder (Zeichenlänge unter-/überschritten & Sonderzeichen)'
-alt 'username' zu lang (>50 Zeichen)
-    App --> User : 400 Bad Request\n{"error": "Field 'username' must not exceed 50 characters."}
+alt#red 'username' zu lang (>50 Zeichen)
+    App --[#red]> User : 400 Bad Request\n{"error": "Field 'username' must not exceed 50 characters."}
 
 else 'password' zu kurz (<8 Zeichen)
-    App --> User : 400 Bad Request\n{"error": "Field 'password' must be at least 8 characters long."}
+    App --[#red]> User : 400 Bad Request\n{"error": "Field 'password' must be at least 8 characters long."}
 
 else 'username' enthält Sonderzeichen
-    App --> User : 400 Bad Request\n{"error": "Field 'username' may only contain letters, digits, and underscores."}
+    App --[#red]> User : 400 Bad Request\n{"error": "Field 'username' may only contain letters, digits, and underscores."}
 end
 
-'Wenn alle Validierungen erfolgreich sind --> weiter zu Repo
-alt Alle Validierungen erfolgreich
-    'App stellt Anfrage an Repo, ob Username bereits existiert'
-    App -> Repo : existiert_username(username)
-    activate Repo
+
+'App stellt Anfrage an Repo, ob Username bereits existiert'
+App -> Repo : existiert_username(username)
+activate Repo
+    
+alt#red Username bereits vergeben
     Repo --> App : ja (Username vergeben)
-    App --> User : 409 Conflict\n{"error": "Username is already taken."}
+    App --[#red]> User : 409 Conflict\n{"error": "Username is already taken."}
 end
 
 'Username ist noch nicht registriert'
-alt Username frei -> Passwort hashen & User speichern
+else#green Username ist frei -> Registrierung durchführen
     Repo --> App : nein (Username ist noch nicht registriert)
     deactivate Repo
 
@@ -72,12 +73,12 @@ alt Username frei -> Passwort hashen & User speichern
     Repo --> App : User-Objekt mit id
     deactivate Repo
 
-    App --> User : 201 Created\n{"id": 1, "username": "annika"}
+    App --[#green]> User : 201 Created\n{"id": 1, "username": "annika"}
 end
 
 'Unerwarteter Systemabsturz'
 note over App
-    Ausnahmebedingung:
+    **Ausnahmebedingung:**
     Sollte während der Verarbeitung der Daten ein unerwarteter Server-Fehler auftreten,
     antwortet das System dann mit:
     500 Internal Server Error\n{"error": "An unexpected error occured. Please try again later."}
