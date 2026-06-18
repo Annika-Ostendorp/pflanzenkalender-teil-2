@@ -74,4 +74,11 @@ alt Username frei -> Passwort hashen & User speichern
     App --> User : 201 Created\n{"id": 1, "username": "annika"}
 end
 
+'Unerwarteter Systemabsturz'
+note over App
+    Ausnahmebedingung:
+    Sollte während der Verarbeitung der Daten ein unerwarteter Server-Fehler auftreten,
+    antwortet das System dann mit:
+    500 Internal Server Error\n{"error": "An unexpected error occured. Please try again later."}
+endnote
 @enduml
