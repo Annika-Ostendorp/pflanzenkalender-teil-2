@@ -33,6 +33,27 @@ def validate_username(username) -> str: # Benutzernamen prüfen nach Vorgaben au
 
     return None # falls keine Fehler gefunden -> einfach None zurück
 
+
+def validate_password(password) -> str:
+    # Feld fehlt komplett im JSON-Payload
+    if password is None:
+        return "Field 'password' is required."
+    
+    # wieder Datentyp prüfen -> wenn kein str -> ungültig
+    if not isinstance(password, str):
+        return "Field 'password' must not be empty."
+    
+    # password ist str, aber komplett leer
+    if password == "":
+        return "Field 'password' must not be empty."
+    
+    # password unterschreitet geforderte Mindestlänge von 8 Zeichen
+    if len(password) < 8:
+        return "Field 'password' must be at least 8 characters long."
+    
+    return None # falls keine Fehler gefunden -> wieder None zurückgeben
+
+
 class PlantAppManager:
     def __init__(self):
         self.app = Flask(__name__, template_folder='templates', static_folder='static')
