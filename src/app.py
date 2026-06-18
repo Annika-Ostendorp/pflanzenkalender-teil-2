@@ -4,9 +4,34 @@ from werkzeug.exceptions import HTTPException
 from models import Plant, CareSchedule, ActionLog, User
 from src.auth_service import AuthenticationService
 
+import re # empfohlenes Modul für Sonderzeichen-Prüfung (siehe KI-Issue #9)
+
 VALID_CARE_TYPES = {'watering', 'fertilizing', 'repotting'}
 UPDATABLE_PLANT_FIELDS = {'name', 'species', 'location'}
 
+def validate_username(username) -> str: # Benutzernamen prüfen nach Vorgaben aus Task 5
+    # Feld fehlt komplett im JSON-Payload
+    if username is None:
+        return "Field 'username' is required."
+    
+    # Typ von username prüfen -> falls kein str -> Error leer/ ungültig
+    if not isinstance(username, str):
+        return "Field 'username' must not be empty."
+    
+    # username ist str, aber komplett leer
+    if username == "":
+        return "Field 'username' must not be empty."
+    
+    # username überschreitet maximal erlaubte Länge von 50 Zeichen
+    if len(username) > 50:
+        return "Field 'username' must not exceed 50 characters."
+    
+    # prüfen, ob username fälschlicherweise Sonderzeichen enthält
+    pattern = r"^\w+$" # siehe KI-Issue (#9) -> enthält a-z, A-Z, 0-9 und _
+    if not re.match(pattern, username):
+        return "Field 'username' may only contain letters, digits, and underscores."
+
+    return None # falls keine Fehler gefunden -> einfach None zurück
 
 class PlantAppManager:
     def __init__(self):
