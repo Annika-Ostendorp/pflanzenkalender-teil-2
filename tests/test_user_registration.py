@@ -1,4 +1,4 @@
-def test_register_success(client): # aus Akzeptanzkriterien 1 & 2 der User Story:
+def test_post_register_success(client): # aus Akzeptanzkriterien 1 & 2 der User Story:
                                    # Endpoint mit gültigen Daten erstellt User, ohne dass das Passwort/Hash versehentlich zurückgegeben wird
     payload = {
         "username": "Annika",
@@ -17,7 +17,7 @@ def test_register_success(client): # aus Akzeptanzkriterien 1 & 2 der User Story
     assert "password_hash" not in data # Passwort-Hash darf ja auch nicht zurückgegeben werden
 
 
-def test_register_duplicate_username(client): # Kann sich nicht mit einem bereits vergebenem Namen registrieren --> 409 Conflict
+def test_post_register_duplicate_username(client): # Kann sich nicht mit einem bereits vergebenem Namen registrieren --> 409 Conflict
     payload = {
         "username": "Tobi",
         "password": "sicheres_passwort"
@@ -35,7 +35,7 @@ def test_register_duplicate_username(client): # Kann sich nicht mit einem bereit
     assert data["error"] == "Username is already taken." # entspricht die Fehlermeldung exakt dieser Syntax?
 
 
-def test_register_missing_username(client): # wenn "username" komplett in Payload fehlt --> 400 Bad Request
+def test_post_register_missing_username(client): # wenn "username" komplett in Payload fehlt --> 400 Bad Request
     # hier payload erstellen, der extra kein "username"-Attribut bekommt
     payload = {
         "password": "meinpasswort"
@@ -50,7 +50,7 @@ def test_register_missing_username(client): # wenn "username" komplett in Payloa
     assert data["error"] == "Field 'username' is required." # entspricht die Fehlermeldung exakt dieser Syntax?
 
 
-def test_register_missing_password(client): # gleiche Logik wie vorhin --> diesmal fehlt "password" in Payload
+def test_post_register_missing_password(client): # gleiche Logik wie vorhin --> diesmal fehlt "password" in Payload
     payload = {
         "username": "Annika"
     }
@@ -64,7 +64,7 @@ def test_register_missing_password(client): # gleiche Logik wie vorhin --> diesm
     assert data["error"] == "Field 'password' is required." # entspricht die Fehlermeldung exakt dieser Syntax?
 
 
-def test_register_empty_username(client): # Übergebener Username darf kein leerer String sein --> sonst 400 Bad Request
+def test_post_register_empty_username(client): # Übergebener Username darf kein leerer String sein --> sonst 400 Bad Request
     payload = {
         "username": "",
         "password": "Annika123"
@@ -79,7 +79,7 @@ def test_register_empty_username(client): # Übergebener Username darf kein leer
     assert data["error"] == "Field 'username' must not be empty." # entspricht die Fehlermeldung exakt dieser Syntax?
 
 
-def test_register_empty_password(client): # Übergebenes Passwort darf auch kein leerer String sein --> sonst 400 Bad Request
+def test_post_register_empty_password(client): # Übergebenes Passwort darf auch kein leerer String sein --> sonst 400 Bad Request
     payload = {
         "username": "Bob",
         "password": ""
@@ -94,7 +94,7 @@ def test_register_empty_password(client): # Übergebenes Passwort darf auch kein
     assert data["error"] == "Field 'password' must not be empty." # entspricht die Fehlermeldung exakt dieser Syntax?
 
 
-def test_register_username_too_long(client): # Username darf Maximumlänge von 50 Zeichen nicht überschreiten --> sonst 400 Bad Request
+def test_post_register_username_too_long(client): # Username darf Maximumlänge von 50 Zeichen nicht überschreiten --> sonst 400 Bad Request
     sehr_langer_Benutzername = "abc" * 50 # überschreitet sicher die geforderte Maximumlänge eines Benutzernamens
 
     payload = {
@@ -111,7 +111,7 @@ def test_register_username_too_long(client): # Username darf Maximumlänge von 5
     assert data["error"] == "Field 'username' must not exceed 50 characters." # entspricht die Fehlermeldung exakt dieser Syntax?
 
 
-def test_register_password_too_short(client): # Passwort muss länger als 8 Zeichen sein --> sonst 400 Bad Request
+def test_post_register_password_too_short(client): # Passwort muss länger als 8 Zeichen sein --> sonst 400 Bad Request
     payload = {
         "username": "Annika",
         "password": "bla123" # Passwort zu kurz mit nur 6 Zeichen
@@ -126,7 +126,7 @@ def test_register_password_too_short(client): # Passwort muss länger als 8 Zeic
     assert data["error"] == "Field 'password' must be at least 8 characters long." # entspricht die Fehlermeldung exakt dieser Syntax?
 
 
-def test_register_username_invalid_characters(client): # wenn Username ungültige Sonderzeichen enthält --> 400 Bad Request
+def test_post_register_username_invalid_characters(client): # wenn Username ungültige Sonderzeichen enthält --> 400 Bad Request
     payload = {
         "username": "Annika#", # darf keine Sonderzeichen enthalten!
         "password": "sicherespasswort"
@@ -141,7 +141,7 @@ def test_register_username_invalid_characters(client): # wenn Username ungültig
     assert data["error"] == "Field 'username' may only contain letters, digits, and underscores." # entspricht die Fehlermeldung exakt dieser Syntax?
 
 
-def test_register_invalid_json_body(client): # Request-Body kein gültiges JSON --> 400 Bad Request
+def test_post_register_invalid_json_body(client): # Request-Body kein gültiges JSON --> 400 Bad Request
     invalid_json = "{username: Annika}" # ungültiges JSON --> fehlende Anführungszeichen
 
     response = client.post("/api/auth/register", data = invalid_json, content_type = "application/json") # nicht json=..., da das ein Python-Dictionary direkt in ein valides JSON umwandelt
@@ -152,10 +152,10 @@ def test_register_invalid_json_body(client): # Request-Body kein gültiges JSON 
     # Überprüfungen
     assert response.status_code == 400 # Struktur stimmt nicht --> ungültiges JSON --> Statuscode 400 zurückgegeben?
     assert "error" in data # 'error' muss in Server-Antwort drin sein
-    assert data["error"] == "Request Body must be valid JSON." # entspricht die Fehlermeldung exakt dieser Syntax?
+    assert data["error"] == "Request body must be valid JSON." # entspricht die Fehlermeldung exakt dieser Syntax?
 
 
-def test_register_invalid_content_type(client): # wenn Content-Type-Header nicht application/json ist --> 415 Unsupported Media Type
+def test_post_register_invalid_content_type(client): # wenn Content-Type-Header nicht application/json ist --> 415 Unsupported Media Type
     payload = {
         "username": "Annika",
         "password": "passwort123"
@@ -170,7 +170,7 @@ def test_register_invalid_content_type(client): # wenn Content-Type-Header nicht
     assert data["error"] == "Content-Type must be 'application/json'." # entspricht die Fehlermeldung exakt dieser Syntax?
 
 
-def test_register_unexpected_server_error(client): # unvorhergesehenen Systemabsturz simulisieren --> 500 Internal Server Error
+def test_post_register_unexpected_server_error(client): # unvorhergesehenen Systemabsturz simulisieren --> 500 Internal Server Error
     payload = {
         "username": ["Ungültiger", "Benutzername"], # hier auf einmal ungültiger Datentyp für username -> Liste und kein string wird gesendet
         "password": "meinsicherespasswort123"
@@ -182,4 +182,4 @@ def test_register_unexpected_server_error(client): # unvorhergesehenen Systemabs
     # Überprüfungen
     assert response.status_code == 500 # Server stürzt ab, wegen ungültigem Datentyp --> Statuscode 500 zurückgegeben?
     assert "error" in data # 'error' muss in Server-Antwort drin sein
-    assert data["error"] == "An unexpected error occured. Please try again later." # entspricht die Fehlermeldung exakt dieser Syntax?
+    assert data["error"] == "An unexpected error occurred. Please try again later." # entspricht die Fehlermeldung exakt dieser Syntax?
