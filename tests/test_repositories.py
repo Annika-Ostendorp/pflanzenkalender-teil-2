@@ -186,7 +186,7 @@ def test_action_log_delete_removes_log():
     repo.delete(log.id)
     assert repo.get_by_id(log.id) is None
 
-    
+
 def test_user_save_assigns_id():
     repo = InMemoryUserRepository()
     user = User(username='alice', password_hash='hash123')
@@ -205,3 +205,10 @@ def test_user_delete_removes_user():
     repo.save(user)
     repo.delete(user.id)
     assert repo.get_by_id(user.id) is None
+
+
+def test_user_get_by_id_returns_user():
+    repo = InMemoryUserRepository()
+    user = User(username='alice', password_hash='hash123')
+    repo.save(user)
+    assert repo.get_by_id(user.id) is user
