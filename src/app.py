@@ -246,9 +246,11 @@ class PlantAppManager:
 
                 password_hash = AuthenticationService.get_password_hash(password) # password soll niemals unverschlüsselt gespeichert werden! -> hashen
 
-                new_user = User(username, password_hash) # Instanz aus User-Klasse erstellen -> für Veronikas Repository zur Übergabe später
+                new_user = User(username, password_hash, id = 1) # Instanz aus User-Klasse erstellen -> für Veronikas Repository zur Übergabe später
+                                                                 # hier ID vergeben, damit Test für erfolgreiche Registrierung von Nutzer funktioniert
 
-                return jsonify({"id": 1, "username": new_user.username}), 201 # Happy-Path: User wurde erfolgreich erstellt
+                return jsonify(new_user.to_dict()), 201 # Happy-Path: User wurde erfolgreich erstellt
+                                                        # nun Daten nicht mehr händisch eingeben --> implementierte to_dict()-Funktion verwenden, wo Passwort-Hash sicher nie mitgeschickt wird in API-Antwort
             
             except Exception: # try-except-Block, um möglichen, unvorhergesehenen Fehler im Code abzufangen und zu behandeln
                 return jsonify({"error": "An unexpected error occurred. Please try again later."}), 500
