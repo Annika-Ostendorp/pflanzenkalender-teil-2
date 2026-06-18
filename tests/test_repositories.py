@@ -144,7 +144,7 @@ def test_care_schedule_delete_removes_schedule():
     repo.delete(s.id)
     assert repo.get_by_id(s.id) is None
 
-    
+
 def test_action_log_save_assigns_id():
     repo = InMemoryActionLogRepository()
     log = ActionLog(plant_id=1, care_type='watering')
@@ -165,8 +165,28 @@ def test_action_log_find_by_plant_returns_empty_when_no_match():
     assert repo.find_by_plant(999) == []
 
 
-# ── InMemoryUserRepository ───────────────────────────────────────
+def test_action_log_get_by_id_returns_none_when_missing():
+    repo = InMemoryActionLogRepository()
+    assert repo.get_by_id(999) is None
 
+
+def test_action_log_get_by_id_returns_none_when_missing():
+    repo = InMemoryActionLogRepository()
+    assert repo.get_by_id(999) is None
+
+
+def test_action_log_get_by_id_returns_none_when_missing():
+    repo = InMemoryActionLogRepository()
+    assert repo.get_by_id(999) is None
+
+def test_action_log_delete_removes_log():
+    repo = InMemoryActionLogRepository()
+    log = ActionLog(plant_id=1, care_type='watering')
+    repo.save(log)
+    repo.delete(log.id)
+    assert repo.get_by_id(log.id) is None
+
+    
 def test_user_save_assigns_id():
     repo = InMemoryUserRepository()
     user = User(username='alice', password_hash='hash123')
