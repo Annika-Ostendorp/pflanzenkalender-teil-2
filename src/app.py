@@ -268,7 +268,12 @@ class PlantAppManager:
 
                 username = payload.get("username") # aus payload-Dictionary jew. Einträge für username & password holen
                 password = payload.get("password")
+                
+                username_error = validate_username(username) # prüfen, ob username gültig ist mit oben definierter Funktion validate_username()
 
+                if username_error:
+                    return jsonify({"error": username_error}), 400 # jew. Fehlermeldung siehe obige Funktion
+                    
                 password_hash = AuthenticationService.get_password_hash(password) # password soll niemals unverschlüsselt gespeichert werden! -> hashen
 
                 new_user = User(username, password_hash, id = 1) # Instanz aus User-Klasse erstellen -> für Veronikas Repository zur Übergabe später
