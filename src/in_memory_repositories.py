@@ -75,6 +75,30 @@ class InMemoryActionLogRepository(ActionLogRepository):
 
     def find_by_plant(self, plant_id):
         return [l for l in self._store.values() if l.plant_id == plant_id]
-        
+
     def delete(self, log_id):
         self._store.pop(log_id, None)
+
+
+class InMemoryUserRepository(UserRepository):
+    def __init__(self):
+        self._store = {}
+        self._next_id = 1
+
+    def save(self, user):
+        if user.id is None:
+            user.id = self._next_id
+            self._next_id += 1
+        self._store[user.id] = user
+
+    def get_by_id(self, user_id):
+        return self._store.get(user_id)
+
+    def find_by_username(self, username):
+        return next(
+            (u for u in self._store.values() if u.username == username),
+            None,
+        )
+
+    def delete(self, user_id):
+        self._store.pop(user_id, None)
