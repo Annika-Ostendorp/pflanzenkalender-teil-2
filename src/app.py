@@ -302,30 +302,21 @@ class PlantAppManager:
                 if password_error:
                     return jsonify({"error": password_error}), 400 # wenn Fehler im Passwort -> abbrechen mit Statuscode 400 Bad Request
                 
+
+                existing_user = self.user_repo.find_by_username(username)
+                if existing_user:
+                    return jsonify({"error": "Username is already taken."}), 409
                 
-                for user_id in self.users: # jeden Nutzer in Dictionary durchgehen
-                    existing_user = self.users[user_id] # Vergleichsperson nehmen für Duplikatsprüfung -> nacheinander
+                password_hash = AuthenticationService.get_password_hash(password)
+                new_user = User(username=username, password_hash=password_hash)
+                self.user_repo.save(new_user)
+                return jsonify(new_user.to_dict()), 201
 
-                    if existing_user.username == username: # falls übergebener username schon in Dictionary --> Duplikat --> 409 Conflict Error
-                        return jsonify({"error": "Username is already taken."}), 409
-                    
-
-                password_hash = AuthenticationService.get_password_hash(password) # password soll niemals unverschlüsselt gespeichert werden! -> hashen
-
-                new_user = User(username, password_hash, id = self._user_next_id) # Instanz aus User-Klasse erstellen -> für Veronikas Repository zur Übergabe später
-                                                                                   # hier ID vergeben, damit Test für erfolgreiche Registrierung von Nutzer funktioniert
-
-                self.users[self._user_next_id] = new_user # neuen User in Dictionary von oben abspeichern
-                self._user_next_id += 1 # und neue ID vergeben
-
-                return jsonify(new_user.to_dict()), 201 # Happy-Path: User wurde erfolgreich erstellt
-                                                        # nun Daten nicht mehr händisch eingeben --> implementierte to_dict()-Funktion verwenden, wo Passwort-Hash sicher nie mitgeschickt wird in API-Antwort
-            
-            except Exception: # try-except-Block, um möglichen, unvorhergesehenen Fehler im Code abzufangen und zu behandeln -> Rückgabe von 500 Internal Server Error
+            except Exception:
                 return jsonify({"error": "An unexpected error occurred. Please try again later."}), 500
             
 
 if __name__ == '__main__':  # pragma: no cover
-    manager = PlantAppManager()
+    manager = PlantAppManager(plant_repo=InMemoryPlantRepository(), schedule_repo=InMemoryCareScheduleRepository(), log_repo=InMemoryActionLogRepository(), user_repo=InMemoryUserRepository())
     app = manager.app
     app.run(debug=True, host='127.0.0.1', port=5000)
