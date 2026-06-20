@@ -15,18 +15,148 @@ const CARE_TYPES = Object.keys(CARE_LABELS);
 let selectedPlantId = null;
 let modalCallback   = null;
 
+// ── Auth state ─────────────────────────────────────────────────────────────────
+
+let authToken    = localStorage.getItem('auth_token')    || null;
+let authUsername = localStorage.getItem('auth_username') || null;
+
+function saveAuth(token, username) {
+  authToken    = token;
+  authUsername = username;
+  if (token) {
+    localStorage.setItem('auth_token',    token);
+    localStorage.setItem('auth_username', username);
+  } else {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_username');
+  }
+}
+
+function showAuthScreen() {
+  closeDetail();
+  el('auth-screen').classList.remove('hidden');
+  el('header-user').classList.add('hidden');
+}
+
+function hideAuthScreen() {
+  el('auth-screen').classList.add('hidden');
+  el('header-user').classList.remove('hidden');
+  el('header-username').textContent = authUsername || '';
+}
+
 // ── API helpers ────────────────────────────────────────────────────────────────
 
 async function apiFetch(method, path, body = null) {
   const opts = { method, headers: {} };
+  if (authToken) opts.headers['Authorization'] = `Bearer ${authToken}`;
   if (body !== null) {
     opts.headers['Content-Type'] = 'application/json';
     opts.body = JSON.stringify(body);
   }
   const res = await fetch(`/api${path}`, opts);
+  if (res.status === 401) {
+    saveAuth(null, null);
+    showAuthScreen();
+    throw new Error('Sitzung abgelaufen. Bitte erneut anmelden.');
+  }
   if (!res.ok) throw new Error(`Fehler ${res.status}: ${await res.text()}`);
   if (res.status === 204) return null;
   return res.json();
+}
+
+// ── Auth UI ────────────────────────────────────────────────────────────────────
+
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach(b =>
+    b.classList.toggle('active', b.dataset.auth === tab)
+  );
+  el('auth-form-login').classList.toggle('hidden',    tab !== 'login');
+  el('auth-form-register').classList.toggle('hidden', tab !== 'register');
+  el('login-error').classList.add('hidden');
+  el('reg-error').classList.add('hidden');
+  const first = el(`auth-form-${tab}`).querySelector('input');
+  if (first) first.focus();
+}
+
+function showAuthError(formId, msg) {
+  const box = el(`${formId}-error`);
+  box.textContent = msg;
+  box.classList.remove('hidden');
+}
+
+async function doLogin() {
+  const username = el('login-username').value.trim();
+  const password = el('login-password').value;
+  el('login-error').classList.add('hidden');
+  if (!username || !password) {
+    showAuthError('login', 'Bitte Benutzername und Passwort eingeben.');
+    return;
+  }
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      showAuthError('login', data.error || 'Anmeldung fehlgeschlagen.');
+      return;
+    }
+    saveAuth(data.access_token, username);
+    hideAuthScreen();
+    await loadPlants();
+  } catch {
+    showAuthError('login', 'Netzwerkfehler. Bitte erneut versuchen.');
+  }
+}
+
+async function doRegister() {
+  const username  = el('reg-username').value.trim();
+  const password  = el('reg-password').value;
+  const password2 = el('reg-password2').value;
+  el('reg-error').classList.add('hidden');
+  if (!username || !password) {
+    showAuthError('reg', 'Bitte alle Felder ausfüllen.');
+    return;
+  }
+  if (password !== password2) {
+    showAuthError('reg', 'Passwörter stimmen nicht überein.');
+    return;
+  }
+  try {
+    const regRes = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    const regData = await regRes.json();
+    if (!regRes.ok) {
+      showAuthError('reg', regData.error || 'Registrierung fehlgeschlagen.');
+      return;
+    }
+    // Auto-login after registration
+    const loginRes  = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    const loginData = await loginRes.json();
+    saveAuth(loginData.access_token, username);
+    hideAuthScreen();
+    await loadPlants();
+  } catch {
+    showAuthError('reg', 'Netzwerkfehler. Bitte erneut versuchen.');
+  }
+}
+
+function doLogout() {
+  saveAuth(null, null);
+  el('plants-grid').innerHTML = '';
+  el('plants-empty').classList.add('hidden');
+  el('plants-grid').classList.remove('hidden');
+  updateOverdueBadge(0);
+  showAuthScreen();
 }
 
 // ── DOM helpers ────────────────────────────────────────────────────────────────
@@ -449,7 +579,25 @@ function switchTab(tab) {
 // ── Boot ───────────────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Tabs
+  // Auth screen tabs
+  document.querySelectorAll('.auth-tab').forEach(btn =>
+    btn.addEventListener('click', () => switchAuthTab(btn.dataset.auth))
+  );
+
+  // Auth actions
+  el('btn-do-login').addEventListener('click', doLogin);
+  el('btn-do-register').addEventListener('click', doRegister);
+  el('btn-logout').addEventListener('click', doLogout);
+
+  // Submit on Enter within auth inputs
+  ['login-username', 'login-password'].forEach(id =>
+    el(id).addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); })
+  );
+  ['reg-username', 'reg-password', 'reg-password2'].forEach(id =>
+    el(id).addEventListener('keydown', e => { if (e.key === 'Enter') doRegister(); })
+  );
+
+  // App tabs
   document.querySelectorAll('.tab-btn').forEach(btn =>
     btn.addEventListener('click', () => switchTab(btn.dataset.tab))
   );
@@ -487,5 +635,12 @@ document.addEventListener('DOMContentLoaded', () => {
     else closeDetail();
   });
 
-  loadPlants();
+  // Boot: show auth or load app
+  if (authToken) {
+    hideAuthScreen();
+    loadPlants();
+  } else {
+    showAuthScreen();
+    el('login-username').focus();
+  }
 });

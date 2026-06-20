@@ -1,0 +1,133 @@
+@startuml user_registration
+skinparam actorStyle awesome
+
+actor "User (Website)" as User
+participant "Plant App" as App
+participant "AuthenticationService" as Service
+database "UserRepository" as Repo
+
+'Laut Theorie von KI-Issue #6'
+note over User, Repo
+    Ich habe für diese User Story ein **Sequenzdiagramm** gewählt,
+    da es optimal die Interaktion und Schnittstellen zwischen User, unserer Flask-App und Backend visualisiert. 
+    Es veranschaulicht dabei sehr gut, in welcher Reihenfolge die 11 Fehlerfälle nacheinander verarbeitet werden, 
+    bevor der Happy-Path, die erfolgreiche Registrierung eines neuen Users, in Kraft treten kann.
+    Ein Klassendiagramm würde hingegen bloß die statische Struktur des Systems zeigen.
+
+    Zur konkreten Umsetzung dieser UML-Syntaxelemente (wie die 'alt/else'-Blöcke, Abstände oder die Farben) habe ich mir die offizielle Website von
+    PlantUML (plantuml.com/de/sequence-diagram) als Hilfe herangezogen.
+endnote
+
+|||
+
+'Content-Type Überprüfung'
+alt#red Content-Type Header ist kein JSON
+
+    |||
+
+    User -> App : POST /api/auth/register (mit falschem Header)
+    activate App
+    App --[#red]> User : 415 Unsupported Media Type\n{"error": "Content-Type must be 'application/json'."}
+    deactivate App
+
+    |||
+
+else Request-Body ist ungültiges JSON
+
+    |||
+
+    User -> App : POST /api/auth/register (mit ungültigem Body)
+    activate App
+    App --[#red]> User : 400 Bad Request\n{"error": "Request body must be a valid JSON."}
+    deactivate App
+
+|||
+
+else JSON-Struktur ist valide
+
+|||
+
+    'Input Überprüfung --> Daten werden per POST an Server (App) geschickt & verarbeitet'
+    alt#red Eingabedaten ungültig
+
+        |||
+
+        User -> App : POST /api/auth/register (Payload)
+        activate App
+        note right of App
+            **Mögliche Validierungsfehler (400 Bad Request):**
+            * username fehlt/leer -> "Field 'username' must not be empty."
+            * username > 50 Zeichen -> "Field 'username' must not exceed 50 characters."
+            * username enthält Sonderzeichen -> "Field 'username' may only contain letters, digits, and underscores."
+            * password fehlt/leer -> "Field 'password' must not be empty."
+            * password < 8 Zeichen -> "Field 'password' must be at least 8 characters long."
+        endnote
+        App --[#red]> User: 400 Bad Request\n{"error": "..."}
+        deactivate App
+
+    |||
+
+    'App stellt Anfrage an Repo, ob Username bereits existiert'
+    else Eingabedaten inhaltlich gültig
+
+        |||
+
+        User -> App : POST /api/auth/register (Payload)
+        activate App
+
+        'Prüfen von möglichen Duplikaten'
+        App -> Repo : get_by_username(username)
+        activate Repo
+
+        |||
+
+        alt#red Username bereits vergeben (gibt User-Objekt zurück)
+            Repo --> App : user
+            App --[#red]> User : 409 Conflict\n{"error": "Username is already taken."}
+            deactivate App
+
+        |||
+
+        'Username ist frei -> Registrierung durchführen'
+        else Username frei (gibt None zurück)
+            Repo --> App : None
+            deactivate Repo
+            activate App
+
+            |||
+
+            App -> Service : get_password_hash(password)
+            activate Service
+            Service --> App : password_hash
+            deactivate Service
+
+            |||
+
+            'User-Objekt erzeugen und an add()-Funktion übergeben'
+            App -> Repo : add(user)
+            activate Repo
+            Repo --> App : user (mit zugewiesener id)
+            deactivate Repo
+
+            |||
+
+            App --[#green]> User : 201 Created\n{"id": 1, "username": "annika"}
+            deactivate App
+
+            |||
+
+        end
+    end
+end
+
+|||
+
+'Unerwarteter Systemabsturz'
+note over App
+    **Ausnahmebedingung:**
+    Sollte während der Verarbeitung der Daten ein unerwarteter Server-Fehler auftreten,
+    dann antwortet das System mit:
+    500 Internal Server Error\n{"error": "An unexpected error occured. Please try again later."}
+endnote
+
+@enduml
