@@ -42,29 +42,7 @@ else JSON-Struktur ist valide
         endnote
         App --[#red]> User: 400 Bad Request\n{"error": "..."}
 
-'Strukturelle Error Cases'
-alt#red Content-Type Header ist nicht 'application/json'
-    App --[#red]> User : 415 Unsupported Media Type\n{"error": "Content-Type must be 'application/json'."}
 
-else Request-Body ist kein gültiges JSON
-    App --[#red]> User : 400 Bad Request\n{"error": "Request body must be valid JSON."}
-end
-
-'Fehlende Felder'
-alt#red 'username' fehlt
-    App --[#red]> User : 400 Bad Request\n{"error": "Field 'username' is required."}
-
-else 'password' fehlt
-    App --[#red]> User : 400 Bad Request\n{"error": "Field 'password' is required."}
-end
-
-'Ungültige Felder (leer)'
-alt#red 'username' ist ein leerer String
-    App --[#red]> User : 400 Bad Request\n{"error": "Field 'username' must not be empty."}
-
-else 'password' ist ein leerer String
-    App --[#red]> User : 400 Bad Request\n{"error": "Field 'password' must not be empty."}
-end
 
 'Inkorrekte Felder (Zeichenlänge unter-/überschritten & Sonderzeichen)'
 alt#red 'username' zu lang (>50 Zeichen)
