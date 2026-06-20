@@ -48,15 +48,12 @@ def validate_password(password) -> str:
 
 
 class PlantAppManager:
-    def __init__(self):
+    def __init__(self, plant_repo, schedule_repo, log_repo, user_repo):
         self.app = Flask(__name__, template_folder='templates', static_folder='static')
-        self.plants = {}
-        self.schedules = {}
-        self.logs = {}
-
-        self.users = {} # Daten simulieren, da Veronika noch an UserRepository-Klasse arbeitet
-        self._user_next_id = 1 # privat, da man diese von außen niemals ändern können sollte! -> ID ist spezifisch
-
+        self.plant_repo = plant_repo
+        self.schedule_repo = schedule_repo
+        self.log_repo = log_repo
+        self.user_repo = user_repo
         self.app.register_error_handler(HTTPException, self._handle_http_exception)
         self._register_routes()
 
@@ -75,9 +72,9 @@ class PlantAppManager:
         return base + timedelta(days=schedule.interval_days)
 
     def _plant_status(self, plant_id):
-        plant = self.plants[plant_id]
-        plant_schedules = [s for s in self.schedules.values() if s.plant_id == plant_id]
-        plant_logs = [l for l in self.logs.values() if l.plant_id == plant_id]
+        plant = self.plant_repo.get_by_id(plant_id)
+        plant_schedules = self.schedule_repo.find_by_plant(plant_id)
+        plant_logs = self.log_repo.find_by_plant(plant_id)
         today = date.today()
         status = 'ok'
         for sched in plant_schedules:
@@ -97,7 +94,7 @@ class PlantAppManager:
         @self.app.route('/api/plants', methods=['GET'])
         def get_plants():
             result = []
-            for plant in self.plants.values():
+            for plant in self.plant_repo.find_all():
                 d = plant.to_dict()
                 d['status'] = self._plant_status(plant.id)
                 result.append(d)
@@ -117,7 +114,7 @@ class PlantAppManager:
                 location=data['location'],
                 created_at=data.get('created_at'),
             )
-            self.plants[plant.id] = plant
+            self.plant_repo.save(plant)
             d = plant.to_dict()
             d['status'] = self._plant_status(plant.id)
             return jsonify(d), 201
