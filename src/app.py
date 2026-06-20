@@ -1,10 +1,50 @@
 from datetime import date, timedelta
 from flask import Flask, jsonify, request, render_template
 from werkzeug.exceptions import HTTPException
-from models import Plant, CareSchedule, ActionLog
+from models import Plant, CareSchedule, ActionLog, User
+from src.auth_service import AuthenticationService
+
+import re # empfohlenes Modul für Sonderzeichen-Prüfung (siehe KI-Issue #9)
 
 VALID_CARE_TYPES = {'watering', 'fertilizing', 'repotting'}
 UPDATABLE_PLANT_FIELDS = {'name', 'species', 'location'}
+
+def validate_username(username) -> str: # Benutzernamen prüfen nach Vorgaben aus Task 5
+    # Feld fehlt komplett im JSON-Payload
+    if username is None:
+        return "Field 'username' is required."
+    
+    
+    # username ist str, aber komplett leer
+    if username == "":
+        return "Field 'username' must not be empty."
+    
+    # username überschreitet maximal erlaubte Länge von 50 Zeichen
+    if len(username) > 50:
+        return "Field 'username' must not exceed 50 characters."
+    
+    # prüfen, ob username fälschlicherweise Sonderzeichen enthält
+    pattern = r"^\w+$" # siehe KI-Issue (#9) -> enthält a-z, A-Z, 0-9 und _
+    if not re.match(pattern, username):
+        return "Field 'username' may only contain letters, digits, and underscores."
+
+    return None # falls keine Fehler gefunden -> einfach None zurück
+
+
+def validate_password(password) -> str:
+    # Feld fehlt komplett im JSON-Payload
+    if password is None:
+        return "Field 'password' is required."
+    
+    # password ist str, aber komplett leer
+    if password == "":
+        return "Field 'password' must not be empty."
+    
+    # password unterschreitet geforderte Mindestlänge von 8 Zeichen
+    if len(password) < 8:
+        return "Field 'password' must be at least 8 characters long."
+    
+    return None # falls keine Fehler gefunden -> wieder None zurückgeben
 
 
 class PlantAppManager:
@@ -13,6 +53,9 @@ class PlantAppManager:
         self.plants = {}
         self.schedules = {}
         self.logs = {}
+
+        self.users = {} # Daten simulieren, da Veronika noch an UserRepository-Klasse arbeitet
+        self._user_next_id = 1 # privat, da man diese von außen niemals ändern können sollte! -> ID ist spezifisch
 
         self.app.register_error_handler(HTTPException, self._handle_http_exception)
         self._register_routes()
@@ -233,6 +276,61 @@ class PlantAppManager:
                         })
             result.sort(key=lambda x: x['days_overdue'], reverse=True)
             return jsonify(result), 200
+        
+        # Endpoint POST /api/auth/register
+        @self.app.route('/api/auth/register', methods=['POST'])
+        def register_user():
+            try:
+                if not request.is_json: # wenn Content-Type Header kein JSON ist --> 415 Unsupported Media Type Error
+                    return jsonify({"error": "Content-Type must be 'application/json'."}), 415
+                
+                try: # prüfen, ob Request-Body gültiges JSON ist -> falls nicht -> 400 Bad Request Error
+                    payload = request.get_json() # erstmal alle gesendeten Daten holen -> Payload dann Dictionary
+                
+                except Exception:
+                    return jsonify({"error": "Request body must be valid JSON."}), 400
+
+                if payload is None: # falls Body komplett leer -> payload = None -> das aber auch ungültiges JSON -> 400 Bad Request Error
+                    return jsonify({"error": "Request body must be valid JSON."}), 400
+                
+
+                username = payload.get("username") # aus payload-Dictionary jew. Einträge für username & password holen
+                password = payload.get("password")
+                
+
+                username_error = validate_username(username) # prüfen, ob username gültig ist mit oben definierter Funktion validate_username()
+
+                if username_error:
+                    return jsonify({"error": username_error}), 400 # jew. Fehlermeldung siehe obige Funktion
+
+
+                password_error = validate_password(password) # prüfen, ob password gültig ist mit oben definierter Funktion validate_password()
+
+                if password_error:
+                    return jsonify({"error": password_error}), 400 # wenn Fehler im Passwort -> abbrechen mit Statuscode 400 Bad Request
+                
+                
+                for user_id in self.users: # jeden Nutzer in Dictionary durchgehen
+                    existing_user = self.users[user_id] # Vergleichsperson nehmen für Duplikatsprüfung -> nacheinander
+
+                    if existing_user.username == username: # falls übergebener username schon in Dictionary --> Duplikat --> 409 Conflict Error
+                        return jsonify({"error": "Username is already taken."}), 409
+                    
+
+                password_hash = AuthenticationService.get_password_hash(password) # password soll niemals unverschlüsselt gespeichert werden! -> hashen
+
+                new_user = User(username, password_hash, id = self._user_next_id) # Instanz aus User-Klasse erstellen -> für Veronikas Repository zur Übergabe später
+                                                                                   # hier ID vergeben, damit Test für erfolgreiche Registrierung von Nutzer funktioniert
+
+                self.users[self._user_next_id] = new_user # neuen User in Dictionary von oben abspeichern
+                self._user_next_id += 1 # und neue ID vergeben
+
+                return jsonify(new_user.to_dict()), 201 # Happy-Path: User wurde erfolgreich erstellt
+                                                        # nun Daten nicht mehr händisch eingeben --> implementierte to_dict()-Funktion verwenden, wo Passwort-Hash sicher nie mitgeschickt wird in API-Antwort
+            
+            except Exception: # try-except-Block, um möglichen, unvorhergesehenen Fehler im Code abzufangen und zu behandeln -> Rückgabe von 500 Internal Server Error
+                return jsonify({"error": "An unexpected error occurred. Please try again later."}), 500
+            
 
 if __name__ == '__main__':  # pragma: no cover
     manager = PlantAppManager()

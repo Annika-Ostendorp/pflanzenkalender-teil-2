@@ -60,3 +60,16 @@ class ActionLog:
             'performed_at': self.performed_at,
             'notes': self.notes,
         }
+
+class User:
+    def __init__(self, username: str, password_hash: str, id: int = None):
+        self.id = id
+        self.username = username
+        self.password_hash = password_hash
+
+    def to_dict(self): # ID & Username zurückgeben, aber nicht Passwort/Passwort-Hash
+                       # siehe Akzeptanzkriterium 2: The response contains id and username, but never the password or its hash.
+        return {
+            'id': self.id,
+            'username': self.username
+        }

@@ -18,8 +18,60 @@
         <span id="overdue-badge" class="badge hidden">0</span>
       </button>
     </nav>
+    <div id="header-user" class="header-user hidden">
+      <span id="header-username" class="header-username"></span>
+      <button class="btn-logout" id="btn-logout">Abmelden</button>
+    </div>
   </div>
 </header>
+
+<!-- Auth screen — shown when not logged in -->
+<div id="auth-screen" class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">&#127807;</div>
+      <h2>Pflanzen-Pflegekalender</h2>
+      <p>Melde dich an oder erstelle ein neues Konto.</p>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-auth="login">Anmelden</button>
+      <button class="auth-tab" data-auth="register">Registrieren</button>
+    </div>
+
+    <!-- Login -->
+    <div id="auth-form-login" class="auth-form">
+      <div class="field">
+        <label>Benutzername</label>
+        <input type="text" id="login-username" autocomplete="username" placeholder="Benutzername">
+      </div>
+      <div class="field">
+        <label>Passwort</label>
+        <input type="password" id="login-password" autocomplete="current-password" placeholder="Passwort">
+      </div>
+      <div id="login-error" class="auth-error hidden"></div>
+      <button class="btn-primary auth-submit" id="btn-do-login">Anmelden</button>
+    </div>
+
+    <!-- Register -->
+    <div id="auth-form-register" class="auth-form hidden">
+      <div class="field">
+        <label>Benutzername</label>
+        <input type="text" id="reg-username" autocomplete="username" placeholder="Benutzername">
+      </div>
+      <div class="field">
+        <label>Passwort</label>
+        <input type="password" id="reg-password" autocomplete="new-password" placeholder="Passwort">
+      </div>
+      <div class="field">
+        <label>Passwort wiederholen</label>
+        <input type="password" id="reg-password2" autocomplete="new-password" placeholder="Passwort wiederholen">
+      </div>
+      <div id="reg-error" class="auth-error hidden"></div>
+      <button class="btn-primary auth-submit" id="btn-do-register">Konto erstellen</button>
+    </div>
+  </div>
+</div>
 
 <div class="layout">
 

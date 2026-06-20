@@ -52,6 +52,32 @@ header {
   gap: 2rem;
 }
 
+.header-user {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+
+.header-username {
+  font-size: .82rem;
+  color: rgba(255,255,255,.8);
+  font-weight: 500;
+}
+
+.btn-logout {
+  background: rgba(255,255,255,.14);
+  color: rgba(255,255,255,.85);
+  border: 1.5px solid rgba(255,255,255,.25);
+  padding: .3rem .75rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: .8rem;
+  font-weight: 500;
+  transition: background .15s, color .15s;
+}
+.btn-logout:hover { background: rgba(255,255,255,.24); color: #fff; }
+
 header h1 { font-size: 1.15rem; font-weight: 700; white-space: nowrap; }
 
 nav { display: flex; gap: .25rem; }
@@ -420,6 +446,72 @@ main.panel-open { padding-right: calc(var(--panel-w) + 1.5rem); }
   padding: .1rem .42rem;
   line-height: 1.5;
 }
+
+/* ── Auth Screen ─────────────────────────────────────────────────────────────── */
+.auth-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--green-900);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.auth-screen.hidden { display: none !important; }
+
+.auth-card {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  overflow: hidden;
+}
+
+.auth-logo {
+  background: var(--green-700);
+  color: #fff;
+  text-align: center;
+  padding: 1.75rem 1.5rem 1.25rem;
+}
+.auth-logo-icon { font-size: 2.2rem; margin-bottom: .4rem; }
+.auth-logo h2   { font-size: 1.05rem; font-weight: 700; margin-bottom: .3rem; }
+.auth-logo p    { font-size: .8rem; color: rgba(255,255,255,.75); }
+
+.auth-tabs {
+  display: flex;
+  border-bottom: 1.5px solid var(--border);
+}
+.auth-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: .75rem;
+  font-size: .88rem;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2.5px solid transparent;
+  margin-bottom: -1.5px;
+  transition: color .15s, border-color .15s;
+}
+.auth-tab.active { color: var(--green-700); border-bottom-color: var(--green-500); }
+.auth-tab:hover:not(.active) { color: var(--text); }
+
+.auth-form { padding: 1.25rem; }
+
+.auth-error {
+  background: #fff0f0;
+  border: 1.5px solid #ffc0c2;
+  color: var(--overdue);
+  border-radius: 6px;
+  padding: .5rem .75rem;
+  font-size: .83rem;
+  margin-bottom: .75rem;
+}
+
+.auth-submit { width: 100%; padding: .6rem; font-size: .92rem; margin-top: .25rem; }
 
 @media (max-width: 700px) {
   :root { --panel-w: 100vw; }
