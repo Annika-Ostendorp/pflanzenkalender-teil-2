@@ -5,9 +5,6 @@ class AuthenticationService:
     # wie in Task 2 gefordert (über AuthenticationService.get_password_hash())
     @staticmethod
     def get_password_hash(password: str) -> str:
-        if not password: # falls Passwort leer ist -> leeren String zurückgeben
-            return ""
-        
         return generate_password_hash(password) # Klartext-Passwort wird dank generate_password_hash(...) sofort verschlüsselt
                                                 # siehe AK 5: Plaintext is never persisted
 
