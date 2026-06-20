@@ -186,6 +186,9 @@ class PlantAppManager:
                 existing.interval_days = interval_days
                 self.schedule_repo.save(existing)
                 return jsonify(existing.to_dict()), 201
+            sched = CareSchedule(plant_id=plant_id, care_type=care_type, interval_days=interval_days)
+            self.schedule_repo.save(sched)
+            return jsonify(sched.to_dict()), 201
 
         @self.app.route('/api/plants/<int:plant_id>/schedules/<care_type>', methods=['DELETE'])
         def delete_schedule(plant_id, care_type):
