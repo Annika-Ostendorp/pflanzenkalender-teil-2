@@ -43,19 +43,6 @@ else JSON-Struktur ist valide
         App --[#red]> User: 400 Bad Request\n{"error": "..."}
 
 
-
-'Inkorrekte Felder (Zeichenlänge unter-/überschritten & Sonderzeichen)'
-alt#red 'username' zu lang (>50 Zeichen)
-    App --[#red]> User : 400 Bad Request\n{"error": "Field 'username' must not exceed 50 characters."}
-
-else 'password' zu kurz (<8 Zeichen)
-    App --[#red]> User : 400 Bad Request\n{"error": "Field 'password' must be at least 8 characters long."}
-
-else 'username' enthält Sonderzeichen
-    App --[#red]> User : 400 Bad Request\n{"error": "Field 'username' may only contain letters, digits, and underscores."}
-end
-
-
 'App stellt Anfrage an Repo, ob Username bereits existiert'
 App -> Repo : get_by_username(username)
 activate Repo
