@@ -39,25 +39,13 @@ class CareSchedule:
 
 
 class ActionLog:
-    _next_id = 1
 
-    def __init__(self, plant_id, care_type, performed_at=None, notes=None):
-        self.id = ActionLog._next_id
-        ActionLog._next_id += 1
+    def __init__(self, plant_id, care_type, performed_at=None, notes=None, id=None):
+        self.id = id
         self.plant_id = plant_id
         self.care_type = care_type
         self.performed_at = performed_at or date.today().isoformat()
-        self.notes = notes or ''
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'plant_id': self.plant_id,
-            'care_type': self.care_type,
-            'performed_at': self.performed_at,
-            'notes': self.notes,
-        }
-
+        self.notes = notes or ''   
 class User:
     def __init__(self, username: str, password_hash: str, id: int = None):
         self.id = id
