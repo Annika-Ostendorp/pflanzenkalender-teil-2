@@ -18,16 +18,6 @@ note over User, Repo
     PlantUML (plantuml.com/de/sequence-diagram) als Hilfe herangezogen.
 endnote
 
-note right of Service
-    Bezogen auf das 5. Akzeptanzkriterium der User Story ("Plaintext is never persisted.")
-    und die Vorgaben aus der 'password_hashing.md' muss das übergebene Klartext-Passwort ja 
-    sofort transformiert werden. Der AuthenticationService dient dabei also als zustandsloses
-    Hilfswerkzeug, das den Passwort-Hash bereitstellt, ohne selbst etwas dauerhaft zu speichern.
-
-    Im Sequenzdiagramm wird zusätzlich durch das gezielte 'activate' und 'deactivate' visuell sichtbar gemacht,
-    dass der Service nur sehr kurz für die Berechnung des Passwort-Hashes aufgerufen wird und keine 
-    dauerhafte Datenspeicherung durchführt.
-endnote
 
 'Daten werden per POST an Server (App) geschickt & verarbeitet'
 User -> App : POST /api/auth/register (Payload)
