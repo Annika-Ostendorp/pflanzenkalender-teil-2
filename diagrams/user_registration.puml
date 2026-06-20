@@ -47,24 +47,24 @@ else JSON-Struktur ist valide
     'App stellt Anfrage an Repo, ob Username bereits existiert'
     else Eingabedaten inhaltlich gültig
         User -> App : POST /api/auth/register (Payload)
-    
+
         'Prüfen von möglichen Duplikaten'
         App -> Repo : get_by_username(username)
         activate Repo
-    
+
         alt#red Username bereits vergeben (gibt User-Objekt zurück)
             Repo --> App : user
             App --[#red]> User : 409 Conflict\n{"error": "Username is already taken."}
 
-'Username ist frei -> Registrierung durchführen'
-else Username frei (gibt None zurück)
-    Repo --> App : None
-    deactivate Repo
+        'Username ist frei -> Registrierung durchführen'
+        else Username frei (gibt None zurück)
+            Repo --> App : None
+            deactivate Repo
 
-    App -> Service : get_password_hash(password)
-    activate Service
-    Service --> App : password_hash
-    deactivate Service
+            App -> Service : get_password_hash(password)
+            activate Service
+            Service --> App : password_hash
+            deactivate Service
 
     'User-Objekt erzeugen und an add()-Funktion übergeben'
     App -> Repo : add(user)
