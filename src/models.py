@@ -2,11 +2,10 @@ from datetime import date
 
 
 class Plant:
-    _next_id = 1
 
-    def __init__(self, name, species, location, created_at=None):
-        self.id = Plant._next_id
-        Plant._next_id += 1
+    def __init__(self, name, species, location, created_at=None, id=None, user_id=None):
+        self.id = id
+        self.user_id = user_id
         self.name = name
         self.species = species
         self.location = location
@@ -23,11 +22,9 @@ class Plant:
 
 
 class CareSchedule:
-    _next_id = 1
 
-    def __init__(self, plant_id, care_type, interval_days):
-        self.id = CareSchedule._next_id
-        CareSchedule._next_id += 1
+    def __init__(self, plant_id, care_type, interval_days, id=None):
+        self.id = id
         self.plant_id = plant_id
         self.care_type = care_type
         self.interval_days = interval_days
