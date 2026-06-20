@@ -160,13 +160,13 @@ class PlantAppManager:
 
         @self.app.route('/api/plants/<int:plant_id>/schedules', methods=['GET'])
         def get_schedules(plant_id):
-            if plant_id not in self.plants:
+            if not self.plant_repo.get_by_id(plant_id):
                 return jsonify({'error': 'Plant not found'}), 404
-            return jsonify([s.to_dict() for s in self.schedules.values() if s.plant_id == plant_id]), 200
+            return jsonify([s.to_dict() for s in self.schedule_repo.find_by_plant(plant_id)]), 200
 
         @self.app.route('/api/plants/<int:plant_id>/schedules', methods=['POST'])
         def create_or_update_schedule(plant_id):
-            if plant_id not in self.plants:
+            if not self.plant_repo.get_by_id(plant_id):
                 return jsonify({'error': 'Plant not found'}), 404
             data = request.get_json()
             if not data:
@@ -179,26 +179,22 @@ class PlantAppManager:
                 return jsonify({'error': f'care_type must be one of {sorted(VALID_CARE_TYPES)}'}), 400
             if isinstance(interval_days, bool) or not isinstance(interval_days, int) or interval_days < 1:
                 return jsonify({'error': 'interval_days must be a positive integer'}), 400
-            existing = next(
-                (s for s in self.schedules.values() if s.plant_id == plant_id and s.care_type == care_type),
-                None,
-            )
+            existing = self.schedule_repo.find_by_plant_and_care_type(plant_id, care_type)
+
             if existing:
                 existing.interval_days = interval_days
                 return jsonify(existing.to_dict()), 201
             sched = CareSchedule(plant_id=plant_id, care_type=care_type, interval_days=interval_days)
-            self.schedules[sched.id] = sched
+            self.schedule_repo.save(sched)
             return jsonify(sched.to_dict()), 201
 
         @self.app.route('/api/plants/<int:plant_id>/schedules/<care_type>', methods=['DELETE'])
         def delete_schedule(plant_id, care_type):
-            sched = next(
-                (s for s in self.schedules.values() if s.plant_id == plant_id and s.care_type == care_type),
-                None,
-            )
+            sched = self.schedule_repo.find_by_plant_and_care_type(plant_id, care_type)
+
             if not sched:
                 return jsonify({'error': 'Schedule not found'}), 404
-            del self.schedules[sched.id]
+            self.schedule_repo.delete(sched.id)
             return '', 204
 
         @self.app.route('/api/plants/<int:plant_id>/logs', methods=['GET'])
