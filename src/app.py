@@ -317,6 +317,15 @@ class PlantAppManager:
             
 
 if __name__ == '__main__':  # pragma: no cover
-    manager = PlantAppManager(plant_repo=InMemoryPlantRepository(), schedule_repo=InMemoryCareScheduleRepository(), log_repo=InMemoryActionLogRepository(), user_repo=InMemoryUserRepository())
+    from in_memory_repositories import (
+    InMemoryPlantRepository, InMemoryCareScheduleRepository,
+    InMemoryActionLogRepository, InMemoryUserRepository,
+)
+    manager = PlantAppManager(
+    plant_repo=InMemoryPlantRepository(),
+    schedule_repo=InMemoryCareScheduleRepository(),
+    log_repo=InMemoryActionLogRepository(),
+    user_repo=InMemoryUserRepository(),
+)
     app = manager.app
     app.run(debug=True, host='127.0.0.1', port=5000)
