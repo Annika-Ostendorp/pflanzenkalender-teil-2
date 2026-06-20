@@ -142,7 +142,8 @@ class PlantAppManager:
                 return jsonify({'error': f'Invalid fields: {invalid}'}), 400
             for field in UPDATABLE_PLANT_FIELDS:
                 if field in data:
-                    setattr(self.plant_repo.save(plant))
+                    setattr(plant, field, data[field])
+            self.plant_repo.save(plant)
             d = plant.to_dict()
             d['status'] = self._plant_status(plant_id)
             return jsonify(d), 200
