@@ -183,3 +183,19 @@ def test_post_register_unexpected_server_error(client): # unvorhergesehenen Syst
     assert response.status_code == 500 # Server stürzt ab, wegen ungültigem Datentyp --> Statuscode 500 zurückgegeben?
     assert "error" in data # 'error' muss in Server-Antwort drin sein
     assert data["error"] == "An unexpected error occurred. Please try again later." # entspricht die Fehlermeldung exakt dieser Syntax?
+
+
+def test_post_register_username_exactly_50_characters_success(client):
+    valid_username = "a" * 50 # Benutzername jetzt exakt 50 Zeichen lang
+    payload = {
+        "username": valid_username,
+        "password": "validpassword123"
+    }
+
+    response = client.post("/api/auth/register", json = payload)
+    data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 201
+    assert len(data["username"]) == 50 # stimmt Länge exakt?
+    assert data["username"] == valid_username
