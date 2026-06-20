@@ -121,17 +121,17 @@ class PlantAppManager:
 
         @self.app.route('/api/plants/<int:plant_id>', methods=['GET'])
         def get_plant(plant_id):
-            plant = self.plants.get(plant_id)
+            plant = self.plant_repo.get_by_id(plant_id)
             if not plant:
                 return jsonify({'error': 'Plant not found'}), 404
             d = plant.to_dict()
             d['status'] = self._plant_status(plant_id)
-            d['schedules'] = [s.to_dict() for s in self.schedules.values() if s.plant_id == plant_id]
+            d['schedules'] = [s.to_dict() for s in self.schedule_repo.find_by_plant(plant_id)]
             return jsonify(d), 200
 
         @self.app.route('/api/plants/<int:plant_id>', methods=['PUT'])
         def update_plant(plant_id):
-            plant = self.plants.get(plant_id)
+            plant = self.plant_repo.get_by_id(plant_id)
             if not plant:
                 return jsonify({'error': 'Plant not found'}), 404
             data = request.get_json()
@@ -142,20 +142,20 @@ class PlantAppManager:
                 return jsonify({'error': f'Invalid fields: {invalid}'}), 400
             for field in UPDATABLE_PLANT_FIELDS:
                 if field in data:
-                    setattr(plant, field, data[field])
+                    setattr(self.plant_repo.save(plant))
             d = plant.to_dict()
             d['status'] = self._plant_status(plant_id)
             return jsonify(d), 200
 
         @self.app.route('/api/plants/<int:plant_id>', methods=['DELETE'])
         def delete_plant(plant_id):
-            if plant_id not in self.plants:
+            if not self.plant_repo.get_by_id(plant_id):
                 return jsonify({'error': 'Plant not found'}), 404
-            del self.plants[plant_id]
-            for sid in [sid for sid, s in self.schedules.items() if s.plant_id == plant_id]:
-                del self.schedules[sid]
-            for lid in [lid for lid, l in self.logs.items() if l.plant_id == plant_id]:
-                del self.logs[lid]
+            for schedule in self.schedule_repo.find_by_plant(plant_id):
+                self.schedule_repo.delete(schedule.id)
+            for log in self.log_repo.find_by_plant(plant_id):
+                self.log_repo.delete(log.id)
+            self.plant_repo.delete(plant_id)
             return '', 204
 
         @self.app.route('/api/plants/<int:plant_id>/schedules', methods=['GET'])
