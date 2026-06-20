@@ -18,20 +18,34 @@ note over User, Repo
     PlantUML (plantuml.com/de/sequence-diagram) als Hilfe herangezogen.
 endnote
 
+|||
+
 'Content-Type Überprüfung'
 alt#red Content-Type Header ist kein JSON
+
+    |||
+
     User -> App : POST /api/auth/register (mit falschem Header)
     activate App
     App --[#red]> User : 415 Unsupported Media Type\n{"error": "Content-Type must be 'application/json'."}
     deactivate App
 
+    |||
+
 else Request-Body ist ungültiges JSON
+
+    |||
+
     User -> App : POST /api/auth/register (mit ungültigem Body)
     activate App
     App --[#red]> User : 400 Bad Request\n{"error": "Request body must be a valid JSON."}
     deactivate App
 
+|||
+
 else JSON-Struktur ist valide
+
+|||
 
     'Input Überprüfung --> Daten werden per POST an Server (App) geschickt & verarbeitet'
     alt#red Eingabedaten ungültig
@@ -48,7 +62,7 @@ else JSON-Struktur ist valide
         App --[#red]> User: 400 Bad Request\n{"error": "..."}
         deactivate App
 
-
+    |||
 
     'App stellt Anfrage an Repo, ob Username bereits existiert'
     else Eingabedaten inhaltlich gültig
@@ -64,16 +78,22 @@ else JSON-Struktur ist valide
             App --[#red]> User : 409 Conflict\n{"error": "Username is already taken."}
             deactivate App
 
+        |||
+
         'Username ist frei -> Registrierung durchführen'
         else Username frei (gibt None zurück)
             Repo --> App : None
             deactivate Repo
             activate App
 
+            |||
+
             App -> Service : get_password_hash(password)
             activate Service
             Service --> App : password_hash
             deactivate Service
+
+            |||
 
             'User-Objekt erzeugen und an add()-Funktion übergeben'
             App -> Repo : add(user)
@@ -81,11 +101,15 @@ else JSON-Struktur ist valide
             Repo --> App : user (mit zugewiesener id)
             deactivate Repo
 
+            |||
+
             App --[#green]> User : 201 Created\n{"id": 1, "username": "annika"}
             deactivate App
         end
     end
 end
+
+|||
 
 'Unerwarteter Systemabsturz'
 note over App
