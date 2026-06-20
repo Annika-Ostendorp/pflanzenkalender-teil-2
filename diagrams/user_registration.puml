@@ -14,7 +14,7 @@ note over User, Repo
     bevor der Happy-Path, die erfolgreiche Registrierung eines neuen Users, in Kraft treten kann.
     Ein Klassendiagramm würde hingegen bloß die statische Struktur des Systems zeigen.
 
-    Zur konkreten Umsetzung dieser UML-Syntaxelemente (wie die 'alt/else'-Blöcke oder die Farben) habe ich mir die offizielle Website von
+    Zur konkreten Umsetzung dieser UML-Syntaxelemente (wie die 'alt/else'-Blöcke, Abstände oder die Farben) habe ich mir die offizielle Website von
     PlantUML (plantuml.com/de/sequence-diagram) als Hilfe herangezogen.
 endnote
 
@@ -49,6 +49,9 @@ else JSON-Struktur ist valide
 
     'Input Überprüfung --> Daten werden per POST an Server (App) geschickt & verarbeitet'
     alt#red Eingabedaten ungültig
+
+        |||
+
         User -> App : POST /api/auth/register (Payload)
         activate App
         note right of App
@@ -66,12 +69,17 @@ else JSON-Struktur ist valide
 
     'App stellt Anfrage an Repo, ob Username bereits existiert'
     else Eingabedaten inhaltlich gültig
+
+        |||
+
         User -> App : POST /api/auth/register (Payload)
         activate App
 
         'Prüfen von möglichen Duplikaten'
         App -> Repo : get_by_username(username)
         activate Repo
+
+        |||
 
         alt#red Username bereits vergeben (gibt User-Objekt zurück)
             Repo --> App : user
@@ -105,6 +113,9 @@ else JSON-Struktur ist valide
 
             App --[#green]> User : 201 Created\n{"id": 1, "username": "annika"}
             deactivate App
+
+            |||
+
         end
     end
 end
