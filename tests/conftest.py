@@ -1,6 +1,12 @@
 import pytest
 from src.app import PlantAppManager
-from src.models import Plant, CareSchedule, ActionLog
+from src.in_memory_repositories import (
+    InMemoryPlantRepository,
+    InMemoryCareScheduleRepository,
+    InMemoryActionLogRepository,
+    InMemoryUserRepository,
+)
+
 
 
 @pytest.fixture
