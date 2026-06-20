@@ -19,9 +19,18 @@ note over User, Repo
 endnote
 
 
-'Daten werden per POST an Server (App) geschickt & verarbeitet'
-User -> App : POST /api/auth/register (Payload)
-activate App
+'Input Überprüfung --> Daten werden per POST an Server (App) geschickt & verarbeitet'
+alt#red Eingabedaten ungültig
+    User -> App : POST /api/auth/register (Payload)
+    note right of App
+        **Mögliche Validierungsfehler (400 Bad Request):**
+        * username fehlt/leer -> "Field 'username' must not be empty."
+        * username > 50 Zeichen -> "Field 'username' must not exceed 50 characters."
+        * username enthält Sonderzeichen -> "Field 'username' may only contain letters, digits, and underscores."
+        * password fehlt/leer -> "Field 'password' must not be empty."
+        * password < 8 Zeichen -> "Field 'password' must be at least 8 characters long."
+    endnote
+    App --[#red]> User: 400 Bad Request\n{"error": "..."}
 
 'Strukturelle Error Cases'
 alt#red Content-Type Header ist nicht 'application/json'
