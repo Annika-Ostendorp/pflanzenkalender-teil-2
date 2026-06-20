@@ -6,13 +6,13 @@ participant "Plant App" as App
 participant "AuthenticationService" as Service
 database "UserRepository" as Repo
 
+'Laut Theorie von KI-Issue #6'
 note over User, Repo
-    Laut der Theorie (siehe KI-Issue #6) habe ich für die User Story #1 ein **Sequenzdiagramm** gewählt,
-    da es den genauen Ablauf beschreibt, wie ein neuer User registriert wird. Da hier 11 verschiedene Fehlerfälle 
-    nacheinander geprüft werden müssen (wie fehlende Felder, zu kurze Passwörter etc.),
-    hilft dieser Diagrammtyp zu veranschaulichen, in welcher Reihenfolge das System die Daten nacheinander verarbeitet.
-    Ein Klassendiagramm würde hingegen nur die Struktur zeigen, aber hier geht es ja um die Interaktion und die Schnittstellen
-    zwischen User, der App und dem Backend (AuthenticationService & UserRepository).
+    Ich habe für diese User Story ein **Sequenzdiagramm** gewählt,
+    da es optimal die Interaktion und Schnittstellen zwischen User, unserer Flask-App und Backend visualisiert. 
+    Es veranschaulicht dabei sehr gut, in welcher Reihenfolge die 11 Fehlerfälle nacheinander verarbeitet werden, 
+    bevor der Happy-Path, die erfolgreiche Registrierung eines neuen Users, in Kraft treten kann.
+    Ein Klassendiagramm würde hingegen bloß die statische Struktur des Systems zeigen.
 
     Zur konkreten Umsetzung dieser UML-Syntaxelemente (wie die 'alt/else'-Blöcke oder die Farben) habe ich mir die offizielle Website von
     PlantUML (plantuml.com/de/sequence-diagram) als Hilfe herangezogen.
