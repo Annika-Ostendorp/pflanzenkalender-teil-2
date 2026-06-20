@@ -18,6 +18,16 @@ note over User, Repo
     PlantUML (plantuml.com/de/sequence-diagram) als Hilfe herangezogen.
 endnote
 
+'Content-Type Überprüfung'
+alt#red Content-Type Header ist kein JSON
+    User -> App : POST /api/auth/register (mit falschem Header)
+    App --[#red]> User : 415 Unsupported Media Type\n{"error": "Content-Type must be 'application/json'."}
+
+else Request-Body ist ungültiges JSON
+    User -> App : POST /api/auth/register (mit ungültigem Body)
+    App --[#red]> User : 400 Bad Request\n{"error": "Request body must be a valid JSON."}
+
+else JSON-Struktur ist Validierungsfehler
 
 'Input Überprüfung --> Daten werden per POST an Server (App) geschickt & verarbeitet'
 alt#red Eingabedaten ungültig
