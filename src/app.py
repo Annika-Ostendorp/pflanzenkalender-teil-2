@@ -199,10 +199,10 @@ class PlantAppManager:
 
         @self.app.route('/api/plants/<int:plant_id>/logs', methods=['GET'])
         def get_logs(plant_id):
-            if plant_id not in self.plants:
+            if not self.plant_repo.get_by_id(plant_id):
                 return jsonify({'error': 'Plant not found'}), 404
             result = sorted(
-                [l.to_dict() for l in self.logs.values() if l.plant_id == plant_id],
+                [l.to_dict() for l in self.log_repo.find_by_plant(plant_id)],
                 key=lambda l: l['performed_at'],
                 reverse=True,
             )
@@ -210,7 +210,7 @@ class PlantAppManager:
 
         @self.app.route('/api/plants/<int:plant_id>/logs', methods=['POST'])
         def create_log(plant_id):
-            if plant_id not in self.plants:
+            if not self.plant_repo.get_by_id(plant_id):
                 return jsonify({'error': 'Plant not found'}), 404
             data = request.get_json()
             if not data:
@@ -223,16 +223,16 @@ class PlantAppManager:
                 performed_at=data.get('performed_at'),
                 notes=data.get('notes') or '',
             )
-            self.logs[log.id] = log
+            self.log_repo.save(log)
             return jsonify(log.to_dict()), 201
 
         @self.app.route('/api/plants/<int:plant_id>/next-actions', methods=['GET'])
         def get_next_actions(plant_id):
-            plant = self.plants.get(plant_id)
+            plant = self.plant_repo.get_by_id(plant_id)
             if not plant:
                 return jsonify({'error': 'Plant not found'}), 404
-            plant_schedules = [s for s in self.schedules.values() if s.plant_id == plant_id]
-            plant_logs = [l for l in self.logs.values() if l.plant_id == plant_id]
+            plant_schedules = self.schedule_repo.find_by_plant(plant_id)
+            plant_logs = self.log_repo.find_by_plant(plant_id)
             today = date.today()
             result = []
             for sched in plant_schedules:
@@ -252,9 +252,9 @@ class PlantAppManager:
         def get_overdue():
             today = date.today()
             result = []
-            for plant in self.plants.values():
-                plant_schedules = [s for s in self.schedules.values() if s.plant_id == plant.id]
-                plant_logs = [l for l in self.logs.values() if l.plant_id == plant.id]
+            for plant in self.plant_repo.find_all():
+                plant_schedules = self.schedule_repo.find_by_plant(plant.id)
+                plant_logs = self.log_repo.find_by_plant(plant.id)
                 for sched in plant_schedules:
                     nd = self._next_due_date(plant, sched, plant_logs)
                     days_until = (nd - today).days
