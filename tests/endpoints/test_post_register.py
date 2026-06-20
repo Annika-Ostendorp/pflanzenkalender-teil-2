@@ -199,3 +199,18 @@ def test_post_register_username_exactly_50_characters_success(client):
     assert response.status_code == 201
     assert len(data["username"]) == 50 # stimmt Länge exakt?
     assert data["username"] == valid_username
+
+
+def test_post_register_password_exactly_8_characters_success(client):
+    payload = {
+        "username": "veronika",
+        "password": "12345678"
+    }
+
+    response = client.post("/api/auth/register", json = payload)
+    data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 201
+    assert data["username"] == "veronika"
+    assert "password" not in data # Passwort muss ja geheim bleiben
