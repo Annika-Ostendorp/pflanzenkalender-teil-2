@@ -66,13 +66,15 @@ else JSON-Struktur ist valide
             Service --> App : password_hash
             deactivate Service
 
-    'User-Objekt erzeugen und an add()-Funktion übergeben'
-    App -> Repo : add(user)
-    activate Repo
-    Repo --> App : user (mit zugewiesener id)
-    deactivate Repo
+            'User-Objekt erzeugen und an add()-Funktion übergeben'
+            App -> Repo : add(user)
+            activate Repo
+            Repo --> App : user (mit zugewiesener id)
+            deactivate Repo
 
-    App --[#green]> User : 201 Created\n{"id": 1, "username": "annika"}
+            App --[#green]> User : 201 Created\n{"id": 1, "username": "annika"}
+        end
+    end
 end
 
 'Unerwarteter Systemabsturz'
@@ -83,5 +85,4 @@ note over App
     500 Internal Server Error\n{"error": "An unexpected error occured. Please try again later."}
 endnote
 
-deactivate App
 @enduml
