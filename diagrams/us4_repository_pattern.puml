@@ -48,24 +48,20 @@ abstract class UserRepository {
 
 class InMemoryPlantRepository {
   -_store: dict
-  -_next_id: int
 }
 
 
 class InMemoryCareScheduleRepository {
   -_store: dict
-  -_next_id: int
 }
 
 
 class InMemoryActionLogRepository {
   -_store: dict
-  -_next_id: int
 }
 
 class InMemoryUserRepository {
   -_store: dict
-  -_next_id: int
 }
 
 
@@ -109,10 +105,10 @@ PlantAppManager --> UserRepository
 
 
 ' ── Implementations ─────────────────────────────────────
-PlantRepository <|-- InMemoryPlantRepository
-CareScheduleRepository <|-- InMemoryCareScheduleRepository
-ActionLogRepository <|-- InMemoryActionLogRepository
-UserRepository <|-- InMemoryUserRepository
+PlantRepository <|.. InMemoryPlantRepository
+CareScheduleRepository <|.. InMemoryCareScheduleRepository
+ActionLogRepository <|.. InMemoryActionLogRepository
+UserRepository <|.. InMemoryUserRepository
 
 
 ' ── Repository returns domain models ─────────────────────
