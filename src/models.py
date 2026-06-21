@@ -17,6 +17,7 @@ class Plant:
         self.name = name
         self.species = species
         self.location = location  
+        self.created_at = created_at or date.today().isoformat()
 
     def to_dict(self):
         return {
@@ -26,7 +27,7 @@ class Plant:
             'location': self.location,
             'created_at': self.created_at,
         }
-
+        
 
 class CareSchedule:
     def __init__(
@@ -62,7 +63,9 @@ class ActionLog:
         self.id = id
         self.plant_id = plant_id
         self.care_type = care_type  
-
+        self.performed_at = performed_at or date.today().isoformat()
+        self.notes = notes or ''
+        
     def to_dict(self):
         return {
             'id': self.id,
