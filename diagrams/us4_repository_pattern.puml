@@ -17,7 +17,6 @@ class PlantAppManager {
 abstract class PlantRepository {
   {abstract} +save(plant: Plant): None
   {abstract} +get_by_id(plant_id: int): Plant | None
-  {abstract} +find_all(): List[Plant]
   {abstract} +find_by_user(user_id: int): List[Plant]
   {abstract} +delete(plant_id: int): None
 }

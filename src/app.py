@@ -94,6 +94,9 @@ class PlantAppManager:
         @self.app.route('/api/plants', methods=['GET'])
         def get_plants():
             result = []
+
+            # TODO: durch find_by_user(user_id) ersetzen, sobald Plant-Routes JWT-geschützt sind
+
             for plant in self.plant_repo.find_all():
                 d = plant.to_dict()
                 d['status'] = self._plant_status(plant.id)
@@ -254,6 +257,9 @@ class PlantAppManager:
         def get_overdue():
             today = date.today()
             result = []
+            
+            # TODO: durch find_by_user(user_id) ersetzen, sobald Plant-Routes JWT-geschützt sind
+
             for plant in self.plant_repo.find_all():
                 plant_schedules = self.schedule_repo.find_by_plant(plant.id)
                 plant_logs = self.log_repo.find_by_plant(plant.id)
