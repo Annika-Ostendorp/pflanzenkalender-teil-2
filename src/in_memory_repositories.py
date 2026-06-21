@@ -64,19 +64,19 @@ class InMemoryActionLogRepository(ActionLogRepository):
         self._store = {}
         self._next_id = 1
 
-    def save(self, log):
+    def save(self, log: ActionLog) -> None:
         if log.id is None:
             log.id = self._next_id
             self._next_id += 1
         self._store[log.id] = log
 
-    def get_by_id(self, log_id):
+    def get_by_id(self, log_id: int) -> ActionLog | None:
         return self._store.get(log_id)
 
-    def find_by_plant(self, plant_id):
+    def find_by_plant(self, plant_id: int) -> list[ActionLog]:
         return [l for l in self._store.values() if l.plant_id == plant_id]
 
-    def delete(self, log_id):
+    def delete(self, log_id: int) -> None:
         self._store.pop(log_id, None)
 
 
@@ -85,20 +85,20 @@ class InMemoryUserRepository(UserRepository):
         self._store = {}
         self._next_id = 1
 
-    def save(self, user):
+    def save(self, user: User) -> None:
         if user.id is None:
             user.id = self._next_id
             self._next_id += 1
         self._store[user.id] = user
 
-    def get_by_id(self, user_id):
+    def get_by_id(self, user_id: int) -> User | None:
         return self._store.get(user_id)
 
-    def find_by_username(self, username):
+    def find_by_username(self, username: str) -> User | None:
         return next(
             (u for u in self._store.values() if u.username == username),
             None,
         )
 
-    def delete(self, user_id):
+    def delete(self, user_id: int) -> None:
         self._store.pop(user_id, None)
