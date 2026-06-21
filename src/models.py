@@ -3,13 +3,20 @@ from datetime import date
 
 class Plant:
 
-    def __init__(self, name, species, location, created_at=None, id=None, user_id=None):
+    def __init__(
+        self,
+        name: str,
+        species: str,
+        location: str,
+        created_at: str | None = None,
+        id: int | None = None,
+        user_id: int | None = None,
+    ):
         self.id = id
         self.user_id = user_id
         self.name = name
         self.species = species
-        self.location = location
-        self.created_at = created_at or date.today().isoformat()
+        self.location = location  
 
     def to_dict(self):
         return {
@@ -22,8 +29,13 @@ class Plant:
 
 
 class CareSchedule:
-
-    def __init__(self, plant_id, care_type, interval_days, id=None):
+    def __init__(
+        self,
+        plant_id: int,
+        care_type: str,
+        interval_days: int,
+        id: int | None = None,
+    ):
         self.id = id
         self.plant_id = plant_id
         self.care_type = care_type
@@ -56,7 +68,7 @@ class ActionLog:
             'notes': self.notes,
         }
 
-        
+
 class User:
     def __init__(self, username: str, password_hash: str, id: int = None):
         self.id = id
