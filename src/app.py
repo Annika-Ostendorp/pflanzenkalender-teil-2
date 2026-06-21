@@ -48,15 +48,12 @@ def validate_password(password) -> str:
 
 
 class PlantAppManager:
-    def __init__(self):
+    def __init__(self, plant_repo, schedule_repo, log_repo, user_repo):
         self.app = Flask(__name__, template_folder='templates', static_folder='static')
-        self.plants = {}
-        self.schedules = {}
-        self.logs = {}
-
-        self.users = {} # Daten simulieren, da Veronika noch an UserRepository-Klasse arbeitet
-        self._user_next_id = 1 # privat, da man diese von außen niemals ändern können sollte! -> ID ist spezifisch
-
+        self.plant_repo = plant_repo
+        self.schedule_repo = schedule_repo
+        self.log_repo = log_repo
+        self.user_repo = user_repo
         self.app.register_error_handler(HTTPException, self._handle_http_exception)
         self._register_routes()
 
@@ -75,9 +72,9 @@ class PlantAppManager:
         return base + timedelta(days=schedule.interval_days)
 
     def _plant_status(self, plant_id):
-        plant = self.plants[plant_id]
-        plant_schedules = [s for s in self.schedules.values() if s.plant_id == plant_id]
-        plant_logs = [l for l in self.logs.values() if l.plant_id == plant_id]
+        plant = self.plant_repo.get_by_id(plant_id)
+        plant_schedules = self.schedule_repo.find_by_plant(plant_id)
+        plant_logs = self.log_repo.find_by_plant(plant_id)
         today = date.today()
         status = 'ok'
         for sched in plant_schedules:
@@ -97,7 +94,10 @@ class PlantAppManager:
         @self.app.route('/api/plants', methods=['GET'])
         def get_plants():
             result = []
-            for plant in self.plants.values():
+
+            # TODO: durch find_by_user(user_id) ersetzen, sobald Plant-Routes JWT-geschützt sind
+
+            for plant in self.plant_repo.find_all():
                 d = plant.to_dict()
                 d['status'] = self._plant_status(plant.id)
                 result.append(d)
@@ -117,24 +117,24 @@ class PlantAppManager:
                 location=data['location'],
                 created_at=data.get('created_at'),
             )
-            self.plants[plant.id] = plant
+            self.plant_repo.save(plant)
             d = plant.to_dict()
             d['status'] = self._plant_status(plant.id)
             return jsonify(d), 201
 
         @self.app.route('/api/plants/<int:plant_id>', methods=['GET'])
         def get_plant(plant_id):
-            plant = self.plants.get(plant_id)
+            plant = self.plant_repo.get_by_id(plant_id)
             if not plant:
                 return jsonify({'error': 'Plant not found'}), 404
             d = plant.to_dict()
             d['status'] = self._plant_status(plant_id)
-            d['schedules'] = [s.to_dict() for s in self.schedules.values() if s.plant_id == plant_id]
+            d['schedules'] = [s.to_dict() for s in self.schedule_repo.find_by_plant(plant_id)]
             return jsonify(d), 200
 
         @self.app.route('/api/plants/<int:plant_id>', methods=['PUT'])
         def update_plant(plant_id):
-            plant = self.plants.get(plant_id)
+            plant = self.plant_repo.get_by_id(plant_id)
             if not plant:
                 return jsonify({'error': 'Plant not found'}), 404
             data = request.get_json()
@@ -146,30 +146,31 @@ class PlantAppManager:
             for field in UPDATABLE_PLANT_FIELDS:
                 if field in data:
                     setattr(plant, field, data[field])
+            self.plant_repo.save(plant)
             d = plant.to_dict()
             d['status'] = self._plant_status(plant_id)
             return jsonify(d), 200
 
         @self.app.route('/api/plants/<int:plant_id>', methods=['DELETE'])
         def delete_plant(plant_id):
-            if plant_id not in self.plants:
+            if not self.plant_repo.get_by_id(plant_id):
                 return jsonify({'error': 'Plant not found'}), 404
-            del self.plants[plant_id]
-            for sid in [sid for sid, s in self.schedules.items() if s.plant_id == plant_id]:
-                del self.schedules[sid]
-            for lid in [lid for lid, l in self.logs.items() if l.plant_id == plant_id]:
-                del self.logs[lid]
+            for schedule in self.schedule_repo.find_by_plant(plant_id):
+                self.schedule_repo.delete(schedule.id)
+            for log in self.log_repo.find_by_plant(plant_id):
+                self.log_repo.delete(log.id)
+            self.plant_repo.delete(plant_id)
             return '', 204
 
         @self.app.route('/api/plants/<int:plant_id>/schedules', methods=['GET'])
         def get_schedules(plant_id):
-            if plant_id not in self.plants:
+            if not self.plant_repo.get_by_id(plant_id):
                 return jsonify({'error': 'Plant not found'}), 404
-            return jsonify([s.to_dict() for s in self.schedules.values() if s.plant_id == plant_id]), 200
+            return jsonify([s.to_dict() for s in self.schedule_repo.find_by_plant(plant_id)]), 200
 
         @self.app.route('/api/plants/<int:plant_id>/schedules', methods=['POST'])
         def create_or_update_schedule(plant_id):
-            if plant_id not in self.plants:
+            if not self.plant_repo.get_by_id(plant_id):
                 return jsonify({'error': 'Plant not found'}), 404
             data = request.get_json()
             if not data:
@@ -182,34 +183,31 @@ class PlantAppManager:
                 return jsonify({'error': f'care_type must be one of {sorted(VALID_CARE_TYPES)}'}), 400
             if isinstance(interval_days, bool) or not isinstance(interval_days, int) or interval_days < 1:
                 return jsonify({'error': 'interval_days must be a positive integer'}), 400
-            existing = next(
-                (s for s in self.schedules.values() if s.plant_id == plant_id and s.care_type == care_type),
-                None,
-            )
+            existing = self.schedule_repo.find_by_plant_and_care_type(plant_id, care_type)
+
             if existing:
                 existing.interval_days = interval_days
+                self.schedule_repo.save(existing)
                 return jsonify(existing.to_dict()), 201
             sched = CareSchedule(plant_id=plant_id, care_type=care_type, interval_days=interval_days)
-            self.schedules[sched.id] = sched
+            self.schedule_repo.save(sched)
             return jsonify(sched.to_dict()), 201
 
         @self.app.route('/api/plants/<int:plant_id>/schedules/<care_type>', methods=['DELETE'])
         def delete_schedule(plant_id, care_type):
-            sched = next(
-                (s for s in self.schedules.values() if s.plant_id == plant_id and s.care_type == care_type),
-                None,
-            )
+            sched = self.schedule_repo.find_by_plant_and_care_type(plant_id, care_type)
+
             if not sched:
                 return jsonify({'error': 'Schedule not found'}), 404
-            del self.schedules[sched.id]
+            self.schedule_repo.delete(sched.id)
             return '', 204
 
         @self.app.route('/api/plants/<int:plant_id>/logs', methods=['GET'])
         def get_logs(plant_id):
-            if plant_id not in self.plants:
+            if not self.plant_repo.get_by_id(plant_id):
                 return jsonify({'error': 'Plant not found'}), 404
             result = sorted(
-                [l.to_dict() for l in self.logs.values() if l.plant_id == plant_id],
+                [l.to_dict() for l in self.log_repo.find_by_plant(plant_id)],
                 key=lambda l: l['performed_at'],
                 reverse=True,
             )
@@ -217,7 +215,7 @@ class PlantAppManager:
 
         @self.app.route('/api/plants/<int:plant_id>/logs', methods=['POST'])
         def create_log(plant_id):
-            if plant_id not in self.plants:
+            if not self.plant_repo.get_by_id(plant_id):
                 return jsonify({'error': 'Plant not found'}), 404
             data = request.get_json()
             if not data:
@@ -230,16 +228,16 @@ class PlantAppManager:
                 performed_at=data.get('performed_at'),
                 notes=data.get('notes') or '',
             )
-            self.logs[log.id] = log
+            self.log_repo.save(log)
             return jsonify(log.to_dict()), 201
 
         @self.app.route('/api/plants/<int:plant_id>/next-actions', methods=['GET'])
         def get_next_actions(plant_id):
-            plant = self.plants.get(plant_id)
+            plant = self.plant_repo.get_by_id(plant_id)
             if not plant:
                 return jsonify({'error': 'Plant not found'}), 404
-            plant_schedules = [s for s in self.schedules.values() if s.plant_id == plant_id]
-            plant_logs = [l for l in self.logs.values() if l.plant_id == plant_id]
+            plant_schedules = self.schedule_repo.find_by_plant(plant_id)
+            plant_logs = self.log_repo.find_by_plant(plant_id)
             today = date.today()
             result = []
             for sched in plant_schedules:
@@ -259,9 +257,12 @@ class PlantAppManager:
         def get_overdue():
             today = date.today()
             result = []
-            for plant in self.plants.values():
-                plant_schedules = [s for s in self.schedules.values() if s.plant_id == plant.id]
-                plant_logs = [l for l in self.logs.values() if l.plant_id == plant.id]
+            
+            # TODO: durch find_by_user(user_id) ersetzen, sobald Plant-Routes JWT-geschützt sind
+
+            for plant in self.plant_repo.find_all():
+                plant_schedules = self.schedule_repo.find_by_plant(plant.id)
+                plant_logs = self.log_repo.find_by_plant(plant.id)
                 for sched in plant_schedules:
                     nd = self._next_due_date(plant, sched, plant_logs)
                     days_until = (nd - today).days
@@ -309,30 +310,30 @@ class PlantAppManager:
                 if password_error:
                     return jsonify({"error": password_error}), 400 # wenn Fehler im Passwort -> abbrechen mit Statuscode 400 Bad Request
                 
+
+                existing_user = self.user_repo.find_by_username(username)
+                if existing_user:
+                    return jsonify({"error": "Username is already taken."}), 409
                 
-                for user_id in self.users: # jeden Nutzer in Dictionary durchgehen
-                    existing_user = self.users[user_id] # Vergleichsperson nehmen für Duplikatsprüfung -> nacheinander
+                password_hash = AuthenticationService.get_password_hash(password)
+                new_user = User(username=username, password_hash=password_hash)
+                self.user_repo.save(new_user)
+                return jsonify(new_user.to_dict()), 201
 
-                    if existing_user.username == username: # falls übergebener username schon in Dictionary --> Duplikat --> 409 Conflict Error
-                        return jsonify({"error": "Username is already taken."}), 409
-                    
-
-                password_hash = AuthenticationService.get_password_hash(password) # password soll niemals unverschlüsselt gespeichert werden! -> hashen
-
-                new_user = User(username, password_hash, id = self._user_next_id) # Instanz aus User-Klasse erstellen -> für Veronikas Repository zur Übergabe später
-                                                                                   # hier ID vergeben, damit Test für erfolgreiche Registrierung von Nutzer funktioniert
-
-                self.users[self._user_next_id] = new_user # neuen User in Dictionary von oben abspeichern
-                self._user_next_id += 1 # und neue ID vergeben
-
-                return jsonify(new_user.to_dict()), 201 # Happy-Path: User wurde erfolgreich erstellt
-                                                        # nun Daten nicht mehr händisch eingeben --> implementierte to_dict()-Funktion verwenden, wo Passwort-Hash sicher nie mitgeschickt wird in API-Antwort
-            
-            except Exception: # try-except-Block, um möglichen, unvorhergesehenen Fehler im Code abzufangen und zu behandeln -> Rückgabe von 500 Internal Server Error
+            except Exception:
                 return jsonify({"error": "An unexpected error occurred. Please try again later."}), 500
             
 
 if __name__ == '__main__':  # pragma: no cover
-    manager = PlantAppManager()
+    from in_memory_repositories import (
+    InMemoryPlantRepository, InMemoryCareScheduleRepository,
+    InMemoryActionLogRepository, InMemoryUserRepository,
+)
+    manager = PlantAppManager(
+    plant_repo=InMemoryPlantRepository(),
+    schedule_repo=InMemoryCareScheduleRepository(),
+    log_repo=InMemoryActionLogRepository(),
+    user_repo=InMemoryUserRepository(),
+)
     app = manager.app
     app.run(debug=True, host='127.0.0.1', port=5000)

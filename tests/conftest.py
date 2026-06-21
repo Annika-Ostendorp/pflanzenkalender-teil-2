@@ -1,15 +1,23 @@
 import pytest
 from src.app import PlantAppManager
-from src.models import Plant, CareSchedule, ActionLog
+from src.in_memory_repositories import (
+    InMemoryPlantRepository,
+    InMemoryCareScheduleRepository,
+    InMemoryActionLogRepository,
+    InMemoryUserRepository,
+)
+
 
 
 @pytest.fixture
 def client():
-    manager = PlantAppManager()
+    manager = PlantAppManager(
+        plant_repo=InMemoryPlantRepository(),
+        schedule_repo=InMemoryCareScheduleRepository(),
+        log_repo=InMemoryActionLogRepository(),
+        user_repo=InMemoryUserRepository(),
+    )
     manager.app.config['TESTING'] = True
-    Plant._next_id = 1
-    CareSchedule._next_id = 1
-    ActionLog._next_id = 1
     with manager.app.test_client() as c:
         yield c
 

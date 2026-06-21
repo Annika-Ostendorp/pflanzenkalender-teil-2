@@ -1,0 +1,155 @@
+@startuml repository-pattern
+skinparam classAttributeIconSize 0
+skinparam classFontSize 11
+skinparam nodesep 30
+skinparam ranksep 25
+top to bottom direction
+
+
+class PlantAppManager {
+  +plant_repo: PlantRepository
+  +schedule_repo: CareScheduleRepository
+  +log_repo: ActionLogRepository
+  +user_repo: UserRepository
+}
+
+
+abstract class PlantRepository {
+  {abstract} +save(plant: Plant): None
+  {abstract} +get_by_id(plant_id: int): Plant | None
+  {abstract} +find_by_user(user_id: int): List[Plant]
+  {abstract} +delete(plant_id: int): None
+}
+
+
+abstract class CareScheduleRepository {
+  {abstract} +save(schedule: CareSchedule): None
+  {abstract} +get_by_id(schedule_id: int): CareSchedule | None
+  {abstract} +find_by_plant(plant_id: int): List[CareSchedule]
+  {abstract} +find_by_plant_and_care_type(plant_id: int, care_type: str): CareSchedule | None
+  {abstract} +delete(schedule_id: int): None
+}
+
+
+abstract class ActionLogRepository {
+  {abstract} +save(log: ActionLog): None
+  {abstract} +get_by_id(log_id: int): ActionLog | None
+  {abstract} +find_by_plant(plant_id: int): List[ActionLog]
+  {abstract} +delete(log_id: int): None
+}
+
+abstract class UserRepository {
+  {abstract} +save(user: User): None
+  {abstract} +get_by_id(user_id: int): User | None
+  {abstract} +find_by_username(username: str): User | None
+  {abstract} +delete(user_id: int): None
+}
+
+class InMemoryPlantRepository {
+  -_store: dict
+}
+
+
+class InMemoryCareScheduleRepository {
+  -_store: dict
+}
+
+
+class InMemoryActionLogRepository {
+  -_store: dict
+}
+
+class InMemoryUserRepository {
+  -_store: dict
+}
+
+
+class Plant {
+  +id: int | None
+  +user_id: int
+  +name: str
+  +species: str
+  +location: str
+  +created_at: str
+}
+
+class CareSchedule {
+  +id: int | None
+  +plant_id: int
+  +care_type: str
+  +interval_days: int
+}
+
+
+class ActionLog {
+  +id: int | None
+  +plant_id: int
+  +care_type: str
+  +performed_at: str
+  +notes: str
+}
+
+class User {
+  +id: int | None
+  +username: str
+  +password_hash: str
+}
+
+
+' ── Dependency Inversion: Manager → abstract interfaces ──
+PlantAppManager --> PlantRepository
+PlantAppManager --> CareScheduleRepository
+PlantAppManager --> ActionLogRepository
+PlantAppManager --> UserRepository
+
+
+' ── Implementations ─────────────────────────────────────
+PlantRepository <|.. InMemoryPlantRepository
+CareScheduleRepository <|.. InMemoryCareScheduleRepository
+ActionLogRepository <|.. InMemoryActionLogRepository
+UserRepository <|.. InMemoryUserRepository
+
+
+' ── Repository returns domain models ─────────────────────
+PlantRepository ..> Plant : returns
+CareScheduleRepository ..> CareSchedule : returns
+ActionLogRepository ..> ActionLog : returns
+UserRepository ..> User : returns
+
+' ── Column layout (left → right) ─────────────────────────
+PlantRepository -[hidden]right- CareScheduleRepository
+CareScheduleRepository -[hidden]right- ActionLogRepository
+ActionLogRepository -[hidden]right- UserRepository
+InMemoryPlantRepository -[hidden]right- InMemoryCareScheduleRepository
+InMemoryCareScheduleRepository -[hidden]right- InMemoryActionLogRepository
+InMemoryActionLogRepository -[hidden]right- InMemoryUserRepository
+Plant -[hidden]right- CareSchedule
+CareSchedule -[hidden]right- ActionLog
+ActionLog -[hidden]right- User
+PlantRepository -[hidden]down- InMemoryPlantRepository
+InMemoryPlantRepository -[hidden]down- Plant
+CareScheduleRepository -[hidden]down- InMemoryCareScheduleRepository
+InMemoryCareScheduleRepository -[hidden]down- CareSchedule
+ActionLogRepository -[hidden]down- InMemoryActionLogRepository
+InMemoryActionLogRepository -[hidden]down- ActionLog
+UserRepository -[hidden]down- InMemoryUserRepository
+InMemoryUserRepository -[hidden]down- User
+
+note as N1
+Für diese User Story habe ich ein Klassendiagramm gewählt,
+weil hier vor allem die Struktur des Codes verändert wird.
+
+Die User Story führt abstrakte Repository-Klassen und konkrete
+InMemory-Implementierungen ein. Das Diagramm zeigt, dass
+PlantAppManager nur von den abstrakten Repository-Klassen abhängt
+und nicht direkt von den InMemory-Klassen.
+
+Außerdem wird sichtbar, dass die ID-Vergabe nicht mehr in den
+Modellklassen liegt, sondern in der save()-Methode der Repositories.
+
+Ein Sequenz- oder Aktivitätsdiagramm wäre hier weniger passend,
+weil kein neuer Ablauf modelliert wird, sondern neue Klassen und
+ihre Beziehungen.
+end note
+
+@enduml
