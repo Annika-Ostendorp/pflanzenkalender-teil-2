@@ -51,13 +51,17 @@ class CareSchedule:
 
 
 class ActionLog:
-
-    def __init__(self, plant_id, care_type, performed_at=None, notes=None, id=None):
+    def __init__(
+        self,
+        plant_id: int,
+        care_type: str,
+        performed_at: str | None = None,
+        notes: str | None = None,
+        id: int | None = None,
+    ):
         self.id = id
         self.plant_id = plant_id
-        self.care_type = care_type
-        self.performed_at = performed_at or date.today().isoformat()
-        self.notes = notes or ''   
+        self.care_type = care_type  
 
     def to_dict(self):
         return {
