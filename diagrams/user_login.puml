@@ -101,26 +101,26 @@ else JSON-Struktur ist valide
                 App --[#red]> User : 401 Unauthorized\n{"error": "Invalid username or password."}
                 deactivate App
         
-        |||
-
-        'Credentials korrekt -> JWT-Token generieren'
-        else Passwort ist korrekt (True)
-
             |||
 
-            App -> Service : create_token(user.id, username)
-            activate Service
+            'Credentials korrekt -> JWT-Token generieren'
+            else Passwort ist korrekt (True)
 
-            alt#red Token-Generierung funktioniert nicht
-                Service --> App : raises Exception
-                App --[#red]> User : 503 Service Unavailable\n{"error": "Service Unavailable."}
+                |||
+
+                App -> Service : create_token(user.id, username)
+                activate Service
+
+                alt#red Token-Generierung funktioniert nicht
+                    Service --> App : raises Exception
+                    App --[#red]> User : 503 Service Unavailable\n{"error": "Service Unavailable."}
             
-            |||
+                |||
 
-            'Happy Path: Login erfolgreich'
-            else Token erfolgreich erzeugt
-                Service --> App : access_token
-                deactivate Service
+                'Happy Path: Login erfolgreich'
+                else Token erfolgreich erzeugt
+                    Service --> App : access_token
+                    deactivate Service
 
                 App --[#green]> User : 200 OK\n{"access_token": "<JWT>"}
                 deactivate App
