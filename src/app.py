@@ -379,7 +379,12 @@ class PlantAppManager:
             if not AuthenticationService.verify_password(password, user.password_hash):
                 return jsonify({"error": "Invalid username or password"}), 401
             
-            access_token = AuthenticationService.create_token(user.id)
+            try:
+                access_token = AuthenticationService.create_token(user.id)
+            
+            except Exception:
+                return jsonify({"error": "Service Unavailable."}), 503
+            
 
             return jsonify({"access_token": access_token}), 200 # erfolgreich generierten Token am Ende zurückgeben
 
