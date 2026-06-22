@@ -1,0 +1,17 @@
+@startuml user_login
+skinparam actorStyle awesome
+
+actor "User (Website)" as User
+participant "Plant App" as App
+participant "AuthenticationService" as Service
+database "UserRepository" as Repo
+
+'Content-Type Überprüfung'
+alt#red Content-Type Header ist kein JSON
+
+    |||
+
+    User -> App: POST /api/auth/login (mit falschem Header)
+    activate App
+    App --[#red]> User : 415 Unsupported Media Type\n{"error": "Content-Type must be 'application/json'."}
+    deactivate App
