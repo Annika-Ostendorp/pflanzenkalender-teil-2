@@ -45,3 +45,7 @@ def test_post_login_token_contains_required_claims(client):
     assert "sub" in token_payload
     assert "iat" in token_payload
     assert "exp" in token_payload
+    assert isinstance(token_payload["sub"], str) # muss laut Akzeptanzkriterium ein str sein
+    assert token_payload["sub"] != ""
+    assert token_payload["exp"] > token_payload["iat"] # Ablaufzeitpunkt logischerweise nach Ausstellungszeitpunkt
+    assert token_payload["exp"] - token_payload["iat"] == 3600 # Token soll 1 Stunde gültig sein
