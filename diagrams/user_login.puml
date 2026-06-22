@@ -47,22 +47,22 @@ else JSON-Struktur ist valide
             * password fehlt -> "Field 'password' is required."
             * password ist leer -> "Field 'password' must not be empty."
         endnote
-    App --[#red]> User : 400 Bad Request\n{"error": "..."}
-    deactivate App
-
-|||
-
-'App stellt Anfrage an Repo, ob Username existiert'
-else Eingabedaten inhaltlich gültig
+        App --[#red]> User : 400 Bad Request\n{"error": "..."}
+        deactivate App
 
     |||
 
-    User -> App : POST /api/auth/login (Payload)
-    activate App
+    'App stellt Anfrage an Repo, ob Username existiert'
+    else Eingabedaten inhaltlich gültig
 
-    'Prüfen von möglichen Duplikaten/ User abrufen'
-    App -> Repo : get_by_username(username)
-    activate Repo
+        |||
+
+        User -> App : POST /api/auth/login (Payload)
+        activate App
+
+        'Prüfen von möglichen Duplikaten/ User abrufen'
+        App -> Repo : get_by_username(username)
+        activate Repo
 
     |||
 
