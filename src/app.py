@@ -9,6 +9,26 @@ import re # empfohlenes Modul für Sonderzeichen-Prüfung (siehe KI-Issue #9)
 VALID_CARE_TYPES = {'watering', 'fertilizing', 'repotting'}
 UPDATABLE_PLANT_FIELDS = {'name', 'species', 'location'}
 
+# Username & Passwort Validierung für Nutzer-Login
+def validate_login_username(username) -> str:
+    if username is None:
+        return "Field 'username' is required."
+    
+    if username == "":
+        return "Field 'username' must not be empty."
+    
+    return None
+
+def validate_login_password(password) -> str:
+    if password is None:
+        return "Field 'password' is required."
+    
+    if password == "":
+        return "Field 'password' must not be empty."
+    
+    return None
+
+# Username & Passwort Validierung für Nutzer-Registrierung
 def validate_username(username) -> str: # Benutzernamen prüfen nach Vorgaben aus Task 5
     # Feld fehlt komplett im JSON-Payload
     if username is None:
