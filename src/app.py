@@ -324,6 +324,26 @@ class PlantAppManager:
                 return jsonify({"error": "An unexpected error occurred. Please try again later."}), 500
             
 
+        # Endpoint POST /api/auth/login
+        @self.app.route('/api/auth/login', methods = ['POST'])
+        def login_user():
+            payload = request.get_json()
+
+            username = payload["username"]
+            password = payload["password"]
+
+            user = self.user_repo.find_by_username(username)
+
+            if user is None:
+                return jsonify({"error": "Invalid username or password."}), 401
+            
+            if not AuthenticationService.verify_password(password, user.password_hash):
+                return jsonify({"error": "Invalid username or password"}), 401
+            
+            access_token = AuthenticationService.create_token(user.id)
+
+            return jsonify({"access_token": access_token}), 200
+
 if __name__ == '__main__':  # pragma: no cover
     from in_memory_repositories import (
     InMemoryPlantRepository, InMemoryCareScheduleRepository,
