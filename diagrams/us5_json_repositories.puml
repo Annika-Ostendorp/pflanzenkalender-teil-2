@@ -192,5 +192,19 @@ Für User Story #5 habe ich ein Klassendiagramm gewählt,
 weil durch die neuen Json-Repositories vor allem die Struktur
 des Projekts erweitert wird.
 
+Das Diagramm zeigt, wie die vier Json-Repository-Klassen
+die bestehenden Repository-Interfaces implementieren und
+mit dem PlantAppManager, den Modellen und den JSON-Dateien
+zusammenhängen.
+
+Dabei gehe ich davon aus, dass PlantAppManager weiterhin
+nur von den Interfaces abhängt. So können in der Anwendung
+Json-Repositories und in den Tests weiterhin
+InMemory-Repositories verwendet werden.
+
+Die Daten werden beim Start geladen und nach save() oder
+delete() direkt gespeichert. Eine fehlende Datei wird beim
+ersten Schreibvorgang erstellt.
 end note
+
 @enduml
