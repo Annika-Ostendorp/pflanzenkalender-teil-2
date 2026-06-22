@@ -119,3 +119,30 @@ def test_post_login_unknown_username_and_wrong_password_same_response(client): #
     assert unknown_user_data == wrong_password_data
     assert "error" in unknown_user_data
     assert unknown_user_data["error"] == "Invalid username or password."
+
+
+def test_post_login_missing_username(client):
+    payload = {
+        "password": "meinpasswort"
+    }
+
+    response = client.post("/api/auth/login", json = payload)
+    data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 400
+    assert "error" in data
+    assert data["error"] == "Field 'username' is required."
+
+def test_post_login_missing_password(client):
+    payload = {
+        "username": "Annika"
+    }
+
+    response = client.post("/api/auth/login", json = payload)
+    data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 400
+    assert "error" in data
+    assert data["error"] == "Field 'password' is required."
