@@ -350,7 +350,12 @@ class PlantAppManager:
             if not request.is_json():
                 return jsonify({"error": "Content-Type must be 'application/json'."}), 415
             
-            payload = request.get_json()
+            try: # JSON parse errors abfangen
+                payload = request.get_json()
+            
+            except Exception:
+                return jsonify({"error": "Request body must be valid JSON."}), 400
+            
 
             username_error = validate_login_username(payload.get("username"))
 
