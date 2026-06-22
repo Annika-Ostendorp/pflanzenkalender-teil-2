@@ -99,3 +99,27 @@ class Plant {
   +location: str
   +created_at: str
 }
+
+
+class CareSchedule {
+  +id: int | None
+  +plant_id: int
+  +care_type: str
+  +interval_days: int
+}
+
+
+class ActionLog {
+  +id: int | None
+  +plant_id: int
+  +care_type: str
+  +performed_at: str
+  +notes: str
+}
+
+
+class User {
+  +id: int | None
+  +username: str
+  +password_hash: str
+}
