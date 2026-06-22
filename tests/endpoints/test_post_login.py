@@ -172,3 +172,20 @@ def test_post_login_empty_password(client):
 
     response = client.post("/api/auth/login", json = payload)
     data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 400
+    assert "error" in data
+    assert data["error"] == "Field 'password' must not be empty."
+
+
+def test_post_login_invalid_json_body(client):
+    invalid_json = "{username: Annika}"
+
+    response = client.post("/api/auth/login", data = invalid_json)
+    data = response.get_json()
+
+    # Überprüfungen:
+    assert response.status_code == 400
+    assert "error" in data
+    assert data["error"] == "Request body must be valid JSON."
