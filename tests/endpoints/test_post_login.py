@@ -64,3 +64,25 @@ def test_post_login_unknown_username(client): # unbekannter Username --> 401 Una
     assert response.status_code == 401
     assert "error" in data 
     assert data["error"] == "Invalid username or password."
+
+
+def test_post_login_wrong_password(client):
+    register_payload = {
+        "username": "Tobi",
+        "password": "richtigespasswort"
+    }
+
+    client.post("/api/auth/register", json = register_payload)
+
+    payload = {
+        "username": "Tobi",
+        "password": "falschespasswort"
+    }
+
+    response = client.post("/api/auth/login", json = payload)
+    data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 401
+    assert "error" in data
+    assert data["error"] == "Invalid username or password."
