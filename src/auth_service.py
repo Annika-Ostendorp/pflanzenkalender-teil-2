@@ -1,4 +1,6 @@
 from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
+import time
 
 class AuthenticationService:
     # Statische Methode, damit Funktion direkt ohne Instanz der Klasse aufgerufen werden kann,
@@ -18,3 +20,17 @@ class AuthenticationService:
     @staticmethod
     def verify_password(password: str, password_hash: str) -> bool:
         return AuthenticationService.check_password(password, password_hash)
+    
+
+    @staticmethod
+    def create_token(user_id: int) -> str:
+        issued_at = int(time.time()) # aktuelle Zeit als int umwandeln (Unix Timestamp siehe KI-Issue #23)
+        expires_at = issued_at + 3600
+
+        payload = {
+            "sub": str(user_id),
+            "iat": issued_at,
+            "exp": expires_at
+        }
+
+        return jwt.encode(payload, "test-secret", algorithm = "HS256") # Token verschlüsseln
