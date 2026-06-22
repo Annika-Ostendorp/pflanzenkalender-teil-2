@@ -189,3 +189,18 @@ def test_post_login_invalid_json_body(client):
     assert response.status_code == 400
     assert "error" in data
     assert data["error"] == "Request body must be valid JSON."
+
+
+def test_post_login_invalid_content_type(client):
+    payload = {
+        "username": "Annika",
+        "password": "passwort123"
+    }
+
+    response = client.post("/api/auth/login", data = str(payload), content_type = "text/plain")
+    data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 415
+    assert "error" in data
+    assert data["error"] == "Content-Type must be 'application/json'."
