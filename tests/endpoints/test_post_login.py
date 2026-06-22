@@ -134,6 +134,7 @@ def test_post_login_missing_username(client):
     assert "error" in data
     assert data["error"] == "Field 'username' is required."
 
+
 def test_post_login_missing_password(client):
     payload = {
         "username": "Annika"
@@ -146,3 +147,28 @@ def test_post_login_missing_password(client):
     assert response.status_code == 400
     assert "error" in data
     assert data["error"] == "Field 'password' is required."
+
+
+def test_post_login_empty_username(client):
+    payload = {
+        "username": "",
+        "password": "Annika123"
+    }
+
+    response = client.post("/api/auth/login", json = payload)
+    data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 400
+    assert "error" in data
+    assert data["error"] == "Field 'username' must not be empty."
+
+
+def test_post_login_empty_password(client):
+    payload = {
+        "username": "Bob",
+        "password": ""
+    }
+
+    response = client.post("/api/auth/login", json = payload)
+    data = response.get_json()
