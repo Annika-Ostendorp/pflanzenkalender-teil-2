@@ -347,20 +347,21 @@ class PlantAppManager:
         # Endpoint POST /api/auth/login
         @self.app.route('/api/auth/login', methods = ['POST'])
         def login_user():
-            if not request.is_json():
-                return jsonify({"error": "Content-Type must be 'application/json'."}), 415
-            
-            try: # JSON parse errors abfangen
-                payload = request.get_json()
-            
-            except Exception:
-                return jsonify({"error": "Request body must be valid JSON."}), 400
-            
-
-            username_error = validate_login_username(payload.get("username"))
-
-            if username_error: # falls username ungültig --> 400 Bad Request
-                return jsonify({"error": username_error}), 400
+            try:
+                if not request.is_json():
+                    return jsonify({"error": "Content-Type must be 'application/json'."}), 415
+                
+                try: # JSON parse errors abfangen
+                    payload = request.get_json()
+                
+                except Exception:
+                    return jsonify({"error": "Request body must be valid JSON."}), 400
+                
+    
+                username_error = validate_login_username(payload.get("username"))
+    
+                if username_error: # falls username ungültig --> 400 Bad Request
+                    return jsonify({"error": username_error}), 400
             
             password_error = validate_login_password(payload.get("password"))
 
