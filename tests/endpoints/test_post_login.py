@@ -54,11 +54,11 @@ def test_post_login_token_contains_required_claims(client):
 
 def test_post_login_jwt_generation_failure(client): # Mocking, weil simulieren, dass JWT-Erstellung fehlschlägt
     register_payload = {
-        "username": "aice",
+        "username": "alice",
         "password": "geheim124"
     }
 
-    client.post("/api/auth/login", json = register_payload)
+    client.post("/api/auth/register", json = register_payload)
 
     payload = {
         "username": "alice",

@@ -348,11 +348,14 @@ class PlantAppManager:
         @self.app.route('/api/auth/login', methods = ['POST'])
         def login_user():
             try:
-                if not request.is_json():
+                if not request.is_json:
                     return jsonify({"error": "Content-Type must be 'application/json'."}), 415
                 
                 try: # JSON parse errors abfangen
                     payload = request.get_json()
+
+                    if payload is None: # falls Body komplett leer -> payload = None -> das aber auch ungültiges JSON -> 400 Bad Request Error
+                        return jsonify({"error": "Request body must be valid JSON."}), 400
                 
                 except Exception:
                     return jsonify({"error": "Request body must be valid JSON."}), 400
@@ -378,7 +381,7 @@ class PlantAppManager:
                     return jsonify({"error": "Invalid username or password."}), 401
             
                 if not AuthenticationService.verify_password(password, user.password_hash):
-                    return jsonify({"error": "Invalid username or password"}), 401
+                    return jsonify({"error": "Invalid username or password."}), 401
             
                 try:
                     access_token = AuthenticationService.create_token(user.id)
