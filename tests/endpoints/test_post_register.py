@@ -179,8 +179,8 @@ def test_post_register_unexpected_server_error(client): # unvorhergesehenen Syst
     }
 
     with patch(
-        "app.PlantAppManager.user_repo.save",
-        side_effect = Exception("Datenbankfehler")
+        "auth_service.AuthenticationService.get_password_hash",
+        side_effect = Exception("Hashing fehlgeschlagen")
     ):
         
         response = client.post("/api/auth/register", json = payload)

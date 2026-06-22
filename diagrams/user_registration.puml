@@ -76,7 +76,7 @@ else JSON-Struktur ist valide
         activate App
 
         'Prüfen von möglichen Duplikaten'
-        App -> Repo : get_by_username(username)
+        App -> Repo : find_by_username(username)
         activate Repo
 
         |||
@@ -104,7 +104,7 @@ else JSON-Struktur ist valide
             |||
 
             'User-Objekt erzeugen und an add()-Funktion übergeben'
-            App -> Repo : add(user)
+            App -> Repo : save(new_user)
             activate Repo
             Repo --> App : user (mit zugewiesener id)
             deactivate Repo
@@ -127,7 +127,7 @@ note over App
     **Ausnahmebedingung:**
     Sollte während der Verarbeitung der Daten ein unerwarteter Server-Fehler auftreten,
     dann antwortet das System mit:
-    500 Internal Server Error\n{"error": "An unexpected error occured. Please try again later."}
+    500 Internal Server Error\n{"error": "An unexpected error occurred. Please try again later."}
 endnote
 
 @enduml
