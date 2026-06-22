@@ -38,7 +38,7 @@ else Request-Body ist ungültiges JSON
 
     User -> App : POST /api/auth/register (mit ungültigem Body)
     activate App
-    App --[#red]> User : 400 Bad Request\n{"error": "Request body must be a valid JSON."}
+    App --[#red]> User : 400 Bad Request\n{"error": "Request body must be valid JSON."}
     deactivate App
 
 |||

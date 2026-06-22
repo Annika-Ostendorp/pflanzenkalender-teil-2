@@ -11,7 +11,18 @@ alt#red Content-Type Header ist kein JSON
 
     |||
 
-    User -> App: POST /api/auth/login (mit falschem Header)
+    User -> App : POST /api/auth/login (mit falschem Header)
     activate App
     App --[#red]> User : 415 Unsupported Media Type\n{"error": "Content-Type must be 'application/json'."}
+    deactivate App
+
+    |||
+
+else Request-Body ist ungültiges JSON
+
+    |||
+
+    User -> App : POST /api/auth/login (mit ungültigem Body)
+    activate App
+    App --[#red]> User : 400 Bad Request\n{"error": "Request body must be valid JSON."}
     deactivate App
