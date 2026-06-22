@@ -123,3 +123,26 @@ class User {
   +username: str
   +password_hash: str
 }
+
+
+' ── Dependency Inversion: Manager → abstract interfaces ──
+PlantAppManager --> PlantRepository
+PlantAppManager --> CareScheduleRepository
+PlantAppManager --> ActionLogRepository
+PlantAppManager --> UserRepository
+
+
+' ── Json implementations (US#5) ────────────────────────
+PlantRepository <|.. JsonPlantRepository
+CareScheduleRepository <|.. JsonCareScheduleRepository
+ActionLogRepository <|.. JsonActionLogRepository
+UserRepository <|.. JsonUserRepository
+
+
+' ── JSON persistence ─────────────────────────────────────
+JsonPlantRepository ..> plants_json : liest/schreibt
+JsonCareScheduleRepository ..> schedules_json : liest/schreibt
+JsonActionLogRepository ..> logs_json : liest/schreibt
+JsonUserRepository ..> users_json : liest/schreibt
+
+
