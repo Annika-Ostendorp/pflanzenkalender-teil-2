@@ -82,24 +82,24 @@ else JSON-Struktur ist valide
 
         |||
 
-    'Username existiert -> Passwort prüfen'
-    else Username gefunden (gibt User-Objekt zurück)
-        Repo --> App : user
-        deactivate Repo
-        activate App 
+        'Username existiert -> Passwort prüfen'
+        else Username gefunden (gibt User-Objekt zurück)
+            Repo --> App : user
+            deactivate Repo
+            activate App 
 
-        |||
+            |||
 
-        App -> Service : verify_password(user.password_hash, password)
-        activate Service
-        Service --> App : False / True
-        deactivate Service
+            App -> Service : verify_password(user.password_hash, password)
+            activate Service
+            Service --> App : False / True
+            deactivate Service
 
-        |||
+            |||
 
-        alt#red Passwort ist falsch (False)
-            App --[#red]> User : 401 Unauthorized\n{"error": "Invalid username or password."}
-            deactivate App
+            alt#red Passwort ist falsch (False)
+                App --[#red]> User : 401 Unauthorized\n{"error": "Invalid username or password."}
+                deactivate App
         
         |||
 
