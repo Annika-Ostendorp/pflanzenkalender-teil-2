@@ -122,11 +122,24 @@ else JSON-Struktur ist valide
                     Service --> App : access_token
                     deactivate Service
 
-                App --[#green]> User : 200 OK\n{"access_token": "<JWT>"}
-                deactivate App
+                    App --[#green]> User : 200 OK\n{"access_token": "<JWT>"}
+                    deactivate App
 
-                |||
+                    |||
+                end
             end
         end
     end
 end
+
+|||
+
+'Unerwarteter Systemabsturz'
+note over App
+    **Ausnahmebedingung:**
+    Sollte während der Verarbeitung der Daten ein unerwarteter Server-Fehler auftreten,
+    dann antwortet das System mit:
+    500 Internal Server Error\n{"error": "An unexpected error occured. Please try again later."}
+endnote
+
+@enduml
