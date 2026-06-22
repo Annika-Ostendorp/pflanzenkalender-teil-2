@@ -45,3 +45,30 @@ abstract class UserRepository {
   {abstract} +find_by_username(username: str): User | None
   {abstract} +delete(user_id: int): None
 }
+
+
+class JsonPlantRepository {
+  +__init__(file_path: str)
+  -_file_path: str
+  -_store: dict
+  -_load(): None
+  -_persist(): None
+}
+
+
+class JsonCareScheduleRepository {
+  +__init__(file_path: str)
+  -_file_path: str
+  -_store: dict
+  -_load(): None
+  -_persist(): None
+}
+
+
+class JsonActionLogRepository {
+  +__init__(file_path: str)
+  -_file_path: str
+  -_store: dict
+  -_load(): None
+  -_persist(): None
+}
