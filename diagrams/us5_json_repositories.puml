@@ -173,3 +173,24 @@ ActionLog -[hidden]right- User
 PlantRepository -[hidden]down- JsonPlantRepository
 JsonPlantRepository -[hidden]down- plants_json
 plants_json -[hidden]down- Plant
+
+CareScheduleRepository -[hidden]down- JsonCareScheduleRepository
+JsonCareScheduleRepository -[hidden]down- schedules_json
+schedules_json -[hidden]down- CareSchedule
+
+ActionLogRepository -[hidden]down- JsonActionLogRepository
+JsonActionLogRepository -[hidden]down- logs_json
+logs_json -[hidden]down- ActionLog
+
+UserRepository -[hidden]down- JsonUserRepository
+JsonUserRepository -[hidden]down- users_json
+users_json -[hidden]down- User
+
+
+note as N1
+Für User Story #5 habe ich ein Klassendiagramm gewählt,
+weil durch die neuen Json-Repositories vor allem die Struktur
+des Projekts erweitert wird.
+
+end note
+@enduml
