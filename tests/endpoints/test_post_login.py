@@ -1,4 +1,5 @@
 import jwt
+from unittest.mock import patch
 
 def test_post_login_success(client):
     register_payload = { # erst registrieren, damit man sich danach ja nochmal einloggen kann
@@ -49,6 +50,28 @@ def test_post_login_token_contains_required_claims(client):
     assert token_payload["sub"] != ""
     assert token_payload["exp"] > token_payload["iat"] # Ablaufzeitpunkt logischerweise nach Ausstellungszeitpunkt
     assert token_payload["exp"] - token_payload["iat"] == 3600 # Token soll 1 Stunde gültig sein
+
+
+def test_post_login_jwt_generation_failure(client): # Mocking, weil simulieren, dass JWT-Erstellung fehlschlägt
+    payload = {
+        "username": "alice",
+        "password": "geheim124"
+    }
+
+    with patch(
+        "app.AuthenticationService.create_token",
+        side_effect = Exception("Service Unavailable.")
+    ) as mock_create_token:
+        
+        response = client.post("/api/auth/login", json = payload)
+        data = response.get_json()
+
+        # Überprüfungen
+        assert response.status_code == 503
+        assert "error" in data
+        assert data["error"] == "Service Unavailable."
+
+        mock_create_token.assert_called_once()
 
 
 def test_post_login_unknown_username(client): # unbekannter Username --> 401 Unauthorized

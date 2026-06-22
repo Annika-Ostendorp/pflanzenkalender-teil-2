@@ -2,7 +2,7 @@ from datetime import date, timedelta
 from flask import Flask, jsonify, request, render_template
 from werkzeug.exceptions import HTTPException
 from models import Plant, CareSchedule, ActionLog, User
-from src.auth_service import AuthenticationService
+from auth_service import AuthenticationService
 
 import re # empfohlenes Modul für Sonderzeichen-Prüfung (siehe KI-Issue #9)
 
