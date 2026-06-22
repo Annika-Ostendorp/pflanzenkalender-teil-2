@@ -72,3 +72,30 @@ class JsonActionLogRepository {
   -_load(): None
   -_persist(): None
 }
+
+
+class JsonUserRepository {
+  +__init__(file_path: str)
+  -_file_path: str
+  -_store: dict
+  -_load(): None
+  -_persist(): None
+}
+
+
+package "data" #LightGreen {
+  class "plants.json" as plants_json <<JSON-Datei>>
+  class "schedules.json" as schedules_json <<JSON-Datei>>
+  class "logs.json" as logs_json <<JSON-Datei>>
+  class "users.json" as users_json <<JSON-Datei>>
+}
+
+
+class Plant {
+  +id: int | None
+  +user_id: int | None
+  +name: str
+  +species: str
+  +location: str
+  +created_at: str
+}
