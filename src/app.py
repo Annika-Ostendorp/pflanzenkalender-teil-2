@@ -363,22 +363,22 @@ class PlantAppManager:
                 if username_error: # falls username ungültig --> 400 Bad Request
                     return jsonify({"error": username_error}), 400
             
-            password_error = validate_login_password(payload.get("password"))
+                password_error = validate_login_password(payload.get("password"))
 
-            if password_error:
-                return jsonify({"error": password_error}), 400
+                if password_error:
+                    return jsonify({"error": password_error}), 400
             
-            username = payload["username"]
-            password = payload["password"]
+                username = payload["username"]
+                password = payload["password"]
 
-            user = self.user_repo.find_by_username(username)
+                user = self.user_repo.find_by_username(username)
 
-            # identischen Request-Body für unbekannten Username & falsches Passwort zurückgeben
-            if user is None:
-                return jsonify({"error": "Invalid username or password."}), 401
+                # identischen Request-Body für unbekannten Username & falsches Passwort zurückgeben
+                if user is None:
+                    return jsonify({"error": "Invalid username or password."}), 401
             
-            if not AuthenticationService.verify_password(password, user.password_hash):
-                return jsonify({"error": "Invalid username or password"}), 401
+                if not AuthenticationService.verify_password(password, user.password_hash):
+                    return jsonify({"error": "Invalid username or password"}), 401
             
             try:
                 access_token = AuthenticationService.create_token(user.id)
