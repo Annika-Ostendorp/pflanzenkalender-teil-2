@@ -64,22 +64,23 @@ else JSON-Struktur ist valide
         App -> Repo : get_by_username(username)
         activate Repo
 
-    |||
+        |||
 
-    alt#red Username existiert nicht (gibt None zurück)
-    Repo --> App : None
+        alt#red Username existiert nicht (gibt None zurück)
+            Repo --> App : None
+            deactivate Repo
 
-    note over App
-        Egal ob der Benutzername komplett erfunden oder nur das Passwort falsch war;
-        das System antwortet dann immer gleich mit 401 Unauthorized. 
-        Dadurch kann ein möglicher Angreifer unserer App nie herausfinden, welche Usernamen
-        es in der Datenbank wirklich gibt.
-    endnote  
+            note over App
+                Egal ob der Benutzername komplett erfunden oder nur das Passwort falsch war;
+                das System antwortet dann immer gleich mit 401 Unauthorized. 
+                Dadurch kann ein möglicher Angreifer unserer App nie herausfinden, welche Usernamen
+                es in der Datenbank wirklich gibt.
+            endnote  
     
-    App --[#red]> User : 401 Unauthorized\n{"error": "Invalid username or password."}
-    deactivate App
+            App --[#red]> User : 401 Unauthorized\n{"error": "Invalid username or password."}
+            deactivate App
 
-    |||
+        |||
 
     'Username existiert -> Passwort prüfen'
     else Username gefunden (gibt User-Objekt zurück)
