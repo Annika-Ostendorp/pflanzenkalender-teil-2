@@ -187,7 +187,7 @@ def test_post_register_unexpected_server_error(client): # unvorhergesehenen Syst
         data = response.get_json()
 
     # Überprüfungen
-    assert response.status_code == 500 # Server stürzt ab, wegen ungültigem Datentyp --> Statuscode 500 zurückgegeben?
+    assert response.status_code == 500 # unerwarteter interner Fehler wurde korrekt abgefangen
     assert "error" in data # 'error' muss in Server-Antwort drin sein
     assert data["error"] == "An unexpected error occurred. Please try again later." # entspricht die Fehlermeldung exakt dieser Syntax?
 

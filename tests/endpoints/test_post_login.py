@@ -243,7 +243,7 @@ def test_post_login_unexpected_server_error(client):
     }
 
     with patch(
-        "app.PlantManager.user_repo.find_by_username",
+        "in_memory_repositories.InMemoryUserRepository.find_by_username", # Endpunkt sucht User über User-Repository -> dafür passender Test
         side_effect = Exception("datenbankfehler")
     ):
         
