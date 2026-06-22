@@ -364,6 +364,7 @@ class PlantAppManager:
 
             user = self.user_repo.find_by_username(username)
 
+            # identischen Request-Body für unbekannten Username & falsches Passwort zurückgeben
             if user is None:
                 return jsonify({"error": "Invalid username or password."}), 401
             
@@ -372,7 +373,7 @@ class PlantAppManager:
             
             access_token = AuthenticationService.create_token(user.id)
 
-            return jsonify({"access_token": access_token}), 200
+            return jsonify({"access_token": access_token}), 200 # erfolgreich generierten Token am Ende zurückgeben
 
 if __name__ == '__main__':  # pragma: no cover
     from in_memory_repositories import (
