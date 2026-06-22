@@ -204,3 +204,18 @@ def test_post_login_invalid_content_type(client):
     assert response.status_code == 415
     assert "error" in data
     assert data["error"] == "Content-Type must be 'application/json'."
+
+
+def test_post_login_unexpected_server_error(client):
+    payload = {
+        "username": ["Ungültig"],
+        "password": "meinsicherespasswort"
+    }
+
+    response = client.post("/api/auth/login", json = payload)
+    data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 500
+    assert "error" in data
+    assert data["error"] == "An unexpected error occured. Please try again later."
