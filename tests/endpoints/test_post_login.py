@@ -1,10 +1,12 @@
+import jwt
+
 def test_post_login_success(client):
     register_payload = { # erst registrieren, damit man sich danach ja nochmal einloggen kann
         "username": "Annika",
         "password": "passwort123"
     }
 
-    client.post("api/auth/login", json = register_payload)
+    client.post("api/auth/register", json = register_payload)
     
     payload = {
         "username": "Annika",
@@ -21,3 +23,25 @@ def test_post_login_success(client):
     assert data["access_token"] != ""
     assert "password" not in data
     assert "password_hash" not in data
+
+def test_post_login_token_contains_required_claims(client):
+    register_payload = {
+        "username": "Bob",
+        "password": "sicherespasswort"
+    }
+    client.post("/api/auth/register", json = register_payload)
+
+    payload = {
+        "username": "Bob",
+        "password": "sicherespasswort"
+    } 
+
+    response = client.post("/api/auth/login", json = payload)
+    data = response.get_json()
+    token_payload = jwt.decode(data["access_token"], "test-secret", algorithms=["HS256"])
+
+    # Überprüfungen
+    assert response.status_code == 200 # Login muss erfolgreich sein -> sonst kommt kein valider Token zurück 
+    assert "sub" in token_payload
+    assert "iat" in token_payload
+    assert "exp" in token_payload
