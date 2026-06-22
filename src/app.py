@@ -347,6 +347,9 @@ class PlantAppManager:
         # Endpoint POST /api/auth/login
         @self.app.route('/api/auth/login', methods = ['POST'])
         def login_user():
+            if not request.is_json():
+                return jsonify({"error": "Content-Type must be 'application/json'."}), 415
+            
             payload = request.get_json()
 
             username_error = validate_login_username(payload.get("username"))
