@@ -146,3 +146,30 @@ JsonActionLogRepository ..> logs_json : liest/schreibt
 JsonUserRepository ..> users_json : liest/schreibt
 
 
+' ── Repository returns domain models ─────────────────────
+PlantRepository ..> Plant : returns
+CareScheduleRepository ..> CareSchedule : returns
+ActionLogRepository ..> ActionLog : returns
+UserRepository ..> User : returns
+
+
+' ── Column layout (left → right) ─────────────────────────
+PlantRepository -[hidden]right- CareScheduleRepository
+CareScheduleRepository -[hidden]right- ActionLogRepository
+ActionLogRepository -[hidden]right- UserRepository
+
+JsonPlantRepository -[hidden]right- JsonCareScheduleRepository
+JsonCareScheduleRepository -[hidden]right- JsonActionLogRepository
+JsonActionLogRepository -[hidden]right- JsonUserRepository
+
+plants_json -[hidden]right- schedules_json
+schedules_json -[hidden]right- logs_json
+logs_json -[hidden]right- users_json
+
+Plant -[hidden]right- CareSchedule
+CareSchedule -[hidden]right- ActionLog
+ActionLog -[hidden]right- User
+
+PlantRepository -[hidden]down- JsonPlantRepository
+JsonPlantRepository -[hidden]down- plants_json
+plants_json -[hidden]down- Plant
