@@ -49,3 +49,18 @@ def test_post_login_token_contains_required_claims(client):
     assert token_payload["sub"] != ""
     assert token_payload["exp"] > token_payload["iat"] # Ablaufzeitpunkt logischerweise nach Ausstellungszeitpunkt
     assert token_payload["exp"] - token_payload["iat"] == 3600 # Token soll 1 Stunde gültig sein
+
+
+def test_post_login_unknown_username(client): # unbekannter Username --> 401 Unauthorized
+    payload = {
+        "username": "Ungültig",
+        "password": "irgendeinpasswort"
+    }
+
+    response = client.post("/api/auth/login", json = payload)
+    data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 401
+    assert "error" in data 
+    assert data["error"] == "Invalid username or password."
