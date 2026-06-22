@@ -14,7 +14,7 @@ def test_post_login_success(client):
         "password": "passwort123"
     }
 
-    response = client.post("api/auth/login", json = payload)
+    response = client.post("/api/auth/login", json = payload)
     data = response.get_json()
 
     # Überprüfungen
@@ -53,6 +53,13 @@ def test_post_login_token_contains_required_claims(client):
 
 
 def test_post_login_jwt_generation_failure(client): # Mocking, weil simulieren, dass JWT-Erstellung fehlschlägt
+    register_payload = {
+        "username": "aice",
+        "password": "geheim124"
+    }
+
+    client.post("/api/auth/login", json = register_payload)
+
     payload = {
         "username": "alice",
         "password": "geheim124"
@@ -231,14 +238,19 @@ def test_post_login_invalid_content_type(client):
 
 def test_post_login_unexpected_server_error(client):
     payload = {
-        "username": ["Ungültig"],
+        "username": "alice",
         "password": "meinsicherespasswort"
     }
 
-    response = client.post("/api/auth/login", json = payload)
-    data = response.get_json()
+    with patch(
+        "app.PlantManager.user_repo.find_by_username",
+        side_effect = Exception("datenbankfehler")
+    ):
+        
+        response = client.post("/api/auth/login", json = payload)
+        data = response.get_json()
 
     # Überprüfungen
     assert response.status_code == 500
     assert "error" in data
-    assert data["error"] == "An unexpected error occured. Please try again later."
+    assert data["error"] == "An unexpected error occurred. Please try again later."
