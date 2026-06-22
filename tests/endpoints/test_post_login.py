@@ -111,4 +111,11 @@ def test_post_login_unknown_username_and_wrong_password_same_response(client): #
     wrong_password_response = client.post("/api/auth/login", json = wrong_password_payload)
 
     unknown_user_data = unknown_user_response.get_json()
-    wrong_password_data = wrong_password_response.get_json()         
+    wrong_password_data = wrong_password_response.get_json()
+
+    # Überprüfungen
+    assert unknown_user_response.status_code == 401
+    assert wrong_password_response.status_code == 401
+    assert unknown_user_data == wrong_password_data
+    assert "error" in unknown_user_data
+    assert unknown_user_data["error"] == "Invalid username or password."
