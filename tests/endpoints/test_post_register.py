@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 def test_post_register_success(client): # aus Akzeptanzkriterien 1 & 2 der User Story:
                                    # Endpoint mit gültigen Daten erstellt User, ohne dass das Passwort/Hash versehentlich zurückgegeben wird
     payload = {
@@ -172,12 +174,17 @@ def test_post_register_invalid_content_type(client): # wenn Content-Type-Header 
 
 def test_post_register_unexpected_server_error(client): # unvorhergesehenen Systemabsturz simulisieren --> 500 Internal Server Error
     payload = {
-        "username": ["Ungültiger", "Benutzername"], # hier auf einmal ungültiger Datentyp für username -> Liste und kein string wird gesendet
+        "username": "alice",
         "password": "meinsicherespasswort123"
     }
 
-    response = client.post("/api/auth/register", json = payload)
-    data = response.get_json()
+    with patch(
+        "app.PlantAppManager.user_repo.save",
+        side_effect = Exception("Datenbankfehler")
+    ):
+        
+        response = client.post("/api/auth/register", json = payload)
+        data = response.get_json()
 
     # Überprüfungen
     assert response.status_code == 500 # Server stürzt ab, wegen ungültigem Datentyp --> Statuscode 500 zurückgegeben?
