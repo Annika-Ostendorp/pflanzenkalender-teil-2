@@ -36,17 +36,17 @@ else JSON-Struktur ist valide
     'Input Überprüfung --> Daten werden wieder per POST an Server geschickt & verarbeitet'
     alt#red Eingabedaten ungültig
 
-    |||
+        |||
 
-    User -> App : POST /api/auth/login (Payload)
-    activate App
-    note right of App
-        **Mögliche Validierungsfehler (400 Bad Request):**
-        * username fehlt -> "Field 'username' is required."
-        * username ist leer -> "Field 'username' must not be empty."
-        * password fehlt -> "Field 'password' is required."
-        * password ist leer -> "Field 'password' must not be empty."
-    endnote
+        User -> App : POST /api/auth/login (Payload)
+        activate App
+        note right of App
+            **Mögliche Validierungsfehler (400 Bad Request):**
+            * username fehlt -> "Field 'username' is required."
+            * username ist leer -> "Field 'username' must not be empty."
+            * password fehlt -> "Field 'password' is required."
+            * password ist leer -> "Field 'password' must not be empty."
+        endnote
     App --[#red]> User : 400 Bad Request\n{"error": "..."}
     deactivate App
 
@@ -123,3 +123,9 @@ else Eingabedaten inhaltlich gültig
 
                 App --[#green]> User : 200 OK\n{"access_token": "<JWT>"}
                 deactivate App
+
+                |||
+            end
+        end
+    end
+end
