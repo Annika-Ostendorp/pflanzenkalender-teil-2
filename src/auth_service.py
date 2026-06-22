@@ -34,3 +34,12 @@ class AuthenticationService:
         }
 
         return jwt.encode(payload, "test-secret", algorithm = "HS256") # Token verschlüsseln
+    
+
+    @staticmethod
+    def verify_token(token: str):
+        try:
+            return jwt.decode(token, "test-secret", algorithms = ["HS256"]) # wenn gültig, dann kann Payload zurückgegeben werden
+        
+        except jwt.InvalidTokenError:
+            return None
