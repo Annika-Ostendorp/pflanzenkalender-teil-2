@@ -1,5 +1,6 @@
 import jwt
 from unittest.mock import patch
+from auth_service import SECRET_KEY
 
 def test_post_login_success(client):
     register_payload = { # erst registrieren, damit man sich danach ja nochmal einloggen kann
@@ -39,7 +40,7 @@ def test_post_login_token_contains_required_claims(client):
 
     response = client.post("/api/auth/login", json = payload)
     data = response.get_json()
-    token_payload = jwt.decode(data["access_token"], "test-secret", algorithms=["HS256"])
+    token_payload = jwt.decode(data["access_token"], SECRET_KEY, algorithms=["HS256"])
 
     # Überprüfungen
     assert response.status_code == 200 # Login muss erfolgreich sein -> sonst kommt kein valider Token zurück 
@@ -212,7 +213,7 @@ def test_post_login_empty_password(client):
 def test_post_login_invalid_json_body(client):
     invalid_json = "{username: Annika}"
 
-    response = client.post("/api/auth/login", data = invalid_json)
+    response = client.post("/api/auth/login", data = invalid_json, content_type = "application/json")
     data = response.get_json()
 
     # Überprüfungen:
@@ -243,7 +244,7 @@ def test_post_login_unexpected_server_error(client):
     }
 
     with patch(
-        "in_memory_repositories.InMemoryUserRepository.find_by_username", # Endpunkt sucht User über User-Repository -> dafür passender Test
+        "src.in_memory_repositories.InMemoryUserRepository.find_by_username", # Endpunkt sucht User über User-Repository -> dafür passender Test
         side_effect = Exception("datenbankfehler")
     ):
         
