@@ -13,3 +13,8 @@ class AuthenticationService:
     def check_password(password: str, password_hash: str) -> bool:
         return check_password_hash(password_hash, password) # übergebenes Passwort wird gehasht --> dann vergleichen mit Hash aus unserer Datenbank 
                                                             # --> gibt True oder False zurück (Übereinstimmung oder nicht)
+    
+
+    @staticmethod
+    def verify_password(password: str, password_hash: str) -> bool:
+        return AuthenticationService.check_password(password, password_hash)
