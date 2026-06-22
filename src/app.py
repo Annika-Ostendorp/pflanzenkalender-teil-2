@@ -349,6 +349,16 @@ class PlantAppManager:
         def login_user():
             payload = request.get_json()
 
+            username_error = validate_login_username(payload.get("username"))
+
+            if username_error: # falls username ungültig --> 400 Bad Request
+                return jsonify({"error": username_error}), 400
+            
+            password_error = validate_login_password(payload.get("password"))
+
+            if password_error:
+                return jsonify({"error": password_error}), 400
+            
             username = payload["username"]
             password = payload["password"]
 
