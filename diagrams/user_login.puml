@@ -6,6 +6,14 @@ participant "Plant App" as App
 participant "AuthenticationService" as Service
 database "UserRepository" as Repo
 
+note over User, Repo
+    Ich habe für diese User Story wieder ein **Sequenzdiagramm** gewählt, da es auch hier wieder
+    die Interaktion und Schnittstellen zwischen User, App und Backend passend veranschaulicht.
+    Dabei wird auch klar wie die Fehlerfälle nacheinander geprüft werden, bevor der Happy-Path, das erfolgreiche
+    Einloggen mit JWT-Token-Generierung, passieren kann.
+    Da es hier also wieder um wichtige chronologische Abläufe und Interaktionen geht, wären die anderen Diagrammtypen eher unpassend.
+endnote
+
 'Content-Type Überprüfung'
 alt#red Content-Type Header ist kein JSON
 
@@ -68,7 +76,6 @@ else JSON-Struktur ist valide
 
         alt#red Username existiert nicht (gibt None zurück)
             Repo --> App : None
-            deactivate Repo
 
             note over App
                 Egal ob der Benutzername komplett erfunden oder nur das Passwort falsch war;
@@ -100,7 +107,6 @@ else JSON-Struktur ist valide
             alt#red Passwort ist falsch (False)
                 App --[#red]> User : 401 Unauthorized\n{"error": "Invalid username or password."}
                 deactivate App
-        
             |||
 
             'Credentials korrekt -> JWT-Token generieren'
@@ -109,18 +115,21 @@ else JSON-Struktur ist valide
                 |||
 
                 App -> Service : create_token(user.id, username)
+                activate App
                 activate Service
 
                 alt#red Token-Generierung funktioniert nicht
                     Service --> App : raises Exception
                     App --[#red]> User : 503 Service Unavailable\n{"error": "Service Unavailable."}
-            
+                    deactivate App
+                
                 |||
 
                 'Happy Path: Login erfolgreich'
                 else Token erfolgreich erzeugt
                     Service --> App : access_token
                     deactivate Service
+                    activate App
 
                     App --[#green]> User : 200 OK\n{"access_token": "<JWT>"}
                     deactivate App
