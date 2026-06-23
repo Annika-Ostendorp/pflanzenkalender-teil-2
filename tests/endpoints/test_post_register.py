@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 def test_post_register_success(client): # aus Akzeptanzkriterien 1 & 2 der User Story:
                                    # Endpoint mit gültigen Daten erstellt User, ohne dass das Passwort/Hash versehentlich zurückgegeben wird
     payload = {
@@ -172,15 +174,20 @@ def test_post_register_invalid_content_type(client): # wenn Content-Type-Header 
 
 def test_post_register_unexpected_server_error(client): # unvorhergesehenen Systemabsturz simulisieren --> 500 Internal Server Error
     payload = {
-        "username": ["Ungültiger", "Benutzername"], # hier auf einmal ungültiger Datentyp für username -> Liste und kein string wird gesendet
+        "username": "alice",
         "password": "meinsicherespasswort123"
     }
 
-    response = client.post("/api/auth/register", json = payload)
-    data = response.get_json()
+    with patch(
+        "auth_service.AuthenticationService.get_password_hash",
+        side_effect = Exception("Hashing fehlgeschlagen")
+    ):
+        
+        response = client.post("/api/auth/register", json = payload)
+        data = response.get_json()
 
     # Überprüfungen
-    assert response.status_code == 500 # Server stürzt ab, wegen ungültigem Datentyp --> Statuscode 500 zurückgegeben?
+    assert response.status_code == 500 # unerwarteter interner Fehler wurde korrekt abgefangen
     assert "error" in data # 'error' muss in Server-Antwort drin sein
     assert data["error"] == "An unexpected error occurred. Please try again later." # entspricht die Fehlermeldung exakt dieser Syntax?
 
