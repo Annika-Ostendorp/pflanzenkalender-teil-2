@@ -1,4 +1,7 @@
-from src.json_repositories import JsonPlantRepository, JsonCareScheduleRepository, JsonActionLogRepository
+from src.json_repositories import (
+    JsonPlantRepository, JsonCareScheduleRepository,
+    JsonActionLogRepository, JsonUserRepository,
+)
 from src.models import Plant, CareSchedule, ActionLog, User
 
 
@@ -123,3 +126,17 @@ def test_json_log_delete_removes_log(tmp_path):
     repo.save(log)
     repo.delete(log.id)
     assert repo.get_by_id(log.id) is None
+
+
+def test_json_user_starts_empty_when_file_missing(tmp_path):
+    file_path = tmp_path / "users.json"
+    repo = JsonUserRepository(str(file_path))
+    assert repo.find_by_username("alice") is None
+    assert not file_path.exists()
+
+
+def test_json_user_save_creates_file(tmp_path):
+    file_path = tmp_path / "users.json"
+    repo = JsonUserRepository(str(file_path))
+    repo.save(User(username="alice", password_hash="hash123"))
+    assert file_path.exists()
