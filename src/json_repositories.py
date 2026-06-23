@@ -1,7 +1,7 @@
 import json
 import os
 
-from repositories import PlantRepository
+from repositories import PlantRepository, CareScheduleRepository
 from models import Plant, CareSchedule
 
 

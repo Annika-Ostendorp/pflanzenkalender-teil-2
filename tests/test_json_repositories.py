@@ -1,5 +1,5 @@
-from src.json_repositories import JsonPlantRepository
-from models import Plant, CareSchedule
+from src.json_repositories import JsonPlantRepository, JsonCareScheduleRepository
+from src.models import Plant, CareSchedule
 
 
 def test_json_plant_starts_empty_when_file_missing(tmp_path):
@@ -84,3 +84,20 @@ def test_json_schedule_delete_removes_schedule(tmp_path):
     repo.save(s)
     repo.delete(s.id)
     assert repo.get_by_id(s.id) is None
+
+
+def test_json_log_starts_empty_when_file_missing(tmp_path):
+    file_path = tmp_path / "logs.json"
+    repo = JsonActionLogRepository(str(file_path))
+    assert repo.find_by_plant(1) == []
+    assert not file_path.exists()
+
+
+def test_json_log_save_creates_file(tmp_path):
+    file_path = tmp_path / "logs.json"
+    repo = JsonActionLogRepository(str(file_path))
+    repo.save(ActionLog(plant_id=1, care_type="watering"))
+    assert file_path.exists()
+
+
+    
