@@ -142,3 +142,28 @@ class JsonActionLogRepository(ActionLogRepository):
             self._store[log.id] = log
         if self._store:
             self._next_id = max(self._store) + 1
+
+    def _persist(self):
+        directory = os.path.dirname(self._file_path)
+        if directory:
+            os.makedirs(directory, exist_ok=True)
+        records = [l.to_dict() for l in self._store.values()]
+        with open(self._file_path, "w", encoding="utf-8") as f:
+            json.dump(records, f, indent=2)
+
+    def save(self, log: ActionLog) -> None:
+        if log.id is None:
+            log.id = self._next_id
+            self._next_id += 1
+        self._store[log.id] = log
+        self._persist()
+
+    def get_by_id(self, log_id: int) -> ActionLog | None:
+        return self._store.get(log_id)
+
+    def find_by_plant(self, plant_id: int) -> list[ActionLog]:
+        return [l for l in self._store.values() if l.plant_id == plant_id]
+
+    def delete(self, log_id: int) -> None:
+        self._store.pop(log_id, None)
+        self._persist()
