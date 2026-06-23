@@ -77,4 +77,28 @@ class JsonCareScheduleRepository(CareScheduleRepository):
         self._next_id = 1
         self._load()
 
-        
+
+    def _load(self):
+        if not os.path.exists(self._file_path):
+            return
+        with open(self._file_path, encoding="utf-8") as f:
+            data = json.load(f)
+        for d in data:
+            schedule = CareSchedule(
+                plant_id=d["plant_id"],
+                care_type=d["care_type"],
+                interval_days=d["interval_days"],
+                id=d.get("id"),
+            )
+            self._store[schedule.id] = schedule
+        if self._store:
+            self._next_id = max(self._store) + 1
+
+
+    def _persist(self):
+        directory = os.path.dirname(self._file_path)
+        if directory:
+            os.makedirs(directory, exist_ok=True)
+        records = [s.to_dict() for s in self._store.values()]
+        with open(self._file_path, "w", encoding="utf-8") as f:
+            json.dump(records, f, indent=2)
