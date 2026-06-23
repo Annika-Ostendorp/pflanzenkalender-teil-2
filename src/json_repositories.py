@@ -102,3 +102,19 @@ class JsonCareScheduleRepository(CareScheduleRepository):
         records = [s.to_dict() for s in self._store.values()]
         with open(self._file_path, "w", encoding="utf-8") as f:
             json.dump(records, f, indent=2)
+
+
+    def save(self, schedule: CareSchedule) -> None:
+        if schedule.id is None:
+            schedule.id = self._next_id
+            self._next_id += 1
+        self._store[schedule.id] = schedule
+        self._persist()
+
+
+    def get_by_id(self, schedule_id: int) -> CareSchedule | None:
+        return self._store.get(schedule_id)
+
+
+    def find_by_plant(self, plant_id: int) -> list[CareSchedule]:
+        return [s for s in self._store.values() if s.plant_id == plant_id]
