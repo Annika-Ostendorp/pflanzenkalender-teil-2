@@ -64,7 +64,6 @@ else Eingabedaten inhaltlich gültig
 
     alt#red Username existiert nicht (gibt None zurück)
         Repo --> App : None
-        deactivate Repo
 
         note over App
             Egal ob der Benutzername komplett erfunden oder nur das Passwort falsch war;
@@ -84,9 +83,9 @@ else Eingabedaten inhaltlich gültig
 
         |||
 
-        App -> Service : verify_password(user.password_hash, password)
+        App -> Service : verify_password(password, password_hash)
         activate Service
-        Service --> App : False / True
+        Service --> App : True / False
         deactivate Service
 
         |||
@@ -106,7 +105,6 @@ else Eingabedaten inhaltlich gültig
 
             alt#red Token-Generierung funktioniert nicht
                 Service --> App : raises Exception
-                deactivate Service
                 App --[#red]> User : 503 Service Unavailable\n{"error": "Service Unavailable."}
                 
             |||
@@ -118,6 +116,7 @@ else Eingabedaten inhaltlich gültig
                     * sub = User-ID als String
                     * iat = Ausstellungszeitpunkt
                     * exp = Ablaufzeitpunkt
+
                     Die Gültigkeitsdauer beträgt 1 Stunde:
                     exp = iat + 3600 Sekunden
                 endnote
@@ -125,6 +124,7 @@ else Eingabedaten inhaltlich gültig
                 Service --> App : access_token
                 deactivate Service
                 App --[#green]> User : 200 OK\n{"access_token": "<JWT>"}
+                deactivate App
 
                 |||
                 
@@ -132,8 +132,6 @@ else Eingabedaten inhaltlich gültig
         end
     end
 end
-
-deactivate App
 
 |||
 
