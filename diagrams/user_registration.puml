@@ -20,15 +20,16 @@ endnote
 
 |||
 
+User -> App : POST /api/auth/register
+activate App 
+
 'Content-Type Überprüfung'
 alt#red Content-Type Header ist kein JSON
 
     |||
 
-    User -> App : POST /api/auth/register (mit falschem Header)
-    activate App
+    
     App --[#red]> User : 415 Unsupported Media Type\n{"error": "Content-Type must be 'application/json'."}
-    deactivate App
 
     |||
 
@@ -36,10 +37,7 @@ else Request-Body ist ungültiges JSON
 
     |||
 
-    User -> App : POST /api/auth/register (mit ungültigem Body)
-    activate App
     App --[#red]> User : 400 Bad Request\n{"error": "Request body must be valid JSON."}
-    deactivate App
 
 |||
 
@@ -52,8 +50,6 @@ else JSON-Struktur ist valide
 
         |||
 
-        User -> App : POST /api/auth/register (Payload)
-        activate App
         note right of App
             **Mögliche Validierungsfehler (400 Bad Request):**
             * username fehlt/leer -> "Field 'username' must not be empty."
@@ -63,7 +59,6 @@ else JSON-Struktur ist valide
             * password < 8 Zeichen -> "Field 'password' must be at least 8 characters long."
         endnote
         App --[#red]> User: 400 Bad Request\n{"error": "..."}
-        deactivate App
 
     |||
 
@@ -71,9 +66,6 @@ else JSON-Struktur ist valide
     else Eingabedaten inhaltlich gültig
 
         |||
-
-        User -> App : POST /api/auth/register (Payload)
-        activate App
 
         'Prüfen von möglichen Duplikaten'
         App -> Repo : find_by_username(username)
