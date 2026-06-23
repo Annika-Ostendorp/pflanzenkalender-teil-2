@@ -100,4 +100,26 @@ def test_json_log_save_creates_file(tmp_path):
     assert file_path.exists()
 
 
-    
+def test_json_log_data_survives_restart(tmp_path):
+    file_path = tmp_path / "logs.json"
+    repo1 = JsonActionLogRepository(str(file_path))
+    repo1.save(ActionLog(plant_id=1, care_type="watering"))
+    repo2 = JsonActionLogRepository(str(file_path))
+    assert len(repo2.find_by_plant(1)) == 1
+
+
+def test_json_log_save_assigns_id(tmp_path):
+    file_path = tmp_path / "logs.json"
+    repo = JsonActionLogRepository(str(file_path))
+    log = ActionLog(plant_id=1, care_type="watering")
+    repo.save(log)
+    assert log.id == 1
+
+
+def test_json_log_delete_removes_log(tmp_path):
+    file_path = tmp_path / "logs.json"
+    repo = JsonActionLogRepository(str(file_path))
+    log = ActionLog(plant_id=1, care_type="watering")
+    repo.save(log)
+    repo.delete(log.id)
+    assert repo.get_by_id(log.id) is None
