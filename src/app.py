@@ -1,14 +1,34 @@
 from datetime import date, timedelta
 from flask import Flask, jsonify, request, render_template
-from werkzeug.exceptions import HTTPException
+from werkzeug.exceptions import HTTPException, BadRequest
 from models import Plant, CareSchedule, ActionLog, User
-from src.auth_service import AuthenticationService
+from auth_service import AuthenticationService
 
 import re # empfohlenes Modul für Sonderzeichen-Prüfung (siehe KI-Issue #9)
 
 VALID_CARE_TYPES = {'watering', 'fertilizing', 'repotting'}
 UPDATABLE_PLANT_FIELDS = {'name', 'species', 'location'}
 
+# Username & Passwort Validierung für Nutzer-Login
+def validate_login_username(username) -> str:
+    if username is None:
+        return "Field 'username' is required."
+    
+    if username == "":
+        return "Field 'username' must not be empty."
+    
+    return None
+
+def validate_login_password(password) -> str:
+    if password is None:
+        return "Field 'password' is required."
+    
+    if password == "":
+        return "Field 'password' must not be empty."
+    
+    return None
+
+# Username & Passwort Validierung für Nutzer-Registrierung
 def validate_username(username) -> str: # Benutzernamen prüfen nach Vorgaben aus Task 5
     # Feld fehlt komplett im JSON-Payload
     if username is None:
@@ -320,6 +340,58 @@ class PlantAppManager:
                 self.user_repo.save(new_user)
                 return jsonify(new_user.to_dict()), 201
 
+            except Exception:
+                return jsonify({"error": "An unexpected error occurred. Please try again later."}), 500
+            
+
+        # Endpoint POST /api/auth/login
+        @self.app.route('/api/auth/login', methods = ['POST'])
+        def login_user():
+            try:
+                if not request.is_json:
+                    return jsonify({"error": "Content-Type must be 'application/json'."}), 415
+                
+                try: # JSON parse errors abfangen
+                    payload = request.get_json()
+
+                    if payload is None: # falls Body komplett leer -> payload = None -> das aber auch ungültiges JSON -> 400 Bad Request Error
+                        return jsonify({"error": "Request body must be valid JSON."}), 400
+                
+                except BadRequest:
+                    return jsonify({"error": "Request body must be valid JSON."}), 400
+                
+    
+                username_error = validate_login_username(payload.get("username"))
+    
+                if username_error: # falls username ungültig --> 400 Bad Request
+                    return jsonify({"error": username_error}), 400
+            
+                password_error = validate_login_password(payload.get("password"))
+
+                if password_error:
+                    return jsonify({"error": password_error}), 400
+            
+                username = payload["username"]
+                password = payload["password"]
+
+                user = self.user_repo.find_by_username(username)
+
+                # identischen Request-Body für unbekannten Username & falsches Passwort zurückgeben
+                if user is None:
+                    return jsonify({"error": "Invalid username or password."}), 401
+            
+                if not AuthenticationService.verify_password(password, user.password_hash):
+                    return jsonify({"error": "Invalid username or password."}), 401
+            
+                try:
+                    access_token = AuthenticationService.create_token(user.id)
+            
+                except Exception:
+                    return jsonify({"error": "Service Unavailable."}), 503
+            
+
+                return jsonify({"access_token": access_token}), 200 # erfolgreich generierten Token am Ende zurückgeben
+            
             except Exception:
                 return jsonify({"error": "An unexpected error occurred. Please try again later."}), 500
             

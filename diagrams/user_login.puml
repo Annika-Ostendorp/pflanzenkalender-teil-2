@@ -1,0 +1,146 @@
+@startuml user_login
+skinparam actorStyle awesome
+
+actor "User (Website)" as User
+participant "Plant App" as App
+participant "AuthenticationService" as Service
+database "UserRepository" as Repo
+
+note over User, Repo
+    Ich habe für diese User Story wieder ein **Sequenzdiagramm** gewählt, da es auch hier wieder
+    die Interaktion und Schnittstellen zwischen User, App und Backend passend veranschaulicht.
+    Dabei zeigt es einen einzelnen POST-Request an /api/auth/login und visualisiert danach die alternativen
+    Validierungs- und Fehlerfälle, bevor der Happy-Path, das erfolgreiche
+    Einloggen mit JWT-Token-Generierung, passieren kann.
+    Da es hier also wieder um wichtige chronologische Abläufe und Interaktionen geht, wären die anderen Diagrammtypen eher unpassend.
+endnote
+
+User -> App : POST /api/auth/login
+activate App
+
+'Content-Type Überprüfung'
+alt#red Content-Type Header ist kein JSON
+
+    |||
+
+    App --[#red]> User : 415 Unsupported Media Type\n{"error": "Content-Type must be 'application/json'."}
+
+    |||
+
+else Request-Body ist ungültiges JSON
+
+    |||
+
+    App --[#red]> User : 400 Bad Request\n{"error": "Request body must be valid JSON."}
+
+|||
+
+'Input Überprüfung --> Daten werden wieder per POST an Server geschickt & verarbeitet'
+else Eingabedaten ungültig
+
+    |||
+
+    note right of App
+        **Mögliche Validierungsfehler (400 Bad Request):**
+        * username fehlt -> "Field 'username' is required."
+        * username ist leer -> "Field 'username' must not be empty."
+        * password fehlt -> "Field 'password' is required."
+        * password ist leer -> "Field 'password' must not be empty."
+    endnote
+    App --[#red]> User : 400 Bad Request\n{"error": "..."}
+
+    |||
+
+'App stellt Anfrage an Repo, ob Username existiert'
+else Eingabedaten inhaltlich gültig
+
+    |||
+
+    'Prüfen von möglichen Duplikaten/ User abrufen'
+    App -> Repo : find_by_username(username)
+    activate Repo
+
+    |||
+
+    alt#red Username existiert nicht (gibt None zurück)
+        Repo --> App : None
+
+        note over App
+            Egal ob der Benutzername komplett erfunden oder nur das Passwort falsch war;
+            das System antwortet dann immer gleich mit 401 Unauthorized. 
+            Dadurch kann ein möglicher Angreifer unserer App nie herausfinden, welche Usernamen
+            es in der Datenbank wirklich gibt.
+        endnote  
+    
+        App --[#red]> User : 401 Unauthorized\n{"error": "Invalid username or password."}
+
+        |||
+
+    'Username existiert -> Passwort prüfen'
+    else Username gefunden (gibt User-Objekt zurück)
+        Repo --> App : user
+        deactivate Repo
+
+        |||
+
+        App -> Service : verify_password(password, password_hash)
+        activate Service
+        Service --> App : True / False
+        deactivate Service
+
+        |||
+
+        alt#red Passwort ist falsch (False)
+            App --[#red]> User : 401 Unauthorized\n{"error": "Invalid username or password."}
+            
+            |||
+
+        'Credentials korrekt -> JWT-Token generieren'
+        else Passwort ist korrekt (True)
+
+            |||
+
+            App -> Service : create_token(user_id)
+            activate Service
+
+            alt#red Token-Generierung funktioniert nicht
+                Service --> App : raises Exception
+                App --[#red]> User : 503 Service Unavailable\n{"error": "Service Unavailable."}
+                
+            |||
+
+            'Happy Path: Login erfolgreich'
+            else Token erfolgreich erzeugt
+                note right of Service
+                    Das erzeugte JWT enthält:
+                    * sub = User-ID als String
+                    * iat = Ausstellungszeitpunkt
+                    * exp = Ablaufzeitpunkt
+
+                    Die Gültigkeitsdauer beträgt 1 Stunde:
+                    exp = iat + 3600 Sekunden
+                endnote
+
+                Service --> App : access_token
+                deactivate Service
+                App --[#green]> User : 200 OK\n{"access_token": "<JWT>"}
+                deactivate App
+
+                |||
+                
+            end
+        end
+    end
+end
+
+|||
+
+'Unerwarteter Systemabsturz'
+note over App
+    **Ausnahmebedingung:**
+    Sollte während der Verarbeitung der Daten ein unerwarteter Server-Fehler auftreten,
+    dann antwortet das System mit:
+    500 Internal Server Error\n{"error": "An unexpected error occurred. Please try again later."}
+endnote
+
+@enduml
