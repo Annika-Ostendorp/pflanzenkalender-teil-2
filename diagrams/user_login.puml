@@ -9,20 +9,21 @@ database "UserRepository" as Repo
 note over User, Repo
     Ich habe für diese User Story wieder ein **Sequenzdiagramm** gewählt, da es auch hier wieder
     die Interaktion und Schnittstellen zwischen User, App und Backend passend veranschaulicht.
-    Dabei wird auch klar wie die Fehlerfälle nacheinander geprüft werden, bevor der Happy-Path, das erfolgreiche
+    Dabei zeigt es einen einzelnen POST-Request an /api/auth/login und visualisiert danach die alternativen
+    Validierungs- und Fehlerfälle, bevor der Happy-Path, das erfolgreiche
     Einloggen mit JWT-Token-Generierung, passieren kann.
     Da es hier also wieder um wichtige chronologische Abläufe und Interaktionen geht, wären die anderen Diagrammtypen eher unpassend.
 endnote
+
+User -> App : POST /api/auth/login
+activate App
 
 'Content-Type Überprüfung'
 alt#red Content-Type Header ist kein JSON
 
     |||
 
-    User -> App : POST /api/auth/login (mit falschem Header)
-    activate App
     App --[#red]> User : 415 Unsupported Media Type\n{"error": "Content-Type must be 'application/json'."}
-    deactivate App
 
     |||
 
@@ -30,24 +31,15 @@ else Request-Body ist ungültiges JSON
 
     |||
 
-    User -> App : POST /api/auth/login (mit ungültigem Body)
-    activate App
     App --[#red]> User : 400 Bad Request\n{"error": "Request body must be valid JSON."}
-    deactivate App
 
 |||
 
-else JSON-Struktur ist valide
+'Input Überprüfung --> Daten werden wieder per POST an Server geschickt & verarbeitet'
+else Eingabedaten ungültig
 
-|||
-
-    'Input Überprüfung --> Daten werden wieder per POST an Server geschickt & verarbeitet'
-    alt#red Eingabedaten ungültig
-
-        |||
-
-        User -> App : POST /api/auth/login (Payload)
-        activate App
+    |||
+    
         note right of App
             **Mögliche Validierungsfehler (400 Bad Request):**
             * username fehlt -> "Field 'username' is required."
@@ -114,7 +106,7 @@ else JSON-Struktur ist valide
 
                 |||
 
-                App -> Service : create_token(user.id, username)
+                App -> Service : create_token(user_id)
                 activate App
                 activate Service
 
