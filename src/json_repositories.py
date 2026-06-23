@@ -2,7 +2,7 @@ import json
 import os
 
 from repositories import PlantRepository
-from models import Plant
+from models import Plant, CareSchedule
 
 
 class JsonPlantRepository(PlantRepository):
@@ -118,3 +118,16 @@ class JsonCareScheduleRepository(CareScheduleRepository):
 
     def find_by_plant(self, plant_id: int) -> list[CareSchedule]:
         return [s for s in self._store.values() if s.plant_id == plant_id]
+
+
+    def find_by_plant_and_care_type(self, plant_id: int, care_type: str) -> CareSchedule | None:
+        return next(
+            (s for s in self._store.values()
+             if s.plant_id == plant_id and s.care_type == care_type),
+            None,
+        )
+
+
+    def delete(self, schedule_id: int) -> None:
+        self._store.pop(schedule_id, None)
+        self._persist()
