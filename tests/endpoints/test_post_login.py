@@ -83,13 +83,8 @@ def test_post_login_unknown_username(client): # unbekannter Username --> 401 Una
     assert data["error"] == "Invalid username or password."
 
 
-def test_post_login_wrong_password(client):
-    register_payload = {
-        "username": "Tobi",
-        "password": "richtigespasswort"
-    }
-
-    client.post("/api/auth/register", json = register_payload)
+def test_post_login_wrong_password(client, register_user):
+    register_user("Tobi", "richtigespasswort")
 
     payload = {
         "username": "Tobi",
