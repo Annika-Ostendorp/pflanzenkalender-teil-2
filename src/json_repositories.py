@@ -31,3 +31,27 @@ class JsonPlantRepository(PlantRepository):
         if self._store:
             self._next_id = max(self._store) + 1
 
+
+    def _persist(self):
+        directory = os.path.dirname(self._file_path)
+        if directory:
+            os.makedirs(directory, exist_ok=True)
+        records = []
+        for plant in self._store.values():
+            record = plant.to_dict()
+            record["user_id"] = plant.user_id
+            records.append(record)
+        with open(self._file_path, "w", encoding="utf-8") as f:
+            json.dump(records, f, indent=2)
+
+
+    def save(self, plant: Plant) -> None:
+        if plant.id is None:
+            plant.id = self._next_id
+            self._next_id += 1
+        self._store[plant.id] = plant
+        self._persist()
+
+
+    def get_by_id(self, plant_id: int) -> Plant | None:
+        return self._store.get(plant_id)
