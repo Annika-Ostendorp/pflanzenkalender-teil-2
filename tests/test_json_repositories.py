@@ -42,6 +42,28 @@ def test_json_plant_delete_removes_plant(tmp_path):
     repo.save(plant)
 
     repo.delete(plant.id)
-    
+
     assert repo.get_by_id(plant.id) is None
     assert repo.find_all() == []
+
+
+def test_json_schedule_starts_empty_when_file_missing(tmp_path):
+    file_path = tmp_path / "schedules.json"
+    repo = JsonCareScheduleRepository(str(file_path))
+    assert repo.find_by_plant(1) == []
+    assert not file_path.exists()
+
+
+def test_json_schedule_save_creates_file(tmp_path):
+    file_path = tmp_path / "schedules.json"
+    repo = JsonCareScheduleRepository(str(file_path))
+    repo.save(CareSchedule(plant_id=1, care_type="watering", interval_days=7))
+    assert file_path.exists()
+
+
+def test_json_schedule_data_survives_restart(tmp_path):
+    file_path = tmp_path / "schedules.json"
+    repo1 = JsonCareScheduleRepository(str(file_path))
+    repo1.save(CareSchedule(plant_id=1, care_type="watering", interval_days=7))
+    repo2 = JsonCareScheduleRepository(str(file_path))
+    assert len(repo2.find_by_plant(1)) == 1
