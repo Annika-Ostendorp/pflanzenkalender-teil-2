@@ -53,3 +53,15 @@ def log_entry(client, plant):
         'notes': 'Test Notiz',
     })
     return resp.get_json()
+
+
+@pytest.fixture
+def register_user(client):
+    def _register_user(username, password):
+        return client.post("/api/auth/register",
+            json = {
+            "username": username,
+            "password": password
+            }
+        )
+    return _register_user
