@@ -155,4 +155,12 @@ def test_json_user_save_assigns_id(tmp_path):
     repo = JsonUserRepository(str(file_path))
     user = User(username="alice", password_hash="hash123")
     repo.save(user)
-    assert user.id == 1
+    assert user.id == 1 
+
+def test_json_user_delete_removes_user(tmp_path):
+    file_path = tmp_path / "users.json"
+    repo = JsonUserRepository(str(file_path))
+    user = User(username="alice", password_hash="hash123")
+    repo.save(user)
+    repo.delete(user.id)
+    assert repo.get_by_id(user.id) is None
