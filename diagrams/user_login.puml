@@ -39,26 +39,22 @@ else Request-Body ist ungültiges JSON
 else Eingabedaten ungültig
 
     |||
-    
-        note right of App
-            **Mögliche Validierungsfehler (400 Bad Request):**
-            * username fehlt -> "Field 'username' is required."
-            * username ist leer -> "Field 'username' must not be empty."
-            * password fehlt -> "Field 'password' is required."
-            * password ist leer -> "Field 'password' must not be empty."
-        endnote
-        App --[#red]> User : 400 Bad Request\n{"error": "..."}
-        deactivate App
+
+    note right of App
+        **Mögliche Validierungsfehler (400 Bad Request):**
+        * username fehlt -> "Field 'username' is required."
+        * username ist leer -> "Field 'username' must not be empty."
+        * password fehlt -> "Field 'password' is required."
+        * password ist leer -> "Field 'password' must not be empty."
+    endnote
+    App --[#red]> User : 400 Bad Request\n{"error": "..."}
 
     |||
 
-    'App stellt Anfrage an Repo, ob Username existiert'
-    else Eingabedaten inhaltlich gültig
+'App stellt Anfrage an Repo, ob Username existiert'
+else Eingabedaten inhaltlich gültig
 
         |||
-
-        User -> App : POST /api/auth/login (Payload)
-        activate App
 
         'Prüfen von möglichen Duplikaten/ User abrufen'
         App -> Repo : find_by_username(username)
@@ -68,6 +64,7 @@ else Eingabedaten ungültig
 
         alt#red Username existiert nicht (gibt None zurück)
             Repo --> App : None
+            deactivate Repo
 
             note over App
                 Egal ob der Benutzername komplett erfunden oder nur das Passwort falsch war;
@@ -77,7 +74,6 @@ else Eingabedaten ungültig
             endnote  
     
             App --[#red]> User : 401 Unauthorized\n{"error": "Invalid username or password."}
-            deactivate App
 
         |||
 
@@ -85,7 +81,6 @@ else Eingabedaten ungültig
         else Username gefunden (gibt User-Objekt zurück)
             Repo --> App : user
             deactivate Repo
-            activate App 
 
             |||
 
