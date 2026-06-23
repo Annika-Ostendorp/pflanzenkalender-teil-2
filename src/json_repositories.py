@@ -125,3 +125,20 @@ class JsonActionLogRepository(ActionLogRepository):
         self._store = {}
         self._next_id = 1
         self._load()
+
+    def _load(self):
+        if not os.path.exists(self._file_path):
+            return
+        with open(self._file_path, encoding="utf-8") as f:
+            data = json.load(f)
+        for d in data:
+            log = ActionLog(
+                plant_id=d["plant_id"],
+                care_type=d["care_type"],
+                performed_at=d.get("performed_at"),
+                notes=d.get("notes"),
+                id=d.get("id"),
+            )
+            self._store[log.id] = log
+        if self._store:
+            self._next_id = max(self._store) + 1
