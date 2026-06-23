@@ -67,3 +67,20 @@ def test_json_schedule_data_survives_restart(tmp_path):
     repo1.save(CareSchedule(plant_id=1, care_type="watering", interval_days=7))
     repo2 = JsonCareScheduleRepository(str(file_path))
     assert len(repo2.find_by_plant(1)) == 1
+
+
+def test_json_schedule_save_assigns_id(tmp_path):
+    file_path = tmp_path / "schedules.json"
+    repo = JsonCareScheduleRepository(str(file_path))
+    s = CareSchedule(plant_id=1, care_type="watering", interval_days=7)
+    repo.save(s)
+    assert s.id == 1
+
+
+def test_json_schedule_delete_removes_schedule(tmp_path):
+    file_path = tmp_path / "schedules.json"
+    repo = JsonCareScheduleRepository(str(file_path))
+    s = CareSchedule(plant_id=1, care_type="watering", interval_days=7)
+    repo.save(s)
+    repo.delete(s.id)
+    assert repo.get_by_id(s.id) is None
