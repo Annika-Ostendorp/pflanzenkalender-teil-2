@@ -140,3 +140,19 @@ def test_json_user_save_creates_file(tmp_path):
     repo = JsonUserRepository(str(file_path))
     repo.save(User(username="alice", password_hash="hash123"))
     assert file_path.exists()
+
+
+def test_json_user_data_survives_restart(tmp_path):
+    file_path = tmp_path / "users.json"
+    repo1 = JsonUserRepository(str(file_path))
+    repo1.save(User(username="alice", password_hash="hash123"))
+    repo2 = JsonUserRepository(str(file_path))
+    assert repo2.find_by_username("alice") is not None
+
+
+def test_json_user_save_assigns_id(tmp_path):
+    file_path = tmp_path / "users.json"
+    repo = JsonUserRepository(str(file_path))
+    user = User(username="alice", password_hash="hash123")
+    repo.save(user)
+    assert user.id == 1
