@@ -208,3 +208,16 @@ class JsonUserRepository(UserRepository):
             self._next_id += 1
         self._store[user.id] = user
         self._persist()
+
+    def get_by_id(self, user_id: int) -> User | None:
+        return self._store.get(user_id)
+
+    def find_by_username(self, username: str) -> User | None:
+        return next(
+            (u for u in self._store.values() if u.username == username),
+            None,
+        )
+        
+    def delete(self, user_id: int) -> None:
+        self._store.pop(user_id, None)
+        self._persist()
