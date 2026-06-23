@@ -100,15 +100,10 @@ def test_post_login_wrong_password(client, register_user):
     assert data["error"] == "Invalid username or password."
 
 
-def test_post_login_unknown_username_and_wrong_password_same_response(client): # gegen Username Enumeration -> unbekannter Username & falsches Passwort
+def test_post_login_unknown_username_and_wrong_password_same_response(client, register_user): # gegen Username Enumeration -> unbekannter Username & falsches Passwort
                                                                                # führen zur selben Antwort
-    register_payload = {
-        "username": "Lena",
-        "password": "richtigespasswort"
-    }                                 
-
-    client.post("/api/auth/register", json = register_payload)
-
+    register_user("Lena", "richtigespasswort")
+    
     unknown_user_payload = {
         "username": "unbekannt",
         "password": "richtigespasswort"
