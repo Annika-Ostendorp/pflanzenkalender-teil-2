@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 from flask import Flask, jsonify, request, render_template
-from werkzeug.exceptions import HTTPException
+from werkzeug.exceptions import HTTPException, BadRequest
 from models import Plant, CareSchedule, ActionLog, User
 from auth_service import AuthenticationService
 
@@ -357,7 +357,7 @@ class PlantAppManager:
                     if payload is None: # falls Body komplett leer -> payload = None -> das aber auch ungültiges JSON -> 400 Bad Request Error
                         return jsonify({"error": "Request body must be valid JSON."}), 400
                 
-                except Exception:
+                except BadRequest:
                     return jsonify({"error": "Request body must be valid JSON."}), 400
                 
     
