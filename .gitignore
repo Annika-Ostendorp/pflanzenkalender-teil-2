@@ -95,6 +95,8 @@ $RECYCLE.BIN/
 *.sqlite3
 *.db
 
+data/
+
 # Environment variables (optional, but common)
 .env
 .env.*
