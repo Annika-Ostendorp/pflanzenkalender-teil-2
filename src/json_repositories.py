@@ -1,8 +1,8 @@
 import json
 import os
 
-from repositories import PlantRepository, CareScheduleRepository, ActionLogRepository
-from models import Plant, CareSchedule, ActionLog
+from repositories import PlantRepository, CareScheduleRepository, ActionLogRepository, UserRepository
+from models import Plant, CareSchedule, ActionLog, User
 
 
 class JsonPlantRepository(PlantRepository):
@@ -167,3 +167,26 @@ class JsonActionLogRepository(ActionLogRepository):
     def delete(self, log_id: int) -> None:
         self._store.pop(log_id, None)
         self._persist()
+
+
+class JsonUserRepository(UserRepository):
+    def __init__(self, file_path: str):
+        self._file_path = file_path
+        self._store = {}
+        self._next_id = 1
+        self._load()
+
+    def _load(self):
+        if not os.path.exists(self._file_path):
+            return
+        with open(self._file_path, encoding="utf-8") as f:
+            data = json.load(f)
+        for d in data:
+            user = User(
+                username=d["username"],
+                password_hash=d["password_hash"],
+                id=d.get("id"),
+            )
+            self._store[user.id] = user
+        if self._store:
+            self._next_id = max(self._store) + 1
