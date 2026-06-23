@@ -68,3 +68,13 @@ class JsonPlantRepository(PlantRepository):
     def delete(self, plant_id: int) -> None:
         self._store.pop(plant_id, None)
         self._persist()
+
+
+class JsonCareScheduleRepository(CareScheduleRepository):
+    def __init__(self, file_path: str):
+        self._file_path = file_path
+        self._store = {}
+        self._next_id = 1
+        self._load()
+
+        
