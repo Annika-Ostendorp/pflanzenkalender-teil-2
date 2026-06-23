@@ -1,8 +1,8 @@
 import json
 import os
 
-from repositories import PlantRepository, CareScheduleRepository
-from models import Plant, CareSchedule
+from repositories import PlantRepository, CareScheduleRepository, ActionLogRepository
+from models import Plant, CareSchedule, ActionLog
 
 
 class JsonPlantRepository(PlantRepository):
