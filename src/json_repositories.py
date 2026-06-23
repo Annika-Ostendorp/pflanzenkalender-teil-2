@@ -190,3 +190,21 @@ class JsonUserRepository(UserRepository):
             self._store[user.id] = user
         if self._store:
             self._next_id = max(self._store) + 1
+
+    def _persist(self):
+        directory = os.path.dirname(self._file_path)
+        if directory:
+            os.makedirs(directory, exist_ok=True)
+        records = [
+            {"id": u.id, "username": u.username, "password_hash": u.password_hash}
+            for u in self._store.values()
+        ]
+        with open(self._file_path, "w", encoding="utf-8") as f:
+            json.dump(records, f, indent=2)
+
+    def save(self, user: User) -> None:
+        if user.id is None:
+            user.id = self._next_id
+            self._next_id += 1
+        self._store[user.id] = user
+        self._persist()
