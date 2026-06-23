@@ -55,3 +55,16 @@ class JsonPlantRepository(PlantRepository):
 
     def get_by_id(self, plant_id: int) -> Plant | None:
         return self._store.get(plant_id)
+
+
+    def find_all(self) -> list[Plant]:
+        return list(self._store.values())
+
+
+    def find_by_user(self, user_id: int) -> list[Plant]:
+        return [p for p in self._store.values() if p.user_id == user_id]
+ 
+ 
+    def delete(self, plant_id: int) -> None:
+        self._store.pop(plant_id, None)
+        self._persist()
