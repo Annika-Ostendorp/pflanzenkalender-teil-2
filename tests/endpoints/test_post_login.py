@@ -2,14 +2,9 @@ import jwt
 from unittest.mock import patch
 from auth_service import SECRET_KEY
 
-def test_post_login_success(client):
-    register_payload = { # erst registrieren, damit man sich danach ja nochmal einloggen kann
-        "username": "Annika",
-        "password": "passwort123"
-    }
-
-    client.post("api/auth/register", json = register_payload)
-    
+def test_post_login_success(client, register_user):
+    register_user("Annika", "passwort123") # erst registrieren, damit man sich danach ja nochmal einloggen kann
+        
     payload = {
         "username": "Annika",
         "password": "passwort123"
@@ -26,12 +21,8 @@ def test_post_login_success(client):
     assert "password" not in data
     assert "password_hash" not in data
 
-def test_post_login_token_contains_required_claims(client):
-    register_payload = {
-        "username": "Bob",
-        "password": "sicherespasswort"
-    }
-    client.post("/api/auth/register", json = register_payload)
+def test_post_login_token_contains_required_claims(client, register_user):
+    register_user("Bob", "sicherespasswort")
 
     payload = {
         "username": "Bob",
@@ -53,13 +44,8 @@ def test_post_login_token_contains_required_claims(client):
     assert token_payload["exp"] - token_payload["iat"] == 3600 # Token soll 1 Stunde gültig sein
 
 
-def test_post_login_jwt_generation_failure(client): # Mocking, weil simulieren, dass JWT-Erstellung fehlschlägt
-    register_payload = {
-        "username": "alice",
-        "password": "geheim124"
-    }
-
-    client.post("/api/auth/register", json = register_payload)
+def test_post_login_jwt_generation_failure(client, register_user): # Mocking, weil simulieren, dass JWT-Erstellung fehlschlägt
+    register_user("alice", "geheim124")
 
     payload = {
         "username": "alice",
