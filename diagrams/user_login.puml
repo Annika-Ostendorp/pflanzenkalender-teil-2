@@ -71,28 +71,28 @@ else Eingabedaten inhaltlich gültig
             das System antwortet dann immer gleich mit 401 Unauthorized. 
             Dadurch kann ein möglicher Angreifer unserer App nie herausfinden, welche Usernamen
             es in der Datenbank wirklich gibt.
-            endnote  
+        endnote  
     
-            App --[#red]> User : 401 Unauthorized\n{"error": "Invalid username or password."}
+        App --[#red]> User : 401 Unauthorized\n{"error": "Invalid username or password."}
 
         |||
 
-        'Username existiert -> Passwort prüfen'
-        else Username gefunden (gibt User-Objekt zurück)
-            Repo --> App : user
-            deactivate Repo
+    'Username existiert -> Passwort prüfen'
+    else Username gefunden (gibt User-Objekt zurück)
+        Repo --> App : user
+        deactivate Repo
 
-            |||
+        |||
 
-            App -> Service : verify_password(user.password_hash, password)
-            activate Service
-            Service --> App : False / True
-            deactivate Service
+        App -> Service : verify_password(user.password_hash, password)
+        activate Service
+        Service --> App : False / True
+        deactivate Service
 
-            |||
+        |||
 
-            alt#red Passwort ist falsch (False)
-                App --[#red]> User : 401 Unauthorized\n{"error": "Invalid username or password."}
+        alt#red Passwort ist falsch (False)
+            App --[#red]> User : 401 Unauthorized\n{"error": "Invalid username or password."}
             |||
 
             'Credentials korrekt -> JWT-Token generieren'
