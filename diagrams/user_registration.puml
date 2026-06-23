@@ -84,7 +84,6 @@ else JSON-Struktur ist valide
         alt#red Username bereits vergeben (gibt User-Objekt zurück)
             Repo --> App : user
             App --[#red]> User : 409 Conflict\n{"error": "Username is already taken."}
-            deactivate App
 
         |||
 
@@ -92,7 +91,6 @@ else JSON-Struktur ist valide
         else Username frei (gibt None zurück)
             Repo --> App : None
             deactivate Repo
-            activate App
 
             |||
 
