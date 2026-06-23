@@ -102,24 +102,30 @@ else Eingabedaten inhaltlich gültig
                 |||
 
                 App -> Service : create_token(user_id)
-                activate App
                 activate Service
 
                 alt#red Token-Generierung funktioniert nicht
                     Service --> App : raises Exception
+                    deactivate Service
                     App --[#red]> User : 503 Service Unavailable\n{"error": "Service Unavailable."}
-                    deactivate App
                 
                 |||
 
                 'Happy Path: Login erfolgreich'
                 else Token erfolgreich erzeugt
+                    note right of Service
+                        Das erzeugte JWT enthält:
+                        * sub = User-ID als String
+                        * iat = Ausstellungszeitpunkt
+                        * exp = Ablaufzeitpunkt
+
+                        Die Gültigkeitsdauer beträgt 1 Stunde:
+                        exp = iat + 3600 Sekunden
+                    endnote
+
                     Service --> App : access_token
                     deactivate Service
-                    activate App
-
                     App --[#green]> User : 200 OK\n{"access_token": "<JWT>"}
-                    deactivate App
 
                     |||
                 end
