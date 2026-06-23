@@ -1,5 +1,5 @@
-from src.json_repositories import JsonPlantRepository, JsonCareScheduleRepository
-from src.models import Plant, CareSchedule
+from src.json_repositories import JsonPlantRepository, JsonCareScheduleRepository, JsonActionLogRepository
+from src.models import Plant, CareSchedule, ActionLog, User
 
 
 def test_json_plant_starts_empty_when_file_missing(tmp_path):
