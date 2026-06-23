@@ -93,22 +93,23 @@ else Eingabedaten inhaltlich gültig
 
         alt#red Passwort ist falsch (False)
             App --[#red]> User : 401 Unauthorized\n{"error": "Invalid username or password."}
+            
             |||
 
-            'Credentials korrekt -> JWT-Token generieren'
-            else Passwort ist korrekt (True)
+        'Credentials korrekt -> JWT-Token generieren'
+        else Passwort ist korrekt (True)
 
-                |||
+            |||
 
-                App -> Service : create_token(user_id)
-                activate Service
+            App -> Service : create_token(user_id)
+            activate Service
 
-                alt#red Token-Generierung funktioniert nicht
-                    Service --> App : raises Exception
-                    deactivate Service
-                    App --[#red]> User : 503 Service Unavailable\n{"error": "Service Unavailable."}
+            alt#red Token-Generierung funktioniert nicht
+                Service --> App : raises Exception
+                deactivate Service
+                App --[#red]> User : 503 Service Unavailable\n{"error": "Service Unavailable."}
                 
-                |||
+            |||
 
                 'Happy Path: Login erfolgreich'
                 else Token erfolgreich erzeugt
