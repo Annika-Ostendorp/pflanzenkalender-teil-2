@@ -164,3 +164,11 @@ def test_json_user_delete_removes_user(tmp_path):
     repo.save(user)
     repo.delete(user.id)
     assert repo.get_by_id(user.id) is None
+
+
+def test_json_plant_save_creates_data_subdirectory(tmp_path):
+    file_path = tmp_path / "data" / "plants.json"
+    repo = JsonPlantRepository(str(file_path))
+    repo.save(Plant(name="Monstera", species="Araceae", location="Wohnzimmer"))
+    assert (tmp_path / "data").is_dir()
+    assert file_path.exists()
