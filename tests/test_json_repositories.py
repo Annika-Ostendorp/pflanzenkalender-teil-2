@@ -96,17 +96,14 @@ def _assert_user_loaded(repo):
 
 # ── Plant ──────────────────────────────────────────────────────────────────────
 def test_json_plant_starts_empty_when_file_missing(tmp_path):
-    file_path = tmp_path / "plants.json"
-    repo = JsonPlantRepository(str(file_path))
-    assert repo.find_all() == []
-    assert not file_path.exists()
+    _test_starts_empty_without_file(
+        tmp_path, JsonPlantRepository, "plants.json", _assert_plant_empty)
 
 
 def test_json_plant_save_creates_file(tmp_path):
-    file_path = tmp_path / "plants.json"
-    repo = JsonPlantRepository(str(file_path))
-    repo.save(Plant(name="Monstera", species="Araceae", location="Wohnzimmer"))
-    assert file_path.exists()
+    _test_save_creates_file(
+        tmp_path, JsonPlantRepository, "plants.json",
+        Plant(name="Monstera", species="Araceae", location="Wohnzimmer"))
 
 
 def test_json_plant_data_survives_restart(tmp_path):
