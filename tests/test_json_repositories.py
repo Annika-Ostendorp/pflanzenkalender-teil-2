@@ -55,6 +55,29 @@ def _assert_plant_empty(repo):
     assert repo.find_all() == []
 
 
+def _assert_list_repo_empty(repo):
+    assert repo.find_by_plant(1) == []
+
+
+def _assert_user_empty(repo):
+    assert repo.find_by_username("alice") is None
+
+
+def _assert_plant_loaded(repo):
+    plants = repo.find_all()
+    assert len(plants) == 1
+    assert plants[0].name == "Monstera"
+    assert plants[0].id == 1
+
+
+def _assert_schedule_loaded(repo):
+    schedules = repo.find_by_plant(1)
+    assert len(schedules) == 1
+    assert schedules[0].care_type == "watering"
+    assert schedules[0].plant_id == 1
+    assert schedules[0].interval_days == 7
+    assert schedules[0].id == 1
+
 # ── Schedule ──────────────────────────────────────────────────────────────────
 def test_json_plant_starts_empty_when_file_missing(tmp_path):
     file_path = tmp_path / "plants.json"
