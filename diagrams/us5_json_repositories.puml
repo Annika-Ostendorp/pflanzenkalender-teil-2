@@ -204,7 +204,11 @@ InMemory-Repositories verwendet werden.
 
 Die Daten werden beim Start geladen und nach save() oder
 delete() direkt gespeichert. Eine fehlende Datei wird beim
-ersten Schreibvorgang erstellt.
+ersten Schreibvorgang erstellt. 
+
+Die öffentlichen Methoden (save, get_by_id, find_by_user, delete)
+werden aus dem jeweiligen Repository-Interface übernommen und
+in den Json-Klassen nicht erneut aufgeführt.
 end note
 
 @enduml
