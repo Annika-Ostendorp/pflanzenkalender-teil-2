@@ -79,3 +79,23 @@ def unauthenticated_client():
     manager.app.config['TESTING'] = True
     with manager.app.test_client() as c:
         yield c
+
+
+@pytest.fixture
+def client(unauthenticated_client):
+    c = unauthenticated_client
+
+    c.post("/api/auth/register", json = {
+        "username": "TestUser",
+        "password": "testpasswort"
+    })
+
+    login_response = c.post("/api/auth/login", json = {
+        "username": "TestUser",
+        "password": "testpasswort"
+    })
+
+    token = login_response.get_json()["access_token"]
+    c.environ_base["HTTP_AUTHORIZATION"] = f"Bearer {token}"
+
+    yield c
