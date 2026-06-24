@@ -30,3 +30,21 @@ def test_protected_endpoints_missing_token(unauthenticated_client):
         assert response.status_code == 401
         assert "error" in data
         assert data["error"] == "Authentication required."
+
+
+def test_protected_endpoints_invalid_token(unauthenticated_client):
+    unauthenticated_client.environ_base["HTTP_AUTHORIZATION"] = "Bearer invalid-token"
+
+    for method, url, payload in protected_requests:
+        response = unauthenticated_client.open(
+            url,
+            method = method,
+            json = payload
+        )
+
+        data = response.get_json()
+
+        # Überprüfungen
+        assert response.status_code == 401
+        assert "error" in data
+        assert data["error"] == "Invalid or expired token."
