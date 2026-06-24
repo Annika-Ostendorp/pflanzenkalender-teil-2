@@ -48,3 +48,33 @@ def test_protected_endpoints_invalid_token(unauthenticated_client):
         assert response.status_code == 401
         assert "error" in data
         assert data["error"] == "Invalid or expired token."
+
+
+def test_protected_endpoints_expired_token(unauthenticated_client):
+    expired_payload = {
+        "sub": "1",
+        "iat": int(time.time()) - 7200,
+        "exp": int(time.time()) - 3600
+    }
+
+    expired_token = jwt.encode(
+        expired_payload,
+        "test-secret",
+        algorithm = "HS256"
+    )
+
+    unauthenticated_client.environ_base["HTTP_AUTHORIZATION"] = f"Bearer {expired_token}"
+
+    for method, url, payload in protected_requests:
+        response = unauthenticated_client.open(
+            url,
+            method = method,
+            json = payload
+        )
+
+        data = response.get_json()
+
+        # Überprüfungen
+        assert response.status_code == 401
+        assert "error" in data
+        assert data["error"] == "Invalid or expired token."
