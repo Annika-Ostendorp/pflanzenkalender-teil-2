@@ -5,6 +5,17 @@ from repositories import PlantRepository, CareScheduleRepository, ActionLogRepos
 from models import Plant, CareSchedule, ActionLog, User
 
 
+def _read_json_records(file_path: str) -> list | None:
+    if not os.path.exists(file_path):
+        return None
+    try:
+        with open(file_path, encoding="utf-8") as f:
+            data = json.load(f)
+        return data if isinstance(data, list) else []
+    except json.JSONDecodeError:
+        return []
+
+
 class JsonPlantRepository(PlantRepository):
     def __init__(self, file_path: str):
         self._file_path = file_path
@@ -13,10 +24,9 @@ class JsonPlantRepository(PlantRepository):
         self._load()
 
     def _load(self):
-        if not os.path.exists(self._file_path):
+        data = _read_json_records(self._file_path)
+        if data is None:
             return
-        with open(self._file_path, encoding="utf-8") as f:
-            data = json.load(f)
         for d in data:
             plant = Plant(
                 name=d["name"],
@@ -217,7 +227,7 @@ class JsonUserRepository(UserRepository):
             (u for u in self._store.values() if u.username == username),
             None,
         )
-        
+
     def delete(self, user_id: int) -> None:
         self._store.pop(user_id, None)
         self._persist()
