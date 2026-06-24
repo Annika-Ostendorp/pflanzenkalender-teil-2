@@ -95,6 +95,7 @@ def _assert_user_loaded(repo):
     assert user.id == 1
 
 # ── Plant ──────────────────────────────────────────────────────────────────────
+
 def test_json_plant_starts_empty_when_file_missing(tmp_path):
     _test_starts_empty_without_file(
         tmp_path, JsonPlantRepository, "plants.json", _assert_plant_empty)
