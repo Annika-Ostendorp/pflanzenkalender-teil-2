@@ -81,10 +81,9 @@ class JsonCareScheduleRepository(CareScheduleRepository):
         self._load()
 
     def _load(self):
-        if not os.path.exists(self._file_path):
+        data = _read_json_records(self._file_path)
+        if data is None:
             return
-        with open(self._file_path, encoding="utf-8") as f:
-            data = json.load(f)
         for d in data:
             schedule = CareSchedule(
                 plant_id=d["plant_id"],
@@ -137,10 +136,9 @@ class JsonActionLogRepository(ActionLogRepository):
         self._load()
 
     def _load(self):
-        if not os.path.exists(self._file_path):
+        data = _read_json_records(self._file_path)
+        if data is None:
             return
-        with open(self._file_path, encoding="utf-8") as f:
-            data = json.load(f)
         for d in data:
             log = ActionLog(
                 plant_id=d["plant_id"],
@@ -187,10 +185,9 @@ class JsonUserRepository(UserRepository):
         self._load()
 
     def _load(self):
-        if not os.path.exists(self._file_path):
+        data = _read_json_records(self._file_path)
+        if data is None:
             return
-        with open(self._file_path, encoding="utf-8") as f:
-            data = json.load(f)
         for d in data:
             user = User(
                 username=d["username"],
