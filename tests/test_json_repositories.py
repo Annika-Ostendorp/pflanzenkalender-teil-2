@@ -6,7 +6,33 @@ from src.json_repositories import (
 )
 from src.models import Plant, CareSchedule, ActionLog, User
 
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
+def _repo_path(tmp_path, filename):
+    return tmp_path / filename
+
+
+def _test_starts_empty_without_file(tmp_path, repo_class, filename, assert_empty):
+    file_path = _repo_path(tmp_path, filename)
+    repo = repo_class(str(file_path))
+    assert_empty(repo)
+    assert not file_path.exists()
+
+
+def _test_save_creates_file(tmp_path, repo_class, filename, entity):
+    file_path = _repo_path(tmp_path, filename)
+    repo = repo_class(str(file_path))
+    repo.save(entity)
+    assert file_path.exists()
+
+
+def _test_data_survives_restart(tmp_path, repo_class, filename, entity, assert_loaded):
+    file_path = _repo_path(tmp_path, filename)
+    repo1 = repo_class(str(file_path))
+    repo1.save(entity)
+    repo2 = repo_class(str(file_path))
+    assert_loaded(repo2)
+    
 def test_json_plant_starts_empty_when_file_missing(tmp_path):
     file_path = tmp_path / "plants.json"
     repo = JsonPlantRepository(str(file_path))
