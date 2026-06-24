@@ -177,21 +177,18 @@ def test_json_log_data_survives_restart(tmp_path):
 
 
 def test_json_log_save_assigns_id(tmp_path):
-    file_path = tmp_path / "logs.json"
-    repo = JsonActionLogRepository(str(file_path))
-    log = ActionLog(plant_id=1, care_type="watering")
-    repo.save(log)
-    assert log.id == 1
+    _test_save_assigns_id(
+        tmp_path, JsonActionLogRepository, "logs.json",
+        ActionLog(plant_id=1, care_type="watering"))
 
 
 def test_json_log_delete_removes_log(tmp_path):
-    file_path = tmp_path / "logs.json"
-    repo = JsonActionLogRepository(str(file_path))
-    log = ActionLog(plant_id=1, care_type="watering")
-    repo.save(log)
-    repo.delete(log.id)
-    assert repo.get_by_id(log.id) is None
+    _test_delete_removes(
+        tmp_path, JsonActionLogRepository, "logs.json",
+        ActionLog(plant_id=1, care_type="watering"))
 
+
+# ── User ──────────────────────────────────────────────────────────────────────
 
 def test_json_user_starts_empty_when_file_missing(tmp_path):
     file_path = tmp_path / "users.json"
