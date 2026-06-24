@@ -208,20 +208,18 @@ def test_json_user_data_survives_restart(tmp_path):
 
 
 def test_json_user_save_assigns_id(tmp_path):
-    file_path = tmp_path / "users.json"
-    repo = JsonUserRepository(str(file_path))
-    user = User(username="alice", password_hash="hash123")
-    repo.save(user)
-    assert user.id == 1 
+    _test_save_assigns_id(
+        tmp_path, JsonUserRepository, "users.json",
+        User(username="alice", password_hash="hash123"))
+
 
 def test_json_user_delete_removes_user(tmp_path):
-    file_path = tmp_path / "users.json"
-    repo = JsonUserRepository(str(file_path))
-    user = User(username="alice", password_hash="hash123")
-    repo.save(user)
-    repo.delete(user.id)
-    assert repo.get_by_id(user.id) is None
+    _test_delete_removes(
+        tmp_path, JsonUserRepository, "users.json",
+        User(username="alice", password_hash="hash123"))
 
+
+# ── Special cases ─────────────────────────────────────────────────────────────
 
 def test_json_plant_save_creates_data_subdirectory(tmp_path):
     file_path = tmp_path / "data" / "plants.json"
