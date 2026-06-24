@@ -107,22 +107,16 @@ def test_json_plant_save_creates_file(tmp_path):
 
 
 def test_json_plant_data_survives_restart(tmp_path):
-    file_path = tmp_path / "plants.json"
-    repo1 = JsonPlantRepository(str(file_path))
-    repo1.save(Plant(name="Monstera", species="Araceae", location="Wohnzimmer"))
-    repo2 = JsonPlantRepository(str(file_path))
-    plants = repo2.find_all()
-    assert len(plants) == 1
-    assert plants[0].name == "Monstera"
-    assert plants[0].id == 1
+    _test_data_survives_restart(
+        tmp_path, JsonPlantRepository, "plants.json",
+        Plant(name="Monstera", species="Araceae", location="Wohnzimmer"),
+        _assert_plant_loaded)
 
 
 def test_json_plant_save_assigns_id(tmp_path):
-    file_path = tmp_path / "plants.json"
-    repo = JsonPlantRepository(str(file_path))
-    plant = Plant(name="A", species="B", location="C")
-    repo.save(plant)
-    assert plant.id == 1
+    _test_save_assigns_id(
+        tmp_path, JsonPlantRepository, "plants.json",
+        Plant(name="A", species="B", location="C"))
 
 
 def test_json_plant_delete_removes_plant(tmp_path):
