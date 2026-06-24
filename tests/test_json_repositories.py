@@ -139,28 +139,22 @@ def test_json_schedule_save_creates_file(tmp_path):
 
 
 def test_json_schedule_data_survives_restart(tmp_path):
-    file_path = tmp_path / "schedules.json"
-    repo1 = JsonCareScheduleRepository(str(file_path))
-    repo1.save(CareSchedule(plant_id=1, care_type="watering", interval_days=7))
-    repo2 = JsonCareScheduleRepository(str(file_path))
-    assert len(repo2.find_by_plant(1)) == 1
+    _test_data_survives_restart(
+        tmp_path, JsonCareScheduleRepository, "schedules.json",
+        CareSchedule(plant_id=1, care_type="watering", interval_days=7),
+        _assert_schedule_loaded)
 
 
 def test_json_schedule_save_assigns_id(tmp_path):
-    file_path = tmp_path / "schedules.json"
-    repo = JsonCareScheduleRepository(str(file_path))
-    s = CareSchedule(plant_id=1, care_type="watering", interval_days=7)
-    repo.save(s)
-    assert s.id == 1
+    _test_save_assigns_id(
+        tmp_path, JsonCareScheduleRepository, "schedules.json",
+        CareSchedule(plant_id=1, care_type="watering", interval_days=7))
 
 
 def test_json_schedule_delete_removes_schedule(tmp_path):
-    file_path = tmp_path / "schedules.json"
-    repo = JsonCareScheduleRepository(str(file_path))
-    s = CareSchedule(plant_id=1, care_type="watering", interval_days=7)
-    repo.save(s)
-    repo.delete(s.id)
-    assert repo.get_by_id(s.id) is None
+    _test_delete_removes(
+        tmp_path, JsonCareScheduleRepository, "schedules.json",
+        CareSchedule(plant_id=1, care_type="watering", interval_days=7))
 
 
 def test_json_log_starts_empty_when_file_missing(tmp_path):
