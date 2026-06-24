@@ -11,7 +11,7 @@ database "PlantRepository" as Repo
 User -> App : GET /api/plants/<id>
 activate App
 
-alt Authorization Header fehlt
+alt#red Authorization Header fehlt
     'Geschützter Endpoint wird diesmal ohne JWT aufgerufen'
     App --[#red]> User : 401 Unauthorized\n{"error": "Authentication required."}
 
@@ -23,7 +23,7 @@ else Authorization Header vorhanden
     App -> Service : verify_token(token)
     activate Service
 
-    alt Token ungültig, malformed oder expired
+    alt#red Token ungültig, malformed oder expired
         'Token ist nicht oder nicht mehr gültig -> kann also auch nicht zurückgegeben werden'
         Service -> App : None
 
@@ -45,6 +45,26 @@ else Authorization Header vorhanden
         Repo --> App : plant oder None
         deactivate Repo
 
-        alt Pflanze existiert nicht
+        alt#red Pflanze existiert nicht
             'Keine Pflanze mit dieser ID gefunden'
             App --[#red]> User : 404 Not Found\n{"error": "Plant not found."}  
+
+        else Pflanze gehört anderem User
+            'Datenschutz-Prüfung schlägt fehl'
+            App -> App : plant.user_id != user_id
+
+            'Gleiche Antwort wie bei nicht vorhandener Pflanze -> Vermeidung von ID Enumeration'
+            App --[#red]> User : 404 Not Found\n{"error": "Plant not found."}
+            deactivate App
+        end
+    end
+end
+
+note over App
+    **Ausnahmebedingung:**
+    Sollte während der Verarbeitung der Daten ein unerwarteter Server-Fehler auftreten,
+    dann antwortet das System mit:
+    500 Internal Server Error\n{"error": "An unexpected error occurred. Please try again later."}
+endnote
+
+@enduml
