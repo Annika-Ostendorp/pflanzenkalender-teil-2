@@ -25,3 +25,20 @@ App -> Repo : find_by_id(plant_id)
 activate Repo
 Repo --> App : plant
 deactivate Repo
+
+|||
+
+'zum Datenschutz -> stimmen user_id aus JWT & user_id der Pflanze überein? -> nur dann darf Pflanze zurückgegeben werden'
+App -> App : plant.user_id == user_id
+
+note right of App
+    Die Pflanze darf nur zurückgegeben werden, wenn deren ID mit 
+    der User-ID übereinstimmt aus dem JWT. Dabei wird die user_id 
+    aber nicht aus dem Request-Body sondern aus dem JWT gelesen.
+endnote
+
+'am Ende erfolgreich die geforderten Pflanzen-Daten zurückgeben'
+App --[#green]> User : 200 OK\nplant data
+deactivate App
+
+@enduml
