@@ -24,9 +24,23 @@ else Authorization Header vorhanden
     activate Service
 
     alt Token ungültig, malformed oder expired
-    'Token ist nicht oder nicht mehr gültig -> kann also auch nicht zurückgegeben werden'
-    Service -> App : None
+        'Token ist nicht oder nicht mehr gültig -> kann also auch nicht zurückgegeben werden'
+        Service -> App : None
+
+        'Zugriff wird deshalb verweigert'
+        App --[#red]> User : 401 Unauthorized\n{"error": "Invalid or expired token."}
+
+    else Token gültig
+    'Benutzer-ID wird wieder aus gültigem JWt gelesen'
+    Service --> App : Payload mit sub = user_id
     deactivate Service
 
-    'Zugriff wird deshalb verweigert'
-    App --[#red]> User : 401 Unauthorized\n{"error": "Invalid or expired token."}
+    |||
+
+    'Pflanze anhand übergebener plant_id suchen'
+    App -> Repo : find_by_id(plant_id)
+    activate Repo
+
+    'Repository gibt entweder Pflanze oder None zurück'
+    Repo --> App : plant oder None
+    deactivate Repo
