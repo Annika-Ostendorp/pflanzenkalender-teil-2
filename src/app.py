@@ -397,15 +397,15 @@ class PlantAppManager:
             
 
 if __name__ == '__main__':  # pragma: no cover
-    from in_memory_repositories import (
-    InMemoryPlantRepository, InMemoryCareScheduleRepository,
-    InMemoryActionLogRepository, InMemoryUserRepository,
-)
+    from json_repositories import (
+        JsonPlantRepository, JsonCareScheduleRepository,
+        JsonActionLogRepository, JsonUserRepository,
+    )
     manager = PlantAppManager(
-    plant_repo=InMemoryPlantRepository(),
-    schedule_repo=InMemoryCareScheduleRepository(),
-    log_repo=InMemoryActionLogRepository(),
-    user_repo=InMemoryUserRepository(),
-)
+        JsonPlantRepository('data/plants.json'),
+        JsonCareScheduleRepository('data/schedules.json'),
+        JsonActionLogRepository('data/logs.json'),
+        JsonUserRepository('data/users.json'),
+    )
     app = manager.app
     app.run(debug=True, host='127.0.0.1', port=5000)

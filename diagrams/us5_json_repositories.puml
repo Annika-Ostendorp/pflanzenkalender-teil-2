@@ -1,0 +1,214 @@
+@startuml json-repositories
+skinparam classAttributeIconSize 0
+skinparam classFontSize 11
+skinparam nodesep 30
+skinparam ranksep 25
+top to bottom direction
+
+
+class PlantAppManager {
+  +plant_repo: PlantRepository
+  +schedule_repo: CareScheduleRepository
+  +log_repo: ActionLogRepository
+  +user_repo: UserRepository
+}
+
+
+abstract class PlantRepository {
+  {abstract} +save(plant: Plant): None
+  {abstract} +get_by_id(plant_id: int): Plant | None
+  {abstract} +find_by_user(user_id: int): List[Plant]
+  {abstract} +delete(plant_id: int): None
+}
+
+
+abstract class CareScheduleRepository {
+  {abstract} +save(schedule: CareSchedule): None
+  {abstract} +get_by_id(schedule_id: int): CareSchedule | None
+  {abstract} +find_by_plant(plant_id: int): List[CareSchedule]
+  {abstract} +find_by_plant_and_care_type(plant_id: int, care_type: str): CareSchedule | None
+  {abstract} +delete(schedule_id: int): None
+}
+
+
+abstract class ActionLogRepository {
+  {abstract} +save(log: ActionLog): None
+  {abstract} +get_by_id(log_id: int): ActionLog | None
+  {abstract} +find_by_plant(plant_id: int): List[ActionLog]
+  {abstract} +delete(log_id: int): None
+}
+
+
+abstract class UserRepository {
+  {abstract} +save(user: User): None
+  {abstract} +get_by_id(user_id: int): User | None
+  {abstract} +find_by_username(username: str): User | None
+  {abstract} +delete(user_id: int): None
+}
+
+
+class JsonPlantRepository {
+  +__init__(file_path: str)
+  -_file_path: str
+  -_store: dict
+  -_load(): None
+  -_persist(): None
+}
+
+
+class JsonCareScheduleRepository {
+  +__init__(file_path: str)
+  -_file_path: str
+  -_store: dict
+  -_load(): None
+  -_persist(): None
+}
+
+
+class JsonActionLogRepository {
+  +__init__(file_path: str)
+  -_file_path: str
+  -_store: dict
+  -_load(): None
+  -_persist(): None
+}
+
+
+class JsonUserRepository {
+  +__init__(file_path: str)
+  -_file_path: str
+  -_store: dict
+  -_load(): None
+  -_persist(): None
+}
+
+
+package "data" #LightGreen {
+  class "plants.json" as plants_json <<JSON-Datei>>
+  class "schedules.json" as schedules_json <<JSON-Datei>>
+  class "logs.json" as logs_json <<JSON-Datei>>
+  class "users.json" as users_json <<JSON-Datei>>
+}
+
+
+class Plant {
+  +id: int | None
+  +user_id: int | None
+  +name: str
+  +species: str
+  +location: str
+  +created_at: str
+}
+
+
+class CareSchedule {
+  +id: int | None
+  +plant_id: int
+  +care_type: str
+  +interval_days: int
+}
+
+
+class ActionLog {
+  +id: int | None
+  +plant_id: int
+  +care_type: str
+  +performed_at: str
+  +notes: str
+}
+
+
+class User {
+  +id: int | None
+  +username: str
+  +password_hash: str
+}
+
+
+' ── Dependency Inversion: Manager → abstract interfaces ──
+PlantAppManager --> PlantRepository
+PlantAppManager --> CareScheduleRepository
+PlantAppManager --> ActionLogRepository
+PlantAppManager --> UserRepository
+
+
+' ── Json implementations (US#5) ────────────────────────
+PlantRepository <|.. JsonPlantRepository
+CareScheduleRepository <|.. JsonCareScheduleRepository
+ActionLogRepository <|.. JsonActionLogRepository
+UserRepository <|.. JsonUserRepository
+
+
+' ── JSON persistence ─────────────────────────────────────
+JsonPlantRepository ..> plants_json : liest/schreibt
+JsonCareScheduleRepository ..> schedules_json : liest/schreibt
+JsonActionLogRepository ..> logs_json : liest/schreibt
+JsonUserRepository ..> users_json : liest/schreibt
+
+
+' ── Repository returns domain models ─────────────────────
+PlantRepository ..> Plant : returns
+CareScheduleRepository ..> CareSchedule : returns
+ActionLogRepository ..> ActionLog : returns
+UserRepository ..> User : returns
+
+
+' ── Column layout (left → right) ─────────────────────────
+PlantRepository -[hidden]right- CareScheduleRepository
+CareScheduleRepository -[hidden]right- ActionLogRepository
+ActionLogRepository -[hidden]right- UserRepository
+
+JsonPlantRepository -[hidden]right- JsonCareScheduleRepository
+JsonCareScheduleRepository -[hidden]right- JsonActionLogRepository
+JsonActionLogRepository -[hidden]right- JsonUserRepository
+
+plants_json -[hidden]right- schedules_json
+schedules_json -[hidden]right- logs_json
+logs_json -[hidden]right- users_json
+
+Plant -[hidden]right- CareSchedule
+CareSchedule -[hidden]right- ActionLog
+ActionLog -[hidden]right- User
+
+PlantRepository -[hidden]down- JsonPlantRepository
+JsonPlantRepository -[hidden]down- plants_json
+plants_json -[hidden]down- Plant
+
+CareScheduleRepository -[hidden]down- JsonCareScheduleRepository
+JsonCareScheduleRepository -[hidden]down- schedules_json
+schedules_json -[hidden]down- CareSchedule
+
+ActionLogRepository -[hidden]down- JsonActionLogRepository
+JsonActionLogRepository -[hidden]down- logs_json
+logs_json -[hidden]down- ActionLog
+
+UserRepository -[hidden]down- JsonUserRepository
+JsonUserRepository -[hidden]down- users_json
+users_json -[hidden]down- User
+
+
+note as N1
+Für User Story #5 habe ich ein Klassendiagramm gewählt,
+weil durch die neuen Json-Repositories vor allem die Struktur
+des Projekts erweitert wird.
+
+Das Diagramm zeigt, wie die vier Json-Repository-Klassen
+die bestehenden Repository-Interfaces implementieren und
+mit dem PlantAppManager, den Modellen und den JSON-Dateien
+zusammenhängen.
+
+Dabei gehe ich davon aus, dass PlantAppManager weiterhin
+nur von den Interfaces abhängt. So können in der Anwendung
+Json-Repositories und in den Tests weiterhin
+InMemory-Repositories verwendet werden.
+
+Die Daten werden beim Start geladen und nach save() oder
+delete() direkt gespeichert. Eine fehlende Datei wird beim
+ersten Schreibvorgang erstellt. 
+
+Die öffentlichen Methoden (save, get_by_id, find_by_user, delete)
+werden aus dem jeweiligen Repository-Interface übernommen und
+in den Json-Klassen nicht erneut aufgeführt.
+end note
+
+@enduml
