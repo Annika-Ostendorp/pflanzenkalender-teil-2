@@ -15,3 +15,18 @@ protected_requests = [
     ("GET", "/api/plants/1/next-actions", None),
     ("GET", "api/overdue", None),
  ]
+
+def test_protected_endpoints_missing_token(unauthenticated_client):
+    for method, url, payload in protected_requests:
+        response = unauthenticated_client.open(
+            url,
+            method = method,
+            json = payload
+        )
+
+        data = response.get_json()
+
+        # Überprüfungen
+        assert response.status_code == 401
+        assert "error" in data
+        assert data["error"] == "Authentication required."
