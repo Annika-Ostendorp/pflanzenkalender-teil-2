@@ -157,26 +157,23 @@ def test_json_schedule_delete_removes_schedule(tmp_path):
         CareSchedule(plant_id=1, care_type="watering", interval_days=7))
 
 
+# ── Log ───────────────────────────────────────────────────────────────────────
+
 def test_json_log_starts_empty_when_file_missing(tmp_path):
-    file_path = tmp_path / "logs.json"
-    repo = JsonActionLogRepository(str(file_path))
-    assert repo.find_by_plant(1) == []
-    assert not file_path.exists()
+    _test_starts_empty_without_file(
+        tmp_path, JsonActionLogRepository, "logs.json", _assert_list_repo_empty)
 
 
 def test_json_log_save_creates_file(tmp_path):
-    file_path = tmp_path / "logs.json"
-    repo = JsonActionLogRepository(str(file_path))
-    repo.save(ActionLog(plant_id=1, care_type="watering"))
-    assert file_path.exists()
+    _test_save_creates_file(
+        tmp_path, JsonActionLogRepository, "logs.json",
+        ActionLog(plant_id=1, care_type="watering"))
 
 
 def test_json_log_data_survives_restart(tmp_path):
-    file_path = tmp_path / "logs.json"
-    repo1 = JsonActionLogRepository(str(file_path))
-    repo1.save(ActionLog(plant_id=1, care_type="watering"))
-    repo2 = JsonActionLogRepository(str(file_path))
-    assert len(repo2.find_by_plant(1)) == 1
+    _test_data_survives_restart(
+        tmp_path, JsonActionLogRepository, "logs.json",
+        ActionLog(plant_id=1, care_type="watering"), _assert_log_loaded)
 
 
 def test_json_log_save_assigns_id(tmp_path):
