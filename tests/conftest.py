@@ -8,20 +8,6 @@ from src.in_memory_repositories import (
 )
 
 
-
-@pytest.fixture
-def client():
-    manager = PlantAppManager(
-        plant_repo=InMemoryPlantRepository(),
-        schedule_repo=InMemoryCareScheduleRepository(),
-        log_repo=InMemoryActionLogRepository(),
-        user_repo=InMemoryUserRepository(),
-    )
-    manager.app.config['TESTING'] = True
-    with manager.app.test_client() as c:
-        yield c
-
-
 @pytest.fixture
 def plant(client):
     """Create a plant with a known created_at for deterministic date tests."""
