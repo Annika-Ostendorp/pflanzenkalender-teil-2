@@ -14,3 +14,19 @@ activate App
 alt Authorization Header fehlt
     'Geschützter Endpoint wird diesmal ohne JWT aufgerufen'
     App --[#red]> User : 401 Unauthorized\n{"error": "Authentication required."}
+
+else Authorization Header vorhanden
+    'Endpoint wird mit JWT aufgerufen'
+    User -> App : Authorization : Bearer <token>
+
+    'JWT auf Gültigkeit prüfen'
+    App -> Service : verify_token(token)
+    activate Service
+
+    alt Token ungültig, malformed oder expired
+    'Token ist nicht oder nicht mehr gültig -> kann also auch nicht zurückgegeben werden'
+    Service -> App : None
+    deactivate Service
+
+    'Zugriff wird deshalb verweigert'
+    App --[#red]> User : 401 Unauthorized\n{"error": "Invalid or expired token."}
