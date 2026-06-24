@@ -1,3 +1,5 @@
+import pytest
+
 from src.json_repositories import (
     JsonPlantRepository, JsonCareScheduleRepository,
     JsonActionLogRepository, JsonUserRepository,
@@ -172,3 +174,17 @@ def test_json_plant_save_creates_data_subdirectory(tmp_path):
     repo.save(Plant(name="Monstera", species="Araceae", location="Wohnzimmer"))
     assert (tmp_path / "data").is_dir()
     assert file_path.exists()
+
+
+@pytest.mark.parametrize("repo_class,empty_query", [
+    (JsonPlantRepository, lambda repo: repo.find_all()),
+    (JsonCareScheduleRepository, lambda repo: repo.find_by_plant(1)),
+    (JsonActionLogRepository, lambda repo: repo.find_by_plant(1)),
+    (JsonUserRepository, lambda repo: repo.find_by_username("alice")),
+])
+def test_json_repo_starts_empty_when_json_invalid(tmp_path, repo_class, empty_query):
+    file_path = tmp_path / "data.json"
+    file_path.write_text("{ invalid json", encoding="utf-8")
+    repo = repo_class(str(file_path))
+    result = empty_query(repo)
+    assert result == [] or result is None
