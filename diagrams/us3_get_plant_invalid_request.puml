@@ -1,0 +1,16 @@
+@startuml get_plant_invalid_request
+skinparam actorStyle awesome
+
+actor "User (Website)" as User
+participant "Plant App" as App
+participant "AuthenticationService" as Service
+database "PlantRepository" as Repo
+
+|||
+
+User -> App : GET /api/plants/<id>
+activate App
+
+alt Authorization Header fehlt
+    'Geschützter Endpoint wird diesmal ohne JWT aufgerufen'
+    App --[#red]> User : 401 Unauthorized\n{"error": "Authentication required."}
