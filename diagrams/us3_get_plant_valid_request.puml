@@ -9,3 +9,19 @@ database "PlantRepository" as Repo
 'geschützter Endpunkt wird mit gültigem JWT aufgerufen'
 User -> App : GET /api/plants/<id>\nAuthorization: Bearer <token>
 activate App
+
+'JWT auf Gültigkeit prüfen'
+App -> Service : verify_token(token)
+activate Service
+
+'gültiges JWT -> eindeutige Nutzer-ID (sub) wird zurückgegeben (siehe KI-Issue #23)'
+Service --> App : Payload mit sub = user_id 
+deactivate Service
+
+|||
+
+'Pflanze anhand ID suchen & gefundene Pflanze dann zurückgeben'
+App -> Repo : find_by_id(plant_id)
+activate Repo
+Repo --> App : plant
+deactivate Repo
