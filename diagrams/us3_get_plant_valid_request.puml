@@ -6,6 +6,8 @@ participant "Plant App" as App
 participant "AuthenticationService" as Service
 database "PlantRepository" as Repo
 
+|||
+
 'geschützter Endpunkt wird mit gültigem JWT aufgerufen'
 User -> App : GET /api/plants/<id>\nAuthorization: Bearer <token>
 activate App
