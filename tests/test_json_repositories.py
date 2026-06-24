@@ -32,7 +32,30 @@ def _test_data_survives_restart(tmp_path, repo_class, filename, entity, assert_l
     repo1.save(entity)
     repo2 = repo_class(str(file_path))
     assert_loaded(repo2)
-    
+
+
+def _test_save_assigns_id(tmp_path, repo_class, filename, entity):
+    file_path = _repo_path(tmp_path, filename)
+    repo = repo_class(str(file_path))
+    repo.save(entity)
+    assert entity.id == 1
+
+
+def _test_delete_removes(tmp_path, repo_class, filename, entity, assert_gone=None):
+    file_path = _repo_path(tmp_path, filename)
+    repo = repo_class(str(file_path))
+    repo.save(entity)
+    repo.delete(entity.id)
+    assert repo.get_by_id(entity.id) is None
+    if assert_gone:
+        assert_gone(repo)
+
+
+def _assert_plant_empty(repo):
+    assert repo.find_all() == []
+
+
+# ── Schedule ──────────────────────────────────────────────────────────────────
 def test_json_plant_starts_empty_when_file_missing(tmp_path):
     file_path = tmp_path / "plants.json"
     repo = JsonPlantRepository(str(file_path))
