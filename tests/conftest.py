@@ -65,3 +65,17 @@ def register_user(client):
             }
         )
     return _register_user
+
+
+@pytest.fixture
+def unauthenticated_client():
+    manager = PlantAppManager(
+        plant_repo = InMemoryPlantRepository(),
+        schedule_repo = InMemoryCareScheduleRepository(),
+        log_repo = InMemoryActionLogRepository(),
+        user_repo = InMemoryUserRepository(),
+    )
+
+    manager.app.config['TESTING'] = True
+    with manager.app.test_client() as c:
+        yield c
