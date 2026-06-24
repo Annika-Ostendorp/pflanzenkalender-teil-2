@@ -78,7 +78,23 @@ def _assert_schedule_loaded(repo):
     assert schedules[0].interval_days == 7
     assert schedules[0].id == 1
 
-# ── Schedule ──────────────────────────────────────────────────────────────────
+
+def _assert_log_loaded(repo):
+    logs = repo.find_by_plant(1)
+    assert len(logs) == 1
+    assert logs[0].care_type == "watering"
+    assert logs[0].plant_id == 1
+    assert logs[0].id == 1
+
+
+def _assert_user_loaded(repo):
+    user = repo.find_by_username("alice")
+    assert user is not None
+    assert user.username == "alice"
+    assert user.password_hash == "hash123"
+    assert user.id == 1
+
+# ── Plant ──────────────────────────────────────────────────────────────────────
 def test_json_plant_starts_empty_when_file_missing(tmp_path):
     file_path = tmp_path / "plants.json"
     repo = JsonPlantRepository(str(file_path))
