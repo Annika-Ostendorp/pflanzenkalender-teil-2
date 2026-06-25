@@ -1,5 +1,6 @@
 import jwt
 import time
+from src.auth_service import SECRET_KEY
 
 protected_requests = [
     ("GET", "/api/plants", None),
@@ -59,7 +60,7 @@ def test_protected_endpoints_expired_token(unauthenticated_client):
 
     expired_token = jwt.encode(
         expired_payload,
-        "test-secret",
+        SECRET_KEY,
         algorithm = "HS256"
     )
 
