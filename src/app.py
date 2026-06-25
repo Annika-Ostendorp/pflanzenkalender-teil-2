@@ -76,11 +76,20 @@ class PlantAppManager:
         self.user_repo = user_repo
         self.app.register_error_handler(HTTPException, self._handle_http_exception)
         self._register_routes()
+        self.app.register_error_handler(Exception, self._handle_unexpected_exception)
 
     def _handle_http_exception(self, e):
         if request.path.startswith('/api/'):
             return jsonify({'error': e.description}), e.code
         return e
+    
+    def _handle_unexpected_exception(self, e):
+        if request.path.startswith("/api/"):
+            return jsonify({
+                "error": "An unexpected error occurred. Please try again later."
+            }), 500
+        
+        raise e
 
     def _next_due_date(self, plant, schedule, plant_logs):
         relevant = [l for l in plant_logs if l.care_type == schedule.care_type]
