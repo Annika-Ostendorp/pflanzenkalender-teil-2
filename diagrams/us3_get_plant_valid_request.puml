@@ -1,0 +1,46 @@
+@startuml get_plant_valid_request
+skinparam actorStyle awesome
+
+actor "User (Website)" as User
+participant "Plant App" as App
+participant "AuthenticationService" as Service
+database "PlantRepository" as Repo
+
+|||
+
+'geschützter Endpunkt wird mit gültigem JWT aufgerufen'
+User -> App : GET /api/plants/<id>\nAuthorization: Bearer <token>
+activate App
+
+'JWT auf Gültigkeit prüfen'
+App -> Service : verify_token(token)
+activate Service
+
+'gültiges JWT -> eindeutige Nutzer-ID (sub) wird zurückgegeben (siehe KI-Issue #23)'
+Service --> App : Payload mit sub = user_id 
+deactivate Service
+
+|||
+
+'Pflanze anhand ID suchen & gefundene Pflanze dann zurückgeben'
+App -> Repo : get_by_id(plant_id)
+activate Repo
+Repo --> App : plant
+deactivate Repo
+
+|||
+
+'zum Datenschutz -> stimmen user_id aus JWT & user_id der Pflanze überein? -> nur dann darf Pflanze zurückgegeben werden'
+App -> App : plant.user_id == user_id
+
+note right of App
+    Die Pflanze darf nur zurückgegeben werden, wenn deren ID mit 
+    der User-ID übereinstimmt aus dem JWT. Dabei wird die user_id 
+    aber nicht aus dem Request-Body sondern aus dem JWT gelesen.
+endnote
+
+'am Ende erfolgreich die geforderten Pflanzen-Daten zurückgeben'
+App --[#green]> User : 200 OK\nplant data
+deactivate App
+
+@enduml
