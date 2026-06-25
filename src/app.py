@@ -219,9 +219,15 @@ class PlantAppManager:
             if error_response is not None:
                 return error_response, status_code
             
-            plant = self.plant_repo.get_by_id(plant_id)
-            if not plant:
-                return jsonify({'error': 'Plant not found.'}), 404
+            plant, error_response, status_code = self._get_owned_plant_or_error(
+                plant_id,
+                user_id
+            )
+
+            if error_response is not None:
+                return error_response, status_code
+            
+
             data = request.get_json()
             if data is None:
                 return jsonify({'error': 'Invalid or missing JSON body'}), 400
