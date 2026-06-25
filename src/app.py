@@ -324,6 +324,14 @@ class PlantAppManager:
             if error_response is not None:
                 return error_response, status_code
             
+            plant, error_response, status_code = self._get_owned_plant_or_error(
+                plant_id,
+                user_id
+            )
+
+            if error_response is not None:
+                return error_response, status_code
+            
             sched = self.schedule_repo.find_by_plant_and_care_type(plant_id, care_type)
 
             if not sched:
@@ -338,8 +346,14 @@ class PlantAppManager:
             if error_response is not None:
                 return error_response, status_code
             
-            if not self.plant_repo.get_by_id(plant_id):
-                return jsonify({'error': 'Plant not found.'}), 404
+            plant, error_response, status_code = self._get_owned_plant_or_error(
+                plant_id,
+                user_id
+            )
+
+            if error_response is not None:
+                return error_response, status_code
+            
             result = sorted(
                 [l.to_dict() for l in self.log_repo.find_by_plant(plant_id)],
                 key=lambda l: l['performed_at'],
