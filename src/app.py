@@ -159,8 +159,6 @@ class PlantAppManager:
                 return error_response, status_code
             
             result = []
-
-            result = []
             for plant in self.plant_repo.find_by_user(int(user_id)):
                 d = plant.to_dict()
                 d['status'] = self._plant_status(plant.id)
