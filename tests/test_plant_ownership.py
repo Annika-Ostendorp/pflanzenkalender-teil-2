@@ -1,3 +1,6 @@
+import pytest
+
+# Liste mit allen Endpunkten, die auf konkrete Pflanze zugreifen --> alle Endpunkte mit <id>
 foreign_plant_requests = [
 
     ("GET", "/api/plants/{plant_id}", None),
@@ -27,3 +30,27 @@ def test_post_plants_rejects_manual_user_id(client): # Request-Body darf keine m
     assert response.status_code == 400
     assert "error" in data
     assert data["error"] == "Field 'user_id' must not be set manually." 
+
+
+def test_foreign_plant_access_returns_404(client, second_client, method, url_template, payload):
+    plant_response = client.post("/api/plants", json = {
+        "name": "Monstera",
+        "species": "Deliciosa",
+        "location": "Wohnzimmer"
+    })
+
+    plant_id = plant_response.get_json()["id"]
+    url = url_template.format(plant_id = plant_id) # aus URL-Template echte URL bauen --> aus "/api/plants/{plant_id}" wird dann "/api/plants/1"
+
+    response = second_client.open( # second_client ist anderer eingeloggter Nutzer -> versucht auf Pflanze von User 1 zuzugreifen
+        url,
+        method = method,
+        json = payload
+    )
+
+    data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 404
+    assert "error" in data
+    assert data["error"] == "Plant not found." # User bekommt aber dieselbe Antwort wie bei Pflanze, die gar nicht existiert
