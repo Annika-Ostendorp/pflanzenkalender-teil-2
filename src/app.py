@@ -239,6 +239,11 @@ class PlantAppManager:
 
         @self.app.route('/api/plants/<int:plant_id>/schedules', methods=['POST'])
         def create_or_update_schedule(plant_id):
+            user_id, error_response, status_code = self._authenticate_request()
+
+            if error_response is not None:
+                return error_response, status_code
+            
             if not self.plant_repo.get_by_id(plant_id):
                 return jsonify({'error': 'Plant not found'}), 404
             data = request.get_json()
@@ -264,6 +269,11 @@ class PlantAppManager:
 
         @self.app.route('/api/plants/<int:plant_id>/schedules/<care_type>', methods=['DELETE'])
         def delete_schedule(plant_id, care_type):
+            user_id, error_response, status_code = self._authenticate_request()
+
+            if error_response is not None:
+                return error_response, status_code
+            
             sched = self.schedule_repo.find_by_plant_and_care_type(plant_id, care_type)
 
             if not sched:
@@ -273,6 +283,11 @@ class PlantAppManager:
 
         @self.app.route('/api/plants/<int:plant_id>/logs', methods=['GET'])
         def get_logs(plant_id):
+            user_id, error_response, status_code = self._authenticate_request()
+
+            if error_response is not None:
+                return error_response, status_code
+            
             if not self.plant_repo.get_by_id(plant_id):
                 return jsonify({'error': 'Plant not found'}), 404
             result = sorted(
@@ -284,6 +299,11 @@ class PlantAppManager:
 
         @self.app.route('/api/plants/<int:plant_id>/logs', methods=['POST'])
         def create_log(plant_id):
+            user_id, error_response, status_code = self._authenticate_request()
+
+            if error_response is not None:
+                return error_response, status_code
+            
             if not self.plant_repo.get_by_id(plant_id):
                 return jsonify({'error': 'Plant not found'}), 404
             data = request.get_json()
@@ -302,6 +322,11 @@ class PlantAppManager:
 
         @self.app.route('/api/plants/<int:plant_id>/next-actions', methods=['GET'])
         def get_next_actions(plant_id):
+            user_id, error_response, status_code = self._authenticate_request()
+
+            if error_response is not None:
+                return error_response, status_code
+            
             plant = self.plant_repo.get_by_id(plant_id)
             if not plant:
                 return jsonify({'error': 'Plant not found'}), 404
@@ -324,6 +349,11 @@ class PlantAppManager:
 
         @self.app.route('/api/overdue', methods=['GET'])
         def get_overdue():
+            user_id, error_response, status_code = self._authenticate_request()
+
+            if error_response is not None:
+                return error_response, status_code
+            
             today = date.today()
             result = []
             
