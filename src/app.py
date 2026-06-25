@@ -249,8 +249,14 @@ class PlantAppManager:
             if error_response is not None:
                 return error_response, status_code
             
-            if not self.plant_repo.get_by_id(plant_id):
-                return jsonify({'error': '.'}), 404
+            plant, error_response, status_code = self._get_owned_plant_or_error(
+                plant_id,
+                user_id
+            )
+
+            if error_response is not None:
+                return error_response, status_code
+            
             for schedule in self.schedule_repo.find_by_plant(plant_id):
                 self.schedule_repo.delete(schedule.id)
             for log in self.log_repo.find_by_plant(plant_id):
