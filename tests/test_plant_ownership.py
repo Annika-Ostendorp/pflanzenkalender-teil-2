@@ -95,3 +95,20 @@ def test_get_plants_unexpected_server_error(client):
     assert response.status_code == 500
     assert "error" in data
     assert data["error"] == "An unexpected error occurred. Please try again later."
+
+
+@pytest.mark.parametrize(
+    "payload, missing_field",
+    [({"species": "Monstera deliciosa", "location": "Wohnzimmer"}, "name"),
+     ({"name": "Monstera", "location": "Wohnzimmer"}, "species"),
+     ({"name": "Monstera","species": "Monstera deliciosa"}, "location"),]
+)
+
+def test_create_plant_missing_required_fields(client, payload, missing_field):
+    response = client.post("/api/plants", json = payload)
+    data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 400
+    assert "error" in data
+    assert data["error"] == f"Field '{missing_field}' is required."
