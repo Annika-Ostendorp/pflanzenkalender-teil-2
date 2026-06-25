@@ -52,8 +52,7 @@ def _test_delete_removes(tmp_path, repo_class, filename, entity, assert_gone=Non
 
 
 def _assert_plant_empty(repo):
-    assert repo.find_all() == []
-
+    assert repo.find_by_user(1) == []
 
 def _assert_list_repo_empty(repo):
     assert repo.find_by_plant(1) == []
@@ -64,10 +63,10 @@ def _assert_user_empty(repo):
 
 
 def _assert_plant_loaded(repo):
-    plants = repo.find_all()
-    assert len(plants) == 1
-    assert plants[0].name == "Monstera"
-    assert plants[0].id == 1
+    plant = repo.get_by_id(1)
+    assert plant is not None
+    assert plant.name == "Monstera"
+    assert plant.id == 1
 
 
 def _assert_schedule_loaded(repo):
@@ -231,7 +230,7 @@ def test_json_plant_save_creates_data_subdirectory(tmp_path):
 
 
 @pytest.mark.parametrize("repo_class,empty_query", [
-    (JsonPlantRepository, lambda repo: repo.find_all()),
+    (JsonPlantRepository, lambda repo: repo.find_by_user(1)),
     (JsonCareScheduleRepository, lambda repo: repo.find_by_plant(1)),
     (JsonActionLogRepository, lambda repo: repo.find_by_plant(1)),
     (JsonUserRepository, lambda repo: repo.find_by_username("alice")),
@@ -245,7 +244,7 @@ def test_json_repo_starts_empty_when_json_invalid(tmp_path, repo_class, empty_qu
 
 
 @pytest.mark.parametrize("repo_class,empty_query", [
-    (JsonPlantRepository, lambda repo: repo.find_all()),
+    (JsonPlantRepository, lambda repo: repo.find_by_user(1)),
     (JsonCareScheduleRepository, lambda repo: repo.find_by_plant(1)),
     (JsonActionLogRepository, lambda repo: repo.find_by_plant(1)),
     (JsonUserRepository, lambda repo: repo.find_by_username("alice")),
