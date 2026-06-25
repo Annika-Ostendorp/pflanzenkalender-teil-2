@@ -271,8 +271,14 @@ class PlantAppManager:
             if error_response is not None:
                 return error_response, status_code
             
-            if not self.plant_repo.get_by_id(plant_id):
-                return jsonify({'error': 'Plant not found.'}), 404
+            plant, error_response, status_code = self._get_owned_plant_or_error(
+                plant_id,
+                user_id
+            )
+
+            if error_response is not None:
+                return error_response, status_code
+            
             return jsonify([s.to_dict() for s in self.schedule_repo.find_by_plant(plant_id)]), 200
 
         @self.app.route('/api/plants/<int:plant_id>/schedules', methods=['POST'])
@@ -282,8 +288,14 @@ class PlantAppManager:
             if error_response is not None:
                 return error_response, status_code
             
-            if not self.plant_repo.get_by_id(plant_id):
-                return jsonify({'error': 'Plant not found.'}), 404
+            plant, error_response, status_code = self._get_owned_plant_or_error(
+                plant_id,
+                user_id
+            )
+
+            if error_response is not None:
+                return error_response, status_code
+            
             data = request.get_json()
             if not data:
                 return jsonify({'error': 'Request body required'}), 400
