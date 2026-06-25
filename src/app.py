@@ -189,7 +189,7 @@ class PlantAppManager:
                 species=data['species'],
                 location=data['location'],
                 created_at=data.get('created_at'),
-                 user_id=int(user_id),
+                user_id=int(user_id),
             )
             self.plant_repo.save(plant)
             d = plant.to_dict()
