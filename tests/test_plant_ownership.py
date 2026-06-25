@@ -32,6 +32,11 @@ def test_post_plants_rejects_manual_user_id(client): # Request-Body darf keine m
     assert data["error"] == "Field 'user_id' must not be set manually." 
 
 
+@pytest.mark.parametrize( # pytest soll denselben Test mehrfach ausführen
+    "method, url_template, payload",
+    foreign_plant_requests
+)
+
 def test_foreign_plant_access_returns_404(client, second_client, method, url_template, payload):
     plant_response = client.post("/api/plants", json = {
         "name": "Monstera",

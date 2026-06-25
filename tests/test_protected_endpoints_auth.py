@@ -13,7 +13,7 @@ protected_requests = [
     ("GET", "/api/plants/1/logs", None),
     ("POST", "/api/plants/1/logs", {"care_type": "watering"}),
     ("GET", "/api/plants/1/next-actions", None),
-    ("GET", "api/overdue", None),
+    ("GET", "/api/overdue", None),
  ]
 
 def test_protected_endpoints_missing_token(unauthenticated_client):
