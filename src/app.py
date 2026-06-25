@@ -105,6 +105,25 @@ class PlantAppManager:
             if days <= 3:
                 status = 'soon'
         return status
+    
+
+    def _authenticate_request(self):
+        auth_header = request.headers.get("Authorization")
+
+        if auth_header is None:
+            return None, jsonify({"error": "Authentication required."}), 401
+        
+        if not auth_header.startswith("Bearer "):
+            return None, jsonify({"error": "Invalid or expired token."}), 401
+        
+        token = auth_header.replace("Bearer ", "", 1) # brauchen für verify_token() ja nur JWT -> nicht noch Bearer vorne dran -> nur einmal ersetzen
+        payload = AuthenticationService.verify_token(token)
+
+        if payload is None:
+            return None, jsonify({"error": "Invalid or expired token."}), 401
+        
+        return payload["sub"], None, None
+    
 
     def _register_routes(self):
         @self.app.route('/')
