@@ -132,6 +132,11 @@ class PlantAppManager:
 
         @self.app.route('/api/plants', methods=['GET'])
         def get_plants():
+            user_id, error_response, status_code = self._authenticate_request()
+
+            if error_response is not None:
+                return error_response, status_code
+            
             result = []
 
             # TODO: durch find_by_user(user_id) ersetzen, sobald Plant-Routes JWT-geschützt sind
@@ -144,6 +149,11 @@ class PlantAppManager:
 
         @self.app.route('/api/plants', methods=['POST'])
         def create_plant():
+            user_id, error_response, status_code = self._authenticate_request()
+
+            if error_response is not None:
+                return error_response, status_code
+            
             data = request.get_json()
             if not data:
                 return jsonify({'error': 'Request body required'}), 400
@@ -163,6 +173,11 @@ class PlantAppManager:
 
         @self.app.route('/api/plants/<int:plant_id>', methods=['GET'])
         def get_plant(plant_id):
+            user_id, error_response, status_code = self._authenticate_request()
+
+            if error_response is not None:
+                return error_response, status_code
+            
             plant = self.plant_repo.get_by_id(plant_id)
             if not plant:
                 return jsonify({'error': 'Plant not found'}), 404
@@ -173,6 +188,11 @@ class PlantAppManager:
 
         @self.app.route('/api/plants/<int:plant_id>', methods=['PUT'])
         def update_plant(plant_id):
+            user_id, error_response, status_code = self._authenticate_request()
+
+            if error_response is not None:
+                return error_response, status_code
+            
             plant = self.plant_repo.get_by_id(plant_id)
             if not plant:
                 return jsonify({'error': 'Plant not found'}), 404
@@ -192,6 +212,11 @@ class PlantAppManager:
 
         @self.app.route('/api/plants/<int:plant_id>', methods=['DELETE'])
         def delete_plant(plant_id):
+            user_id, error_response, status_code = self._authenticate_request()
+
+            if error_response is not None:
+                return error_response, status_code
+            
             if not self.plant_repo.get_by_id(plant_id):
                 return jsonify({'error': 'Plant not found'}), 404
             for schedule in self.schedule_repo.find_by_plant(plant_id):
@@ -203,6 +228,11 @@ class PlantAppManager:
 
         @self.app.route('/api/plants/<int:plant_id>/schedules', methods=['GET'])
         def get_schedules(plant_id):
+            user_id, error_response, status_code = self._authenticate_request()
+
+            if error_response is not None:
+                return error_response, status_code
+            
             if not self.plant_repo.get_by_id(plant_id):
                 return jsonify({'error': 'Plant not found'}), 404
             return jsonify([s.to_dict() for s in self.schedule_repo.find_by_plant(plant_id)]), 200
