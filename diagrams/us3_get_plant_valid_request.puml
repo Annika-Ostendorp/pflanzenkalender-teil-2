@@ -23,7 +23,7 @@ deactivate Service
 |||
 
 'Pflanze anhand ID suchen & gefundene Pflanze dann zurückgeben'
-App -> Repo : find_by_id(plant_id)
+App -> Repo : get_by_id(plant_id)
 activate Repo
 Repo --> App : plant
 deactivate Repo

@@ -41,7 +41,7 @@ else Authorization Header vorhanden
         |||
 
         'Pflanze anhand übergebener plant_id suchen'
-        App -> Repo : find_by_id(plant_id)
+        App -> Repo : get_by_id(plant_id)
         activate Repo
 
         'Repository gibt entweder Pflanze oder None zurück'
