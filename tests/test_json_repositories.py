@@ -125,6 +125,21 @@ def test_json_plant_delete_removes_plant(tmp_path):
         Plant(name="A", species="B", location="C"), _assert_plant_empty)
 
 
+def test_json_plant_find_by_user_returns_only_matching_plants(tmp_path):
+    file_path = tmp_path / "plants.json"
+    repo = JsonPlantRepository(str(file_path))
+
+    p1 = Plant(name="Monstera", species="Araceae", location="Wohnzimmer", user_id=1)
+    p2 = Plant(name="Ficus", species="Moraceae", location="Küche", user_id=2)
+    repo.save(p1)
+    repo.save(p2)
+
+    result = repo.find_by_user(1)
+
+    assert len(result) == 1
+    assert result[0].name == "Monstera"
+    assert result[0].user_id == 1
+
 # ── Schedule ──────────────────────────────────────────────────────────────────
 
 def test_json_schedule_starts_empty_when_file_missing(tmp_path):
