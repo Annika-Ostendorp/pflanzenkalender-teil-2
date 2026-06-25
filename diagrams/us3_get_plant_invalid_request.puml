@@ -8,7 +8,7 @@ database "PlantRepository" as Repo
 
 |||
 
-User -> App : GET /api/plants/<id>\nAuthorization : Bearer <token>
+User -> App : GET /api/plants/<id>
 activate App
 
 alt#red Authorization Header fehlt
