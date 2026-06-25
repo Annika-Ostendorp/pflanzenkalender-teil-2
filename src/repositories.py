@@ -8,10 +8,6 @@ class PlantRepository(ABC):
     @abstractmethod
     def get_by_id(self, plant_id: int) -> Plant | None: ...
 
-
-    @abstractmethod
-    def find_all(self) -> list[Plant]: ...
-
     @abstractmethod
     def find_by_user(self, user_id: int) -> list[Plant]: ...
 
