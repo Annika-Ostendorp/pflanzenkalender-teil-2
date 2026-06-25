@@ -160,12 +160,8 @@ class PlantAppManager:
             
             result = []
 
-            # TODO: durch find_by_user(user_id) ersetzen, sobald Plant-Routes JWT-geschützt sind
-
-            for plant in self.plant_repo.find_all():
-                if str(plant.user_id) != str(user_id): # User bekommt jetzt wirklich nur seine Pflanzen -> JWT-ID muss mit user_id übereinstimmen
-                    continue
-
+            result = []
+            for plant in self.plant_repo.find_by_user(int(user_id)):
                 d = plant.to_dict()
                 d['status'] = self._plant_status(plant.id)
                 result.append(d)
@@ -441,13 +437,7 @@ class PlantAppManager:
             
             today = date.today()
             result = []
-            
-            # TODO: durch find_by_user(user_id) ersetzen, sobald Plant-Routes JWT-geschützt sind
-
-            for plant in self.plant_repo.find_all():
-                if str(plant.user_id) != str(user_id):
-                    continue
-
+            for plant in self.plant_repo.find_by_user(int(user_id)):
                 plant_schedules = self.schedule_repo.find_by_plant(plant.id)
                 plant_logs = self.log_repo.find_by_plant(plant.id)
                 for sched in plant_schedules:
