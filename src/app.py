@@ -155,8 +155,13 @@ class PlantAppManager:
                 return error_response, status_code
             
             data = request.get_json()
+
             if not data:
                 return jsonify({'error': 'Request body required'}), 400
+            
+            if "user_id" in data:
+                return jsonify({"error": "Field 'user_id' must not be set manually."}), 400
+            
             missing = [f for f in ('name', 'species', 'location') if f not in data]
             if missing:
                 return jsonify({'error': f'Missing required fields: {missing}'}), 400
@@ -165,6 +170,7 @@ class PlantAppManager:
                 species=data['species'],
                 location=data['location'],
                 created_at=data.get('created_at'),
+                user_id=user_id,
             )
             self.plant_repo.save(plant)
             d = plant.to_dict()
