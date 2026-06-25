@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import patch
 
 # Liste mit allen Endpunkten, die auf konkrete Pflanze zugreifen --> alle Endpunkte mit <id>
 foreign_plant_requests = [
@@ -81,3 +82,16 @@ def test_missing_plant_returns_404(client, method, url_template, payload):
     assert response.status_code == 404
     assert "error" in data
     assert data["error"] == "Plant not found."
+
+
+def test_get_plants_unexpected_server_error(client):
+    with patch(
+        "src.app.PlantAppManager._authenticate_request",
+        side_effect=Exception("Unerwarteter Fehler")
+    ):
+        response = client.get("/api/plants")
+        data = response.get_json()
+
+    assert response.status_code == 500
+    assert "error" in data
+    assert data["error"] == "An unexpected error occurred. Please try again later."
