@@ -125,6 +125,18 @@ class PlantAppManager:
         return payload["sub"], None, None
     
 
+    def _get_owned_plant_or_error(self, plant_id, user_id):
+        plant = self.plant_repo.get_by_id(plant_id)
+
+        if plant is None:
+            return None, jsonify({"error": "Plant not found."}), 404
+        
+        if str(plant.user_id) != str(user_id):
+            return None, jsonify({"error": "Plant not found."}), 404
+        
+        return plant, None, None
+    
+    
     def _register_routes(self):
         @self.app.route('/')
         def index():
@@ -371,7 +383,7 @@ class PlantAppManager:
             for plant in self.plant_repo.find_all():
                 if plant.user_id != user_id:
                     continue
-                
+
                 plant_schedules = self.schedule_repo.find_by_plant(plant.id)
                 plant_logs = self.log_repo.find_by_plant(plant.id)
                 for sched in plant_schedules:
