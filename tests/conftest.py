@@ -67,27 +67,27 @@ def manager():
 
 @pytest.fixture
 def unauthenticated_client(manager):
-    with manager.app.test_client() as c:
-        yield c
+    return manager.app.test_client()
 
 
 @pytest.fixture
 def client(manager):
-    with manager.app.test_client() as c:
-        c.post("/api/auth/register", json = {
-            "username": "TestUser",
-            "password": "testpasswort"
-        })
+    c = manager.app.test_client()
+        
+    c.post("/api/auth/register", json = {
+        "username": "TestUser",
+        "password": "testpasswort"
+    })
 
-        login_response = c.post("/api/auth/login", json = {
-            "username": "TestUser",
-            "password": "testpasswort"
-        })
+    login_response = c.post("/api/auth/login", json = {
+        "username": "TestUser",
+        "password": "testpasswort"
+    })
 
-        token = login_response.get_json()["access_token"]
-        c.environ_base["HTTP_AUTHORIZATION"] = f"Bearer {token}"
+    token = login_response.get_json()["access_token"]
+    c.environ_base["HTTP_AUTHORIZATION"] = f"Bearer {token}"
 
-        yield c
+    return c
 
 @pytest.fixture
 def second_client(manager):
