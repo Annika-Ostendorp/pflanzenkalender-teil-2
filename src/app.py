@@ -136,7 +136,7 @@ class PlantAppManager:
         
         return plant, None, None
     
-    
+
     def _register_routes(self):
         @self.app.route('/')
         def index():
@@ -199,9 +199,14 @@ class PlantAppManager:
             if error_response is not None:
                 return error_response, status_code
             
-            plant = self.plant_repo.get_by_id(plant_id)
-            if not plant:
-                return jsonify({'error': 'Plant not found'}), 404
+            plant, error_response, status_code = self._get_owned_plant_or_error(
+                plant_id,
+                user_id
+            )
+
+            if error_response is not None:
+                return error_response, status_code
+            
             d = plant.to_dict()
             d['status'] = self._plant_status(plant_id)
             d['schedules'] = [s.to_dict() for s in self.schedule_repo.find_by_plant(plant_id)]
@@ -216,7 +221,7 @@ class PlantAppManager:
             
             plant = self.plant_repo.get_by_id(plant_id)
             if not plant:
-                return jsonify({'error': 'Plant not found'}), 404
+                return jsonify({'error': 'Plant not found.'}), 404
             data = request.get_json()
             if data is None:
                 return jsonify({'error': 'Invalid or missing JSON body'}), 400
@@ -239,7 +244,7 @@ class PlantAppManager:
                 return error_response, status_code
             
             if not self.plant_repo.get_by_id(plant_id):
-                return jsonify({'error': 'Plant not found'}), 404
+                return jsonify({'error': '.'}), 404
             for schedule in self.schedule_repo.find_by_plant(plant_id):
                 self.schedule_repo.delete(schedule.id)
             for log in self.log_repo.find_by_plant(plant_id):
@@ -255,7 +260,7 @@ class PlantAppManager:
                 return error_response, status_code
             
             if not self.plant_repo.get_by_id(plant_id):
-                return jsonify({'error': 'Plant not found'}), 404
+                return jsonify({'error': 'Plant not found.'}), 404
             return jsonify([s.to_dict() for s in self.schedule_repo.find_by_plant(plant_id)]), 200
 
         @self.app.route('/api/plants/<int:plant_id>/schedules', methods=['POST'])
@@ -266,7 +271,7 @@ class PlantAppManager:
                 return error_response, status_code
             
             if not self.plant_repo.get_by_id(plant_id):
-                return jsonify({'error': 'Plant not found'}), 404
+                return jsonify({'error': 'Plant not found.'}), 404
             data = request.get_json()
             if not data:
                 return jsonify({'error': 'Request body required'}), 400
@@ -310,7 +315,7 @@ class PlantAppManager:
                 return error_response, status_code
             
             if not self.plant_repo.get_by_id(plant_id):
-                return jsonify({'error': 'Plant not found'}), 404
+                return jsonify({'error': 'Plant not found.'}), 404
             result = sorted(
                 [l.to_dict() for l in self.log_repo.find_by_plant(plant_id)],
                 key=lambda l: l['performed_at'],
@@ -326,7 +331,7 @@ class PlantAppManager:
                 return error_response, status_code
             
             if not self.plant_repo.get_by_id(plant_id):
-                return jsonify({'error': 'Plant not found'}), 404
+                return jsonify({'error': 'Plant not found.'}), 404
             data = request.get_json()
             if not data:
                 return jsonify({'error': 'Request body required'}), 400
@@ -350,7 +355,7 @@ class PlantAppManager:
             
             plant = self.plant_repo.get_by_id(plant_id)
             if not plant:
-                return jsonify({'error': 'Plant not found'}), 404
+                return jsonify({'error': 'Plant not found.'}), 404
             plant_schedules = self.schedule_repo.find_by_plant(plant_id)
             plant_logs = self.log_repo.find_by_plant(plant_id)
             today = date.today()
