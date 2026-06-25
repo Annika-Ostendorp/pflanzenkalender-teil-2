@@ -59,3 +59,25 @@ def test_foreign_plant_access_returns_404(client, second_client, method, url_tem
     assert response.status_code == 404
     assert "error" in data
     assert data["error"] == "Plant not found." # User bekommt aber dieselbe Antwort wie bei Pflanze, die gar nicht existiert
+
+
+@pytest.mark.parametrize(
+    "method, url_template, payload",
+    foreign_plant_requests
+)
+
+def test_missing_plant_returns_404(client, method, url_template, payload):
+    missing_plant_id = 999
+
+    response = client.open(
+        url_template.format(plant_id = missing_plant_id),
+        method = method,
+        json = payload
+    )
+
+    data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 404
+    assert "error" in data
+    assert data["error"] == "Plant not found."
