@@ -154,7 +154,7 @@ class PlantAppManager:
             # TODO: durch find_by_user(user_id) ersetzen, sobald Plant-Routes JWT-geschützt sind
 
             for plant in self.plant_repo.find_all():
-                if plant.user_id != user_id: # User bekommt jetzt wirklich nur seine Pflanzen -> JWT-ID muss mit user_id übereinstimmen
+                if str(plant.user_id) != str(user_id): # User bekommt jetzt wirklich nur seine Pflanzen -> JWT-ID muss mit user_id übereinstimmen
                     continue
 
                 d = plant.to_dict()
@@ -179,7 +179,8 @@ class PlantAppManager:
             
             missing = [f for f in ('name', 'species', 'location') if f not in data]
             if missing:
-                return jsonify({'error': f'Missing required fields: {missing}'}), 400
+                return jsonify({'error': f"Field '{missing[0]}' is required."}), 400
+            
             plant = Plant(
                 name=data['name'],
                 species=data['species'],
@@ -435,7 +436,7 @@ class PlantAppManager:
             # TODO: durch find_by_user(user_id) ersetzen, sobald Plant-Routes JWT-geschützt sind
 
             for plant in self.plant_repo.find_all():
-                if plant.user_id != user_id:
+                if str(plant.user_id) != str(user_id):
                     continue
 
                 plant_schedules = self.schedule_repo.find_by_plant(plant.id)
