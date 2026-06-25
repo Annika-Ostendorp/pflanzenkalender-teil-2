@@ -88,3 +88,21 @@ def client(manager):
         c.environ_base["HTTP_AUTHORIZATION"] = f"Bearer {token}"
 
         yield c
+
+@pytest.fixture
+def second_client(manager):
+    with manager.app.test_client() as c:
+        c.post("/api/auth/register", json = {
+            "username": "SecondUser",
+            "password": "testpasswort"
+        })
+
+        login_response = c.post("/api/auth/login", json = {
+            "username": "SecondUser",
+            "password": "testpasswort"
+        })
+
+        token = login_response.get_json()["access_token"]
+        c.environ_base["HTTP_AUTHORIZATION"] = f"Bearer {token}"
+
+        yield c
