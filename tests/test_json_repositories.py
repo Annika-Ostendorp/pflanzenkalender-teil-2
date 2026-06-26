@@ -140,6 +140,33 @@ def test_json_plant_find_by_user_returns_only_matching_plants(tmp_path):
     assert result[0].name == "Monstera"
     assert result[0].user_id == 1
 
+
+def test_json_plant_find_by_user_handles_string_user_id_from_file(tmp_path):
+    file_path = tmp_path / "plants.json"
+    file_path.write_text(
+        """
+        [
+            {
+                "id": 1, 
+                "user_id": "1", 
+                "name": "Monstera", 
+                "species": "Deliciosa", 
+                "location": "Flur", 
+                "created_at": "2026-06-25"
+            }
+        ]
+        """,
+        encoding="utf-8",
+    )
+
+    repo = JsonPlantRepository(str(file_path))
+
+    result = repo.find_by_user(1)
+
+    assert len(result) == 1
+    assert result[0].name == "Monstera"
+    assert result[0].user_id == 1
+
 # ── Schedule ──────────────────────────────────────────────────────────────────
 
 def test_json_schedule_starts_empty_when_file_missing(tmp_path):

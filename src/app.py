@@ -44,7 +44,7 @@ def validate_username(username) -> str: # Benutzernamen prüfen nach Vorgaben au
         return "Field 'username' must not exceed 50 characters."
     
     # prüfen, ob username fälschlicherweise Sonderzeichen enthält
-    pattern = r"^\w+$" # siehe KI-Issue (#9) -> enthält a-z, A-Z, 0-9 und _
+    pattern = r"^[A-Za-z0-9_]+$" # siehe KI-Issue (#56) -> enthält nun nur a-z, A-Z, 0-9 und _
     if not re.match(pattern, username):
         return "Field 'username' may only contain letters, digits, and underscores."
 
@@ -131,7 +131,12 @@ class PlantAppManager:
         if payload is None:
             return None, jsonify({"error": "Invalid or expired token."}), 401
         
-        return payload["sub"], None, None
+        user_id = payload.get("sub")
+
+        if user_id is None or not str(user_id).isdigit():
+            return None, jsonify({"error": "Invalid or expired token."}), 401
+        
+        return user_id, None, None
     
 
     def _get_owned_plant_or_error(self, plant_id, user_id):
@@ -385,6 +390,11 @@ class PlantAppManager:
                 return jsonify({'error': 'Request body required'}), 400
             if not data.get('care_type'):
                 return jsonify({'error': 'care_type is required'}), 400
+            
+            if data["care_type"] not in VALID_CARE_TYPES:
+                return jsonify({"error": "Invalid care type"}), 400
+            
+            
             log = ActionLog(
                 plant_id=plant_id,
                 care_type=data['care_type'],
