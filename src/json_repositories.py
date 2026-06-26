@@ -34,7 +34,7 @@ class JsonPlantRepository(PlantRepository):
                 location=d["location"],
                 created_at=d.get("created_at"),
                 id=d.get("id"),
-                user_id=d.get("user_id"),
+                user_id=int(d["user_id"]) if d.get("user_id") is not None else None,
             )
             self._store[plant.id] = plant
         if self._store:
