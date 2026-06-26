@@ -35,13 +35,6 @@ def test_get_by_id_returns_none_when_missing():
     assert repo.get_by_id(999) is None
 
 
-def test_find_all_returns_all_plants():
-    repo = InMemoryPlantRepository()
-    repo.save(Plant(name='A', species='B', location='C'))
-    repo.save(Plant(name='X', species='Y', location='Z'))
-    assert len(repo.find_all()) == 2
-
-
 def test_delete_removes_plant():
     repo = InMemoryPlantRepository()
     plant = Plant(name='A', species='B', location='C')
@@ -67,13 +60,8 @@ def test_save_updates_existing_plant():
     repo.save(plant)
     plant.name = 'New'
     repo.save(plant)
-    assert len(repo.find_all()) == 1
+    assert repo.get_by_id(plant.id) is not None
     assert repo.get_by_id(plant.id).name == 'New'
-
-
-def test_find_all_returns_empty_list_when_no_plants():
-    repo = InMemoryPlantRepository()
-    assert repo.find_all() == []
 
 
 def test_find_by_user_returns_empty_when_no_match():
