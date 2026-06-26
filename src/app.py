@@ -44,7 +44,7 @@ def validate_username(username) -> str: # Benutzernamen prüfen nach Vorgaben au
         return "Field 'username' must not exceed 50 characters."
     
     # prüfen, ob username fälschlicherweise Sonderzeichen enthält
-    pattern = r"^\w+$" # siehe KI-Issue (#9) -> enthält a-z, A-Z, 0-9 und _
+    pattern = r"^[A-Za-z0-9_]+$" # siehe KI-Issue (#56) -> enthält nun nur a-z, A-Z, 0-9 und _
     if not re.match(pattern, username):
         return "Field 'username' may only contain letters, digits, and underscores."
 

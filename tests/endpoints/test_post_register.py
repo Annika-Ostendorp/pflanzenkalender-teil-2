@@ -143,6 +143,19 @@ def test_post_register_username_invalid_characters(client): # wenn Username ung�
     assert data["error"] == "Field 'username' may only contain letters, digits, and underscores." # entspricht die Fehlermeldung exakt dieser Syntax?
 
 
+def test_post_register_username_with_non_ascii_character_returns_400(client):
+    response = client.post("/api/auth/register", json={
+        "username": "müller", # Test schlägt fehl, da Umlaute wie ä, ö, ü, etc. auch nicht erlaubt sind
+        "password": "securePassword123"
+    })
+
+    data = response.get_json()
+
+    # Überprüfungen
+    assert response.status_code == 400
+    assert data["error"] == "Field 'username' may only contain letters, digits, and underscores."
+
+
 def test_post_register_invalid_json_body(client): # Request-Body kein gültiges JSON --> 400 Bad Request
     invalid_json = "{username: Annika}" # ungültiges JSON --> fehlende Anführungszeichen
 
