@@ -307,3 +307,19 @@ def test_logs_sorted_newest_first(client):
     add_log(client, p['id'], days_ago=1)
     logs = client.get(f'/api/plants/{p["id"]}/logs').get_json()
     assert logs[0]['performed_at'] > logs[1]['performed_at']
+
+
+def test_create_log_invalid_care_type_returns_400(client):
+    plant = make_plant(client)
+
+    response = client.post(
+        f"/api/plants/{plant["id"]}/logs",
+        json = {
+            "care_type": "invalid",
+            "performed_at": "2026-06-01",
+        },
+    )
+
+    # Überprüfungen
+    assert response.status_code == 400
+    assert response.get_json() == {"error": "Invalid care type"}

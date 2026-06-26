@@ -390,6 +390,11 @@ class PlantAppManager:
                 return jsonify({'error': 'Request body required'}), 400
             if not data.get('care_type'):
                 return jsonify({'error': 'care_type is required'}), 400
+            
+            if data["care_type"] not in VALID_CARE_TYPES:
+                return jsonify({"error": "Invalid care type"}), 400
+            
+            
             log = ActionLog(
                 plant_id=plant_id,
                 care_type=data['care_type'],
