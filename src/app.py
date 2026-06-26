@@ -131,7 +131,12 @@ class PlantAppManager:
         if payload is None:
             return None, jsonify({"error": "Invalid or expired token."}), 401
         
-        return payload["sub"], None, None
+        user_id = payload.get("sub")
+
+        if user_id is None or not str(user_id).isdigit():
+            return None, jsonify({"error": "Invalid or expired token."}), 401
+        
+        return user_id, None, None
     
 
     def _get_owned_plant_or_error(self, plant_id, user_id):
