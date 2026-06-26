@@ -1,6 +1,6 @@
 import jwt
 from unittest.mock import patch
-from auth_service import SECRET_KEY
+from src.auth_service import SECRET_KEY
 
 def test_post_login_success(client, register_user):
     register_user("Annika", "passwort123") # erst registrieren, damit man sich danach ja nochmal einloggen kann
