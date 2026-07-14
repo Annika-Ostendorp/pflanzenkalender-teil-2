@@ -1,0 +1,946 @@
+<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Modularbeit Teil 2 – Prüfbericht</title><style>:root{
+  --bg:#f5f6fa;--card:#fff;--border:#d1d5db;--text:#1f2937;--muted:#6b7280;
+  --accent:#4e6ea8;--accent-light:#e8edf7;
+  --green:#16a34a;--yellow:#d97706;--red:#dc2626;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg);color:var(--text);padding:2rem;max-width:1100px;margin:0 auto;}
+a{color:var(--accent);}code{background:#f3f4f6;padding:.1rem .3rem;border-radius:3px;font-size:.85em;}
+header{margin-bottom:1.5rem;}
+header h1{font-size:1.5rem;color:var(--accent);margin-bottom:.25rem;}
+header p{font-size:.85rem;color:var(--muted);margin-bottom:.5rem;}
+.header-buttons{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem;}
+.header-buttons button,.btn-import-label{
+  padding:.3rem .75rem;border:1px solid var(--accent);border-radius:5px;
+  background:var(--accent-light);color:var(--accent);font-size:.82rem;
+  cursor:pointer;font-weight:600;display:inline-block;}
+.header-buttons button:hover,.btn-import-label:hover{background:var(--accent);color:#fff;}
+.summary-table{width:100%;border-collapse:collapse;margin-bottom:1rem;font-size:.88rem;}
+.summary-table th{text-align:left;padding:.4rem .75rem;background:var(--accent-light);
+  border-bottom:2px solid var(--border);}
+.summary-table td{padding:.3rem .75rem;border-bottom:1px solid var(--border);}
+.summary-table tr.total td{font-weight:700;background:#f0f4ff;}
+.pts{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.grade-line{font-size:.88rem;margin-bottom:1.5rem;color:var(--muted);}
+details.section{background:var(--card);border:1px solid var(--border);
+  border-radius:8px;margin-bottom:.6rem;overflow:hidden;}
+details.section>summary{padding:.65rem 1rem;font-weight:600;font-size:.93rem;
+  cursor:pointer;display:flex;align-items:center;gap:.6rem;
+  list-style:none;user-select:none;}
+details.section>summary::-webkit-details-marker{display:none;}
+details.section>summary::after{content:"▼";font-size:.6rem;color:var(--muted);
+  margin-left:auto;transition:transform .15s;}
+details.section[open]>summary::after{transform:rotate(180deg);}
+details.section.full>summary{background:#dcfce7;}
+details.section.partial>summary{background:#fef9c3;}
+details.section.none>summary{background:#fee2e2;}
+details.section.neutral>summary{background:#f1f5f9;}
+.sec-title{flex:1;}.sec-score{font-size:.8rem;font-weight:700;color:var(--muted);}
+.section-body{padding:.75rem 1rem 1rem;}
+.checks-table{width:100%;border-collapse:collapse;margin-bottom:.4rem;font-size:.84rem;}
+.check-row td{padding:.28rem .2rem;vertical-align:top;}
+.check-icon{width:1.6rem;text-align:center;}
+.check-desc{width:100%;}
+.check-pts{white-space:nowrap;text-align:right;font-weight:600;padding-left:.5rem;}
+.bullet-row td,.note-row td{padding:.08rem .2rem;}
+.bullet{font-size:.79rem;color:var(--muted);padding-left:1.8rem;}
+.note{font-size:.79rem;color:var(--yellow);padding-left:1.8rem;}
+.info-box{font-size:.81rem;color:var(--muted);background:#f9fafb;
+  border-left:3px solid var(--accent);padding:.45rem .7rem;margin:.4rem 0;border-radius:0 4px 4px 0;}
+details.data-view{border:1px solid var(--border);border-radius:5px;margin-top:.45rem;}
+details.data-view>summary{padding:.35rem .7rem;font-size:.81rem;font-weight:600;
+  color:var(--accent);cursor:pointer;list-style:none;background:#f8f9ff;user-select:none;}
+details.data-view>summary::-webkit-details-marker{display:none;}
+details.data-view>summary::before{content:"▶ ";font-size:.58rem;}
+details.data-view[open]>summary::before{content:"▼ ";}
+.data-body{padding:.55rem .7rem;}
+details.item{border:1px solid var(--border);border-radius:4px;margin-bottom:.3rem;overflow:hidden;}
+details.item>summary{padding:.35rem .65rem;cursor:pointer;
+  display:flex;align-items:center;flex-wrap:wrap;gap:.3rem;
+  list-style:none;background:#fafafa;font-size:.81rem;user-select:none;}
+details.item>summary::-webkit-details-marker{display:none;}
+details.item>summary::before{content:"▶ ";font-size:.58rem;color:var(--muted);}
+details.item[open]>summary::before{content:"▼ ";}
+.iid{font-family:monospace;font-size:.8rem;min-width:2.8rem;}
+.item-title{flex:1;font-size:.83rem;}
+.item-body{padding:.55rem .7rem;border-top:1px solid var(--border);font-size:.81rem;}
+.lbl{display:inline-block;padding:.08rem .42rem;border-radius:999px;
+  font-size:.67rem;font-weight:600;color:#fff;white-space:nowrap;}
+.meta{font-size:.73rem;color:var(--muted);}
+.state{font-size:.68rem;font-weight:600;padding:.08rem .38rem;border-radius:4px;}
+.state.open{background:#dcfce7;color:var(--green);}
+.state.closed{background:#f3f4f6;color:var(--muted);}
+.missing{color:var(--red);font-size:.82rem;padding:.2rem 0;}
+table.attrs{border-collapse:collapse;font-size:.81rem;margin-bottom:.4rem;}
+table.attrs th{text-align:left;padding:.16rem .55rem .16rem 0;color:var(--muted);
+  font-weight:500;white-space:nowrap;vertical-align:top;}
+table.attrs td{padding:.16rem 0;}
+.dist-bar-wrap{background:#e5e7eb;border-radius:3px;height:8px;width:120px;display:inline-block;vertical-align:middle;}
+.dist-bar{height:8px;border-radius:3px;}
+body.drag-over::after{content:'JSON hier ablegen';position:fixed;inset:0;
+  background:rgba(78,110,168,.12);border:3px dashed var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;font-weight:700;color:var(--accent);
+  pointer-events:none;z-index:9999;}
+</style></head><body><header><h1>Modularbeit Teil 2 – Projektprüfung</h1><p id="report-meta"></p><div class="header-buttons"><label class="btn-import-label">📂 JSON laden<input type="file" id="file-import" accept=".json" style="display:none"></label></div></header><div id="summary-container"></div><div id="sections-container"></div><script>
+(function(){
+  var DATA = null;
+  var SOURCE_FILENAME = null;
+
+  function esc(s) {
+    if (s == null) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function fmtN(n) {
+    n = Math.round(n * 100) / 100;
+    return n % 1 ? n + '' : Math.floor(Math.abs(n)) * (n < 0 ? -1 : 1) + '';
+  }
+
+  function grade(pts, max) {
+    var p = Math.ceil(pts / max * 100);
+    if (p >= 95) return '1,0'; if (p >= 90) return '1,3'; if (p >= 85) return '1,7';
+    if (p >= 80) return '2,0'; if (p >= 75) return '2,3'; if (p >= 70) return '2,7';
+    if (p >= 65) return '3,0'; if (p >= 60) return '3,3'; if (p >= 55) return '3,7';
+    if (p >= 50) return '4,0'; return '5,0';
+  }
+
+  var LC = {'Type::User Story': '#6699cc', 'Type::Bug': '#dc143c', 'AI Usage Doc': '#cc338b'};
+
+  function labelBadge(name) {
+    return '<span class="lbl" style="background:' + (LC[name] || '#888') + '">' + esc(name) + '</span>';
+  }
+  function labelBadges(labels) {
+    return (labels && labels.length) ? labels.map(labelBadge).join(' ') : '';
+  }
+  function collapsible(titleHtml, inner) {
+    return '<details class="data-view"><summary>' + titleHtml + '</summary><div class="data-body">' + inner + '</div></details>';
+  }
+  function linkify(text, pu) {
+    var s = esc(text).replace(/#(\d+)/g, function(m, n) {
+      return '<a href="' + esc(pu) + '/-/issues/' + n + '" target="_blank">#' + n + '</a>';
+    });
+    // Commit-Kurz-/Voll-Hashes in Backticks (z.B. `a1b2c3d4`) zum Commit in GitLab verlinken
+    s = s.replace(/`([0-9a-f]{7,40})`/g, function(m, sha) {
+      return '<a href="' + esc(pu) + '/-/commit/' + sha + '" target="_blank"><code>' + sha + '</code></a>';
+    });
+    return s;
+  }
+
+  function issueBlock(issue, pu) {
+    var url = pu + '/-/issues/' + issue.iid;
+    var sc  = issue.state === 'opened' ? 'open' : 'closed';
+    var wh  = issue.weight != null ? '<span class="meta">W:' + esc(issue.weight) + '</span>' : '';
+    var assigneeText = (issue.assignees || []).join(', ') || '—';
+    var descRow = issue.description ?
+      '<tr><th>Beschreibung</th><td>' +
+      '<div style="white-space:pre-wrap">' + renderMarkdown(issue.description) + '</div>' +
+      '</td></tr>' : '';
+    return (
+      '<details class="item"><summary>' +
+      '<a class="iid" href="' + esc(url) + '" target="_blank">#' + issue.iid + '</a>' +
+      '<span class="item-title">' + esc(issue.title) + '</span>' +
+      labelBadges(issue.labels) +
+      '<span class="meta">' + esc(issue.milestone || '—') + '</span>' + wh +
+      '<span class="state ' + sc + '">' + esc(issue.state) + '</span>' +
+      '</summary><div class="item-body"><table class="attrs">' +
+      '<tr><th>Assignees</th><td>' + esc(assigneeText) + '</td></tr>' +
+      '<tr><th>Weight</th><td>' + esc(issue.weight != null ? issue.weight : '—') + '</td></tr>' +
+      '<tr><th>Labels</th><td>' + labelBadges(issue.labels) + '</td></tr>' +
+      descRow +
+      '</table></div></details>'
+    );
+  }
+
+  function renderDistribution(d, pu) {
+    if (!d.distribution || !Object.keys(d.distribution).length) return '';
+    var total = d.total_weight || 0;
+    var members = Object.keys(d.distribution).sort(function(a, b) {
+      return d.distribution[b].pct - d.distribution[a].pct;
+    });
+    var rows = members.map(function(member) {
+      var data = d.distribution[member];
+      var bw = Math.min(Math.max(Math.floor(data.pct), 0), 100);
+      return '<tr>' +
+        '<td>' + esc(member) + '</td>' +
+        '<td style="text-align:right">' + data.weight + '&nbsp;SP</td>' +
+        '<td style="text-align:right">' + data.pct.toFixed(1) + '%</td>' +
+        '<td style="padding-left:.5rem">' +
+          '<span class="dist-bar-wrap">' +
+          '<span class="dist-bar" style="background:var(--accent);width:' + bw + '%"></span>' +
+          '</span>' +
+        '</td>' +
+        '</tr>';
+    }).join('');
+    rows += '<tr style="font-weight:600;border-top:2px solid var(--border)">' +
+      '<td>Gesamt</td>' +
+      '<td style="text-align:right">' + total + '&nbsp;SP</td>' +
+      '<td style="text-align:right">100%</td>' +
+      '<td></td></tr>';
+    return collapsible(
+      esc('Gewichtsverteilung (' + members.length + ' Mitglieder, ' + total + ' SP gesamt)'),
+      '<table class="attrs" style="width:100%">' +
+      '<tr><th>Mitglied</th><th style="text-align:right">Weight</th>' +
+      '<th style="text-align:right">Anteil</th><th style="padding-left:.5rem">Verteilung</th></tr>' +
+      rows + '</table>'
+    );
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '';
+    var d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    var p = function(n) { return n < 10 ? '0' + n : '' + n; };
+    return p(d.getDate()) + '.' + p(d.getMonth() + 1) + '.' + d.getFullYear() +
+           ', ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+
+  function renderMarkdown(raw) {
+    if (!raw) return '';
+    // 1. Markdown backslash-escapes auflösen (z.B. \< → <, \[ → [)
+    var text = raw.replace(/\\([\\`*_{}\[\]()#+\-.!<>"'])/g, '$1');
+    // 2. HTML-escapen
+    var s = esc(text);
+    // 3. Inline-Code: `code`
+    s = s.replace(/`([^`\n]+)`/g,
+      '<code style="background:#f3f4f6;padding:0 3px;border-radius:3px;font-size:.85em;font-family:monospace">$1</code>');
+    // 4. Fett: **text**
+    s = s.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+    return s;
+  }
+
+  function renderNote(n) {
+    return '<div style="border-left:2px solid var(--border);margin:.2rem 0 .2rem .5rem;padding:.2rem .5rem">' +
+           '<span style="font-weight:600;font-size:.78rem">' + esc(n.author) + '</span>' +
+           '<span style="color:var(--muted);font-size:.72rem;margin-left:.4rem">' + formatDate(n.created_at) + '</span>' +
+           '<div style="margin-top:.15rem;white-space:pre-wrap;font-size:.82rem;word-break:break-word">' + renderMarkdown(n.body) + '</div>' +
+           '</div>';
+  }
+
+  function renderMergeRequests(mrs) {
+    if (!mrs || !mrs.length) return '';
+
+    var items = mrs.map(function(mr) {
+      var stateColor = mr.state === 'merged' ? '#6d28d9' : mr.state === 'opened' ? '#16a34a' : '#6b7280';
+      var stateBadge = '<span style="background:' + stateColor +
+                       ';color:#fff;border-radius:3px;padding:1px 5px;font-size:.72rem">' +
+                       esc(mr.state) + (mr.draft ? ' (Draft)' : '') + '</span> ';
+
+      var reviewerOk = mr.reviewers.length > 0;
+      var reviewerHtml = reviewerOk
+        ? '<b>' + esc(mr.reviewers.join(', ')) + '</b>'
+        : '<span style="color:#dc2626">kein Reviewer</span>';
+
+      var meta = '<div style="font-size:.78rem;color:var(--muted);margin:.1rem 0 .35rem">' +
+                 'Autor: <b>' + esc(mr.author) + '</b>' +
+                 (mr.assignees.length ? ' &nbsp;·&nbsp; Assignee: <b>' + esc(mr.assignees.join(', ')) + '</b>' : '') +
+                 ' &nbsp;·&nbsp; Reviewer: ' + reviewerHtml +
+                 '</div>';
+
+      // Alle Discussions mit mindestens einer sichtbaren (nicht-System-)Note
+      var visibleDiscs = (mr.discussions || []).filter(function(disc) {
+        return (disc.notes || []).some(function(n) { return !n.system; });
+      });
+
+      var openCount = visibleDiscs.filter(function(d) { return d.resolved === false; }).length;
+
+      var discHtml = visibleDiscs.map(function(disc) {
+        var notes = (disc.notes || []).filter(function(n) { return !n.system; });
+
+        var resolvedMark = disc.resolved === true
+          ? ' <span style="color:#16a34a;font-size:.73rem">✓ aufgelöst</span>'
+          : disc.resolved === false
+          ? ' <span style="color:#dc2626;font-size:.73rem">● offen</span>'
+          : '';
+
+        var firstNote  = notes[0];
+        var preview    = firstNote ? renderMarkdown((firstNote.body || '').split('\n')[0].slice(0, 90)) : '(leer)';
+        var replyBadge = notes.length > 1
+          ? ' <span style="color:var(--muted);font-size:.72rem">[' + notes.length + ' Nachrichten]</span>'
+          : '';
+
+        return collapsible(
+          preview + replyBadge + resolvedMark,
+          notes.map(renderNote).join('') || '<p style="color:var(--muted);font-size:.8rem">—</p>'
+        );
+      }).join('');
+
+      var discSummary = esc(visibleDiscs.length + ' Discussion(s)') +
+                        (openCount ? ' · <span style="color:#dc2626">' + openCount + ' offen</span>' : '');
+
+      var titleLink = mr.web_url
+        ? '<a href="' + esc(mr.web_url) + '" target="_blank" style="color:inherit;text-decoration:none"><b>' + esc(mr.title) + '</b></a>'
+        : '<b>' + esc(mr.title) + '</b>';
+
+      var body = meta +
+                 (visibleDiscs.length
+                   ? '<div style="margin:.25rem 0 .1rem;font-size:.8rem;font-weight:600">Discussions</div>' + discHtml
+                   : '<div style="font-size:.8rem;color:var(--muted);margin-top:.2rem">Keine Discussions</div>');
+
+      return collapsible(
+        '!<b>' + mr.iid + '</b> ' + stateBadge + titleLink +
+        ' <span style="font-size:.78rem;color:var(--muted);margin-left:.5rem">' + discSummary + '</span>',
+        body
+      );
+    }).join('');
+
+    return '<div>' + items + '</div>';
+  }
+
+  function renderScale(scale, earned, title, colHeader) {
+    var maxPts = Math.max.apply(null, scale.map(function(i) { return i[1]; }));
+    var rows = scale.map(function(item) {
+      var achieved = (typeof earned === 'number') && (item[1] === earned);
+      var rowStyle = achieved ? ' style="background:#dcfce7;font-weight:600"' : '';
+      var marker   = achieved ? ' ◀ erreicht' : '';
+      return '<tr' + rowStyle + '>' +
+             '<td>' + esc(item[0]) + '<span style="color:var(--green);font-size:.78rem">' +
+             esc(marker) + '</span></td>' +
+             '<td style="text-align:right">' + esc(item[1]) + '&nbsp;/&nbsp;' + maxPts + '&nbsp;P</td>' +
+             '</tr>';
+    }).join('');
+    return '<div class="info-box" style="padding:.5rem .7rem">' +
+           '<strong style="font-size:.8rem;color:var(--accent)">' + esc(title) + '</strong>' +
+           '<table class="attrs" style="margin-top:.3rem">' +
+           '<tr><th>' + esc(colHeader) + '</th><th style="text-align:right">Punkte</th></tr>' +
+           rows + '</table></div>';
+  }
+
+  function renderDiagrams(diagrams, criteria, secId) {
+    return diagrams.map(function(d) {
+      var title = esc(d.name.replace(/\.puml$/i, ''));
+      if (!d.svg) {
+        return '<div class="info-box">⚠ ' + title +
+               (d.error ? ': <code>' + esc(d.error) + '</code>' : '') + '</div>';
+      }
+      var boxes = criteria.map(function(c) {
+        var n   = c.possible || 1;
+        var arr = (d.scores || {})[c.key] || [];
+        var checkboxesHtml = '';
+        for (var i = 0; i < n; i++) {
+          var checked = arr[i] ? ' checked' : '';
+          checkboxesHtml += '<input type="checkbox" class="diagram-score"' + checked +
+            ' data-sec-id="' + esc(secId) + '" data-diagram="' + esc(d.name) +
+            '" data-key="' + esc(c.key) + '" data-index="' + i + '" style="margin-top:.15rem">';
+        }
+        return '<div style="display:flex;align-items:flex-start;gap:.4rem;margin:.25rem 0;font-size:.87rem">' +
+          '<span style="flex-shrink:0;white-space:nowrap">' + checkboxesHtml + '</span>' +
+          '<span><strong>' + esc(c.label) + '</strong>' +
+          (n > 1 ? ' <span style="color:var(--muted)">(' + n + ' P)</span>' : '') +
+          ' <span style="color:var(--muted)">' + esc(c.description) + '</span></span>' +
+          '</div>';
+      }).join('');
+      var comment = d.comment || '';
+      var commentBox = '<textarea rows="2" placeholder="Kommentar …" ' +
+        'data-sec-id="' + esc(secId) + '" data-diagram="' + esc(d.name) + '" class="diagram-comment" ' +
+        'style="width:100%;font-size:.85rem;border:1px solid var(--border);' +
+        'border-radius:4px;padding:4px 7px;resize:vertical;box-sizing:border-box;margin-top:.4rem">' +
+        esc(comment) + '</textarea>';
+      return '<details class="data-view" open><summary>' + title + '</summary>' +
+             '<div class="data-body">' +
+             '<div style="overflow:auto;padding:.5rem .5rem 0">' + d.svg + '</div>' +
+             '<div style="padding:.5rem .6rem .8rem">' + boxes + commentBox + '</div>' +
+             '</div></details>';
+    }).join('\n');
+  }
+
+  function _diagCriteriaPossible(criteria) {
+    return criteria.reduce(function(s, c) { return s + (c.possible || 1); }, 0);
+  }
+
+  function renderDiagramSummary(diagrams, criteria, secId) {
+    if (!diagrams.length || !criteria.length) return '';
+    // Nur erfolgreich gerenderte Diagramme fließen in den Durchschnitt ein –
+    // Fehler-Diagramme haben keine Checkboxen und würden sonst mit 0 zählen.
+    var scored = diagrams.filter(function(d) { return !!d.svg; });
+    if (!scored.length) return '';
+    var rows = criteria.map(function(c) {
+      var n = c.possible || 1;
+      var sum = scored.reduce(function(s, d) {
+        var arr = (d.scores || {})[c.key] || [];
+        return s + arr.filter(Boolean).length;
+      }, 0);
+      var avg = sum / scored.length;
+      return '<tr><td>' + esc(c.label) + '</td>' +
+             '<td class="pts" id="diag-avg-' + esc(secId) + '-' + esc(c.key) + '">' +
+             fmtN(avg) + '&nbsp;/&nbsp;' + n + '</td></tr>';
+    }).join('');
+    var totalPossible = _diagCriteriaPossible(criteria);
+    var earned = _diagEarned(diagrams, criteria);
+    var note = scored.length < diagrams.length
+      ? ' · ' + scored.length + '/' + diagrams.length + ' gerendert' : '';
+    return '<details class="data-view" open>' +
+           '<summary>Auswertung (' + fmtN(earned) + '&nbsp;/&nbsp;' + totalPossible + '&nbsp;Punkte' + note + ')</summary>' +
+           '<div class="data-body"><table class="checks-table"><tbody>' + rows +
+           '<tr style="font-weight:600"><td>Gesamt</td>' +
+           '<td class="pts" id="diag-total-' + esc(secId) + '">' +
+           fmtN(earned) + '&nbsp;/&nbsp;' + totalPossible + '</td></tr>' +
+           '</tbody></table></div></details>';
+  }
+
+  function renderEndpointTests(testData, testNames) {
+    if (!testData || !testNames || !testNames.length) return '';
+
+    var rows = '';
+    testNames.forEach(function(pair) {
+      var groupName = pair[0], tf = pair[1];
+      var r = testData[tf] || {};
+      var total = r.total || 0, failed = r.failed || 0, passed = total - failed;
+      var cell, rowBg;
+      if (total === 0) {
+        cell = '<span style="color:var(--muted)">—</span>';
+        rowBg = ' style="background:#fef9c3"';
+      } else if (failed === 0) {
+        cell = '<span style="color:var(--green)">✅ ' + passed + '/' + total + '</span>';
+        rowBg = '';
+      } else {
+        cell = '<span style="color:#dc2626">❌ ' + passed + '/' + total + '</span>';
+        rowBg = ' style="background:#fee2e2"';
+      }
+      rows += '<tr' + rowBg + '><td>' + esc(groupName) + '</td><td>' + cell + '</td></tr>';
+    });
+    var inner = '<table class="attrs"><tr><th>Testgruppe</th><th>Tests</th></tr>' + rows + '</table>';
+
+    var failureBlocks = '';
+    testNames.forEach(function(pair) {
+      var groupName = pair[0], tf = pair[1];
+      var r = testData[tf] || {};
+      (r.failures || []).forEach(function(f) {
+        if (!f || typeof f !== 'object') return;
+        var src = f.source ? '<p style="font-weight:600;font-size:.8rem;margin:.4rem 0 .15rem">Test-Code:</p>' +
+                  '<pre style="white-space:pre-wrap;margin:0;padding:.5rem;background:var(--code-bg,#f5f5f5);' +
+                  'border-radius:4px;font-size:.78rem;overflow:auto">' + esc(f.source) + '</pre>' : '';
+        var out = f.output ? '<p style="font-weight:600;font-size:.8rem;margin:.4rem 0 .15rem">pytest-Ausgabe:</p>' +
+                  '<pre style="white-space:pre-wrap;margin:0;padding:.5rem;background:var(--code-bg,#f5f5f5);' +
+                  'border-radius:4px;font-size:.78rem;overflow:auto">' + esc(f.output) + '</pre>' : '';
+        failureBlocks += collapsible(
+          esc(groupName) + ' &rsaquo; <code>' + esc(f.name) + '</code>',
+          src + out
+        );
+      });
+    });
+    if (failureBlocks) {
+      inner += collapsible('Fehlgeschlagene Tests', failureBlocks);
+    } else if (testData.pytest_output) {
+      inner += collapsible('pytest-Ausgabe',
+        '<pre style="white-space:pre-wrap;margin:0;padding:.5rem;background:var(--code-bg,#f5f5f5);' +
+        'border-radius:4px;font-size:.78rem;overflow:auto">' + esc(testData.pytest_output) + '</pre>');
+    }
+    return collapsible('Endpunkt-Testergebnisse', inner);
+  }
+
+  function renderData(d, pu, sec) {
+    var parts = [];
+
+    if (d.coverage_scale && d.coverage_scale.length) {
+      parts.push(renderScale(
+        d.coverage_scale, d.coverage_earned,
+        'Bewertungsschema: Code Coverage',
+        'Gemessene Coverage'
+      ));
+    }
+
+    if (d.endpoint_tests && d.endpoint_test_names) {
+      parts.push(renderEndpointTests(d.endpoint_tests, d.endpoint_test_names));
+    }
+
+    if (d.plant_crud_scale && d.plant_crud_scale.length) {
+      parts.push(renderScale(
+        d.plant_crud_scale, d.plant_crud_earned,
+        'Bewertungsschema: Plant-/Schedule-/Log-Endpunkte',
+        'Erfolgsquote'
+      ));
+    }
+
+    if (d.pipeline_web_url) {
+      parts.push('<div class="info-box">🔗 <a href="' + esc(d.pipeline_web_url) +
+                  '" target="_blank">Pipeline ansehen</a> (Status: ' +
+                  esc(d.pipeline_status || '?') + ')</div>');
+    }
+
+    if (d.weight_dist_scale && d.weight_dist_scale.length) {
+      parts.push(renderScale(
+        d.weight_dist_scale, d.weight_dist_earned,
+        'Bewertungsschema: Gewichtsaufteilung',
+        'Min. Weight des Mitglieds mit kleinerem Anteil'
+      ));
+    }
+
+    if (d.mr_settings_scale && d.mr_settings_scale.length) {
+      parts.push(renderScale(
+        d.mr_settings_scale, d.mr_earned,
+        'Bewertungsschema: MR-Konfiguration',
+        'Fehlende Einstellungen'
+      ));
+    }
+
+    if (d.closes_scale && d.closes_scale.length) {
+      parts.push(renderScale(
+        d.closes_scale, d.closes_earned,
+        'Bewertungsschema: MR referenziert Story',
+        'Anzahl MRs mit Closes #x'
+      ));
+    }
+
+    if (d.commit_size_scale && d.commit_size_scale.length) {
+      parts.push(renderScale(
+        d.commit_size_scale, d.commit_size_earned,
+        'Bewertungsschema: Commit-Größe',
+        'Anzahl Commits > 50 Zeilen'
+      ));
+    }
+
+    if (d.commit_timing_scale && d.commit_timing_scale.length) {
+      parts.push(renderScale(
+        d.commit_timing_scale, d.commit_timing_earned,
+        'Bewertungsschema: Commit-Abstand',
+        'Anzahl Commits < 45s Abstand'
+      ));
+    }
+
+    if (d.distribution) {
+      parts.push(renderDistribution(d, pu));
+    }
+
+    if (d.user_stories) {
+      var sorted = d.user_stories.slice().sort(function(a, b) { return a.iid - b.iid; });
+      var inner = sorted.map(function(s) { return issueBlock(s, pu); }).join('') ||
+                  '<p class="missing">Keine gefunden</p>';
+      parts.push(collapsible(esc('User Stories (' + sorted.length + ')'), inner));
+    }
+
+    if (d.ai_issues) {
+      var aiSorted = d.ai_issues.slice().sort(function(a, b) { return a.iid - b.iid; });
+      var aiInner = aiSorted.map(function(s) { return issueBlock(s, pu); }).join('') ||
+                    '<p class="missing">Keine gefunden</p>';
+      parts.push(collapsible(esc('KI-Nutzungsprotokolle (' + aiSorted.length + ')'), aiInner));
+    }
+
+    if (d.merge_requests && d.merge_requests.length) {
+      parts.push(collapsible(
+        esc('Merge Requests (' + d.merge_requests.length + ')'),
+        renderMergeRequests(d.merge_requests)
+      ));
+    }
+
+    if (d.requirements_txt) {
+      parts.push(collapsible(
+        esc('requirements.txt'),
+        '<pre style="white-space:pre-wrap;margin:0;padding:.6rem;background:var(--code-bg,#f5f5f5);' +
+        'border-radius:4px;font-size:.85rem;overflow:auto">' + esc(d.requirements_txt) + '</pre>'
+      ));
+    }
+
+    if (d.diagrams && d.diagrams.length) {
+      var criteria = d.diagram_review || [];
+      var sid = sec ? sec.sec_id : '';
+      parts.push(renderDiagrams(d.diagrams, criteria, sid));
+      if (criteria.length) {
+        parts.push(renderDiagramSummary(d.diagrams, criteria, sid));
+      }
+    }
+
+    if (d.manual_review && d.manual_review.length && sec) {
+      var mrRows = d.manual_review.map(function(item) {
+        var val     = typeof item.earned === 'number' ? item.earned : '';
+        var comment = item.comment || '';
+        var sid     = esc(sec.sec_id);
+        var key     = esc(item.key);
+        return '<tr class="check-row">' +
+            '<td class="check-icon">✏️</td>' +
+            '<td class="check-desc">' + esc(item.label) + '</td>' +
+            '<td class="check-pts" style="white-space:nowrap">' +
+              '<input type="number" min="0" max="' + item.possible + '" value="' + val + '" ' +
+              'data-key="' + key + '" data-max="' + item.possible + '" ' +
+              'data-sec-id="' + sid + '" class="manual-input" ' +
+              'style="width:3rem;text-align:center;border:1px solid var(--border);' +
+              'border-radius:4px;padding:1px 3px;font-size:.85rem">' +
+              '&nbsp;/&nbsp;' + fmtN(item.possible) +
+            '</td></tr>' +
+          '<tr>' +
+            '<td></td>' +
+            '<td colspan="2" style="padding-bottom:.5rem">' +
+              '<textarea rows="2" placeholder="Kommentar …" ' +
+              'data-key="' + key + '" data-sec-id="' + sid + '" class="manual-comment" ' +
+              'style="width:100%;font-size:.82rem;border:1px solid var(--border);' +
+              'border-radius:4px;padding:3px 6px;resize:vertical;box-sizing:border-box">' +
+              esc(comment) +
+              '</textarea>' +
+            '</td>' +
+          '</tr>';
+      }).join('');
+      parts.push('<table class="checks-table" style="border-top:1px solid var(--border);margin-top:.4rem"><tbody>' +
+                 mrRows + '</tbody></table>');
+    }
+
+    return parts.join('\n');
+  }
+
+  function renderSection(sec, pu) {
+    var te = _secTotalEarned(sec);
+    var tp = _secTotalPossible(sec);
+
+    var icon, cls;
+    if (tp === 0)        { icon = '➖'; cls = 'neutral'; }
+    else if (te === tp)  { icon = '✅'; cls = 'full'; }
+    else if (te > 0)     { icon = '🟡'; cls = 'partial'; }
+    else                 { icon = '❌'; cls = 'none'; }
+
+    var cr = '';
+    (sec.checks || []).forEach(function(c) {
+      var ci = c.earned === c.possible ? '✅' : (c.earned > 0 ? '🟡' : '❌');
+      cr += '<tr class="check-row">' +
+            '<td class="check-icon">' + ci + '</td>' +
+            '<td class="check-desc">' + esc(c.description) + '</td>' +
+            '<td class="check-pts">' + fmtN(c.earned) + '&nbsp;/&nbsp;' + fmtN(c.possible) + '</td></tr>';
+      (c.bullets || []).forEach(function(b) {
+        cr += '<tr class="bullet-row"><td></td><td colspan="2" class="bullet">' + linkify(b, pu) + '</td></tr>';
+      });
+      if (c.note) {
+        cr += '<tr class="note-row"><td></td><td colspan="2" class="note">⚠️ ' + linkify(c.note, pu) + '</td></tr>';
+      }
+    });
+
+    var infos = (sec.infos || []).map(function(i) {
+      return '<div class="info-box">ℹ️ ' + esc(i) + '</div>';
+    }).join('');
+    var dh = renderData(sec.data || {}, pu, sec);
+    var mc = renderManualCorrection(sec);
+
+    return '<details class="section ' + cls + '"><summary>' +
+      '<span class="sec-icon">' + icon + '</span>' +
+      '<span class="sec-title">' + esc(sec.title) + '</span>' +
+      '<span class="sec-score" id="sec-score-' + sec.sec_id + '">' + fmtN(te) + '&nbsp;/&nbsp;' + fmtN(tp) + '</span>' +
+      '</summary>' +
+      '<div class="section-body"><table class="checks-table">' + cr + '</table>' + infos + dh + mc + '</div></details>';
+  }
+
+  function renderManualCorrection(sec) {
+    var data    = sec.data || {};
+    var mc      = data.manual_correction || {points: null, comment: ''};
+    var ptsVal  = typeof mc.points === 'number' ? mc.points : '';
+    var comment = mc.comment || '';
+    var sid     = esc(sec.sec_id);
+    return '<details class="data-view" style="margin-top:.5rem">' +
+      '<summary>✏️ Manuelle Korrektur' +
+      (typeof mc.points === 'number' ? ' (' + (mc.points > 0 ? '+' : '') + fmtN(mc.points) + 'P)' : '') +
+      '</summary>' +
+      '<div class="data-body">' +
+      '<label style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;margin-bottom:.4rem">' +
+      'Korrektur (+/-):' +
+      '<input type="number" step="0.5" value="' + esc(ptsVal) + '" placeholder="z.B. +2 oder -1" ' +
+      'class="manual-correction-input" data-sec-id="' + sid + '" ' +
+      'style="width:5rem;text-align:center;border:1px solid var(--border);' +
+      'border-radius:4px;padding:2px 4px;font-size:.85rem">' +
+      '<span style="color:var(--muted)">Punkte</span>' +
+      '</label>' +
+      '<textarea rows="2" placeholder="Anmerkung zur Korrektur …" ' +
+      'class="manual-correction-comment" data-sec-id="' + sid + '" ' +
+      'style="width:100%;font-size:.85rem;border:1px solid var(--border);' +
+      'border-radius:4px;padding:4px 7px;resize:vertical;box-sizing:border-box">' +
+      esc(comment) + '</textarea>' +
+      '</div></details>';
+  }
+
+  // ── Score-Helpers ────────────────────────────────────────────────────────────
+
+  function _secMR(sec) { return ((sec.data || {}).manual_review || []); }
+
+  function _secManualEarned(sec) {
+    return _secMR(sec).reduce(function(s, i) {
+      return s + (typeof i.earned === 'number' ? i.earned : 0);
+    }, 0);
+  }
+  function _secManualPossible(sec) {
+    return _secMR(sec).reduce(function(s, i) { return s + (i.possible || 0); }, 0);
+  }
+  function _secManualFilled(sec) {
+    var mr = _secMR(sec);
+    return mr.length > 0 && mr.every(function(i) { return typeof i.earned === 'number'; });
+  }
+
+  function _diagEarned(diagrams, criteria) {
+    if (!diagrams.length || !criteria.length) return 0;
+    var scored = diagrams.filter(function(d) { return !!d.svg; });
+    if (!scored.length) return 0;
+    return criteria.reduce(function(total, c) {
+      var sum = scored.reduce(function(s, d) {
+        var arr = (d.scores || {})[c.key] || [];
+        return s + arr.filter(Boolean).length;
+      }, 0);
+      return total + sum / scored.length;
+    }, 0);
+  }
+  function _secDiagramEarned(sec) {
+    var d = sec.data || {};
+    return _diagEarned(d.diagrams || [], d.diagram_review || []);
+  }
+  function _secDiagramPossible(sec) {
+    var d = sec.data || {};
+    var diagrams = d.diagrams || [], criteria = d.diagram_review || [];
+    return (diagrams.length > 0 && criteria.length > 0) ? _diagCriteriaPossible(criteria) : 0;
+  }
+
+  function _secCorrection(sec) {
+    var mc = (sec.data || {}).manual_correction;
+    return (mc && typeof mc.points === 'number') ? mc.points : 0;
+  }
+  function _secCorrectionEarned(sec) { return _secCorrection(sec); }
+  // Die manuelle Korrektur darf das Maximum (possible) einer Sektion nicht verändern -
+  // sie wirkt sich nur auf die erreichten Punkte aus.
+
+  function _secTotalEarned(sec) {
+    return sec.earned + _secManualEarned(sec) + _secDiagramEarned(sec) + _secCorrectionEarned(sec);
+  }
+  function _secTotalPossible(sec) {
+    return sec.possible + _secManualPossible(sec) + _secDiagramPossible(sec);
+  }
+
+  function _updateSecScore(sec) {
+    var span = document.getElementById('sec-score-' + sec.sec_id);
+    if (!span) return;
+    span.innerHTML = fmtN(_secTotalEarned(sec)) + '&nbsp;/&nbsp;' + fmtN(_secTotalPossible(sec));
+  }
+
+  function renderSummary(data) {
+    var secs = data.sections || [];
+
+    var subStyle = 'padding-left:1.2rem;color:var(--muted);font-size:.87rem';
+    var rows = secs.filter(function(s) {
+      return _secTotalPossible(s) > 0 || _secCorrection(s) !== 0;
+    }).map(function(s) {
+      var te = _secTotalEarned(s);
+      var tp = _secTotalPossible(s);
+      var secRow = '<tr><td>' + esc(s.title) + '</td>' +
+                   '<td class="pts">' + fmtN(te) + '&nbsp;/&nbsp;' + fmtN(tp) + '</td></tr>';
+
+      var mr = _secMR(s);
+      var checkRows = mr.length ? (s.checks || []).map(function(c) {
+        return '<tr><td style="' + subStyle + '">' + esc(c.description) + '</td>' +
+               '<td class="pts">' + fmtN(c.earned) + '&nbsp;/&nbsp;' + fmtN(c.possible) + '</td></tr>';
+      }).join('') : '';
+      var manualRows = mr.map(function(item) {
+        var pts = typeof item.earned === 'number' ? fmtN(item.earned) : '–';
+        return '<tr><td style="' + subStyle + '">' + esc(item.label) + '</td>' +
+               '<td class="pts">' + pts + '&nbsp;/&nbsp;' + fmtN(item.possible) + '</td></tr>';
+      }).join('');
+      return secRow + checkRows + manualRows;
+    }).join('');
+
+    var allFilled = secs.every(function(s) {
+      return _secMR(s).length === 0 || _secManualFilled(s);
+    });
+    var totalE = secs.reduce(function(s, sec) { return s + _secTotalEarned(sec); }, 0);
+    var totalP = secs.reduce(function(s, sec) { return s + _secTotalPossible(sec); }, 0);
+    var g   = totalP ? grade(totalE, totalP) : '—';
+    var pct = totalP ? Math.ceil(totalE / totalP * 100) : 0;
+    var note = allFilled ? '' : ' <span style="color:var(--muted);font-size:.8rem">(manuelle Punkte ausstehend)</span>';
+
+    document.getElementById('summary-container').innerHTML =
+      '<table class="summary-table">' +
+      '<tr><th>Bereich</th><th class="pts">Punkte</th></tr>' +
+      rows +
+      '<tr class="total"><td>Gesamt</td>' +
+      '<td class="pts">' + fmtN(totalE) + '&nbsp;/&nbsp;' + fmtN(totalP) + '</td></tr>' +
+      '</table>' +
+      '<p class="grade-line">' +
+      fmtN(totalE) + '&nbsp;/&nbsp;' + fmtN(totalP) + '&nbsp;Pkt. = <strong>' + pct + '%</strong>' +
+      '&nbsp;&rarr;&nbsp;Note: <strong>' + g + '</strong>' + note + '</p>';
+  }
+
+  function _suggestedFilename(data) {
+    if (SOURCE_FILENAME) return SOURCE_FILENAME;
+    return 'report_' + (data.project_name || 'report').replace(/[^\w-]/g, '_') + '_data.json';
+  }
+
+  function downloadJson(data) {
+    var filename = _suggestedFilename(data);
+    var json     = JSON.stringify(data, null, 2);
+    if (window.showSaveFilePicker) {
+      window.showSaveFilePicker({
+        suggestedName: filename,
+        types: [{description: 'JSON', accept: {'application/json': ['.json']}}],
+      }).then(function(fh) {
+        return fh.createWritable();
+      }).then(function(w) {
+        return w.write(json).then(function() { return w.close(); });
+      }).catch(function(err) {
+        if (err.name !== 'AbortError') alert('Speichern fehlgeschlagen: ' + err);
+      });
+    } else {
+      var blob = new Blob([json], {type: 'application/json'});
+      var url  = URL.createObjectURL(blob);
+      var a    = document.createElement('a');
+      a.href   = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      if (DATA) downloadJson(DATA);
+    }
+  });
+
+  function init(data) {
+    DATA = data;
+    document.title = 'Prüfbericht – ' + data.project_name;
+    document.getElementById('report-meta').innerHTML =
+      '<a href="' + esc(data.project_url) + '" target="_blank">' + esc(data.project_url) + '</a>' +
+      '&nbsp;·&nbsp;Namespace: <code>' + esc(data.namespace) + '</code>' +
+      '&nbsp;·&nbsp;Geprüft: ' + esc(data.checked_at);
+
+    var sc = document.getElementById('sections-container');
+    sc.innerHTML = (data.sections || []).map(function(s) {
+      return renderSection(s, data.project_url || '');
+    }).join('\n');
+
+    renderSummary(data);
+  }
+
+  // Delegierter Event-Handler für alle manuellen Eingabefelder
+  document.addEventListener('input', function(e) {
+    var t = e.target;
+    if (t.classList.contains('manual-input')) {
+      var v = t.value === '' ? null : parseInt(t.value);
+      if (v !== null) { v = Math.max(0, Math.min(parseInt(t.dataset.max), v)); t.value = v; }
+      var sec = (DATA.sections || []).filter(function(s) { return s.sec_id === t.dataset.secId; })[0];
+      if (sec) {
+        var item = _secMR(sec).filter(function(i) { return i.key === t.dataset.key; })[0];
+        if (item) item.earned = v;
+        _updateSecScore(sec);
+        renderSummary(DATA);
+      }
+    } else if (t.classList.contains('manual-comment')) {
+      var sec2 = (DATA.sections || []).filter(function(s) { return s.sec_id === t.dataset.secId; })[0];
+      if (sec2) {
+        var item2 = _secMR(sec2).filter(function(i) { return i.key === t.dataset.key; })[0];
+        if (item2) item2.comment = t.value;
+      }
+    } else if (t.classList.contains('diagram-comment')) {
+      var sec3 = (DATA.sections || []).filter(function(s) { return s.sec_id === t.dataset.secId; })[0];
+      if (sec3) {
+        var diag = ((sec3.data || {}).diagrams || []).filter(function(d) { return d.name === t.dataset.diagram; })[0];
+        if (diag) diag.comment = t.value;
+      }
+    } else if (t.classList.contains('manual-correction-input')) {
+      var sec4 = (DATA.sections || []).filter(function(s) { return s.sec_id === t.dataset.secId; })[0];
+      if (sec4) {
+        if (!sec4.data) sec4.data = {};
+        if (!sec4.data.manual_correction) sec4.data.manual_correction = {points: null, comment: ''};
+        var v2 = t.value === '' ? null : parseFloat(t.value);
+        sec4.data.manual_correction.points = (v2 !== null && !isNaN(v2)) ? v2 : null;
+        var summaryEl = t.closest('details');
+        if (summaryEl) {
+          var sumTextEl = summaryEl.querySelector('summary');
+          if (sumTextEl) {
+            sumTextEl.textContent = '✏️ Manuelle Korrektur' +
+              (typeof sec4.data.manual_correction.points === 'number'
+                ? ' (' + (sec4.data.manual_correction.points > 0 ? '+' : '') + fmtN(sec4.data.manual_correction.points) + 'P)'
+                : '');
+          }
+        }
+        _updateSecScore(sec4);
+        renderSummary(DATA);
+      }
+    } else if (t.classList.contains('manual-correction-comment')) {
+      var sec5 = (DATA.sections || []).filter(function(s) { return s.sec_id === t.dataset.secId; })[0];
+      if (sec5) {
+        if (!sec5.data) sec5.data = {};
+        if (!sec5.data.manual_correction) sec5.data.manual_correction = {points: null, comment: ''};
+        sec5.data.manual_correction.comment = t.value;
+      }
+    }
+  });
+
+  document.addEventListener('change', function(e) {
+    var t = e.target;
+    if (!t.classList.contains('diagram-score')) return;
+    var secId = t.dataset.secId;
+    var sec = (DATA.sections || []).filter(function(s) { return s.sec_id === secId; })[0];
+    if (!sec) return;
+    var diag = ((sec.data || {}).diagrams || []).filter(function(d) { return d.name === t.dataset.diagram; })[0];
+    if (diag) {
+      if (!diag.scores) diag.scores = {};
+      if (!diag.scores[t.dataset.key]) diag.scores[t.dataset.key] = [];
+      diag.scores[t.dataset.key][parseInt(t.dataset.index, 10)] = t.checked;
+    }
+    // Durchschnittszellen im Auswertungsblock aktualisieren
+    var criteria = (sec.data || {}).diagram_review || [];
+    var diagrams = (sec.data || {}).diagrams || [];
+    var scoredDiags = diagrams.filter(function(d) { return !!d.svg; });
+    criteria.forEach(function(c) {
+      var cell = document.getElementById('diag-avg-' + secId + '-' + c.key);
+      if (!cell) return;
+      var n = c.possible || 1;
+      var sum = scoredDiags.reduce(function(s, d) {
+        var arr = (d.scores || {})[c.key] || [];
+        return s + arr.filter(Boolean).length;
+      }, 0);
+      cell.innerHTML = fmtN(scoredDiags.length ? sum / scoredDiags.length : 0) + '&nbsp;/&nbsp;' + n;
+    });
+    var totalCell = document.getElementById('diag-total-' + secId);
+    if (totalCell) {
+      var totalPossible = _diagCriteriaPossible(criteria);
+      var earned = _diagEarned(diagrams, criteria);
+      totalCell.innerHTML = fmtN(earned) + '&nbsp;/&nbsp;' + totalPossible;
+      var sumEl = totalCell.closest('details');
+      if (sumEl) {
+        var s2 = sumEl.querySelector('summary');
+        if (s2) s2.textContent = 'Auswertung (' + fmtN(earned) + ' / ' + totalPossible + ' Punkte)';
+      }
+    }
+    _updateSecScore(sec);
+    renderSummary(DATA);
+  });
+
+  function loadFile(file) {
+    SOURCE_FILENAME = file.name;
+    var r = new FileReader();
+    r.onload = function(e) {
+      try { init(JSON.parse(e.target.result)); }
+      catch (ex) { alert('Ungültige JSON-Datei'); }
+    };
+    r.readAsText(file);
+  }
+
+  document.getElementById('file-import').addEventListener('change', function(ev) {
+    var f = ev.target.files[0]; if (!f) return;
+    loadFile(f); ev.target.value = '';
+  });
+
+  document.addEventListener('dragover', function(e) {
+    e.preventDefault(); document.body.classList.add('drag-over');
+  });
+  document.addEventListener('dragleave', function(e) {
+    if (!e.relatedTarget || e.relatedTarget === document.documentElement)
+      document.body.classList.remove('drag-over');
+  });
+  document.addEventListener('drop', function(e) {
+    e.preventDefault(); document.body.classList.remove('drag-over');
+    var f = e.dataTransfer.files[0];
+    if (f && f.name.endsWith('.json')) loadFile(f);
+  });
+
+  var dataFile = new URLSearchParams(window.location.search).get('data');
+  if (dataFile) {
+    SOURCE_FILENAME = dataFile.split('/').pop().split('?')[0] || null;
+    fetch(dataFile)
+      .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(init)
+      .catch(function(err) {
+        document.getElementById('sections-container').innerHTML =
+          '<p style="color:#dc2626;padding:1rem">⚠ Datendatei nicht geladen: ' +
+          '<code>' + esc(dataFile) + '</code> (' + err + ')<br>' +
+          'Bitte den Viewer über einen HTTP-Server öffnen ' +
+          '(z.B. <code>python -m http.server</code>).</p>';
+      });
+  }
+})();
+</script></body></html>
