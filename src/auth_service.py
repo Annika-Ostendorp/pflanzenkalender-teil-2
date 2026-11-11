@@ -1,8 +1,16 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 import time
+import os
+import secrets
 
-SECRET_KEY = "test-secret-key-for-jwt-signing-32"
+if os.environ.get("RENDER") and not os.environ.get("JWT_SECRET_KEY"):
+    raise RuntimeError("JWT_SECRET_KEY must be configured")
+
+SECRET_KEY = os.environ.setdefault(
+    "JWT_SECRET_KEY",
+    secrets.token_urlsafe(48)
+)
 
 class AuthenticationService:
     # Statische Methode, damit Funktion direkt ohne Instanz der Klasse aufgerufen werden kann,

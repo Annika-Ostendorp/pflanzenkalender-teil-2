@@ -100,3 +100,4 @@ data/
 # Environment variables (optional, but common)
 .env
 .env.*
+/data/
