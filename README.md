@@ -136,7 +136,15 @@ Die Tests können mit folgendem Befehl gestartet werden:
 python -m pytest
 ```
 
-Für den Anwendungsstart ist der tatsächliche Flask-Einstiegspunkt des Repositories zu verwenden.
+**Anwendung lokal starten (im Repository-Hauptverzeichnis):**
+
+```bash
+python src/app.py
+```
+
+Danach ist die Anwendung unter **http://127.0.0.1:5000** erreichbar. Für den Produktionsbetrieb gibt es zusätzlich `wsgi.py` als WSGI-Einstiegspunkt.
+
+Für Render **muss** die Umgebungsvariable `JWT_SECRET_KEY` gesetzt sein. Auch lokal ist ein stabiler, zufällig erzeugter Schlüssel sinnvoll; Passwörter und Schlüssel gehören nicht ins Repository.
 
 ## Live-Demo
 
@@ -145,6 +153,53 @@ Für den Anwendungsstart ist der tatsächliche Flask-Einstiegspunkt des Reposito
 Für die Hochschularbeit wurde eine öffentlich zugängliche Demonstrationsversion bereitgestellt.
 
 Die Demo verwendet lediglich eine temporäre Datenhaltung. Eingegebene Daten sind nicht als dauerhaft gespeicherte persönliche Pflanzenverwaltung zu verstehen.
+
+## Technische Referenz: Authentifizierung und API
+
+### Architektur und Datenhaltung
+
+Die Flask-Anwendung wird über `PlantAppManager` in `src/app.py` erstellt. Der `AuthenticationService` in `src/auth_service.py` übernimmt Passwort-Hashing, Passwortprüfung sowie die Erstellung und Verifikation der JWTs.
+
+Die Anwendung verwendet austauschbare Repository-Implementierungen: **In-Memory-Repositories** beispielsweise für isolierte Tests und **JSON-Repositories** für die lokale Ausführung. Diese Komponenten für Datenhaltung und Repository Pattern entstanden im Team; mein persönlicher Schwerpunkt lag auf den User Stories **#1–#3**.
+
+Die lokale Startkonfiguration verwendet JSON-Dateien unter `data/`. Beim Deployment auf Render ist Dateispeicherung ohne dauerhaftes Volume nicht als verlässliche Persistenz anzusehen.
+
+### Authentifizierungs-Endpunkte
+
+| Methode | Pfad | Funktion |
+|---|---|---|
+| POST | `/api/auth/register` | Benutzerkonto mit `username` und `password` anlegen |
+| POST | `/api/auth/login` | Anmelden und `access_token` erhalten |
+
+Ein erfolgreiches Registrieren liefert den HTTP-Status **201**. Ein bereits vergebener Benutzername wird mit **409 Conflict** behandelt. Erfolgreicher Login liefert **200** und ein JWT, ungültige Anmeldedaten führen zu **401 Unauthorized**.
+
+Die in `auth_service.py` implementierten JWTs verwenden **HS256** und eine Laufzeit von **3.600 Sekunden (eine Stunde)**. Für geschützte Anfragen wird der Header `Authorization: Bearer <token>` erwartet.
+
+### Geschützte Pflanzen-Endpunkte
+
+Die API stellt die Pflanzen- und Pflegefunktionen aus Teil 1 weiterhin bereit, unter anderem:
+
+| Methode | Pfad | Funktion |
+|---|---|---|
+| GET, POST | `/api/plants` | Eigene Pflanzen abrufen beziehungsweise anlegen |
+| GET, PUT, DELETE | `/api/plants/<id>` | Eigene Pflanze lesen, ändern oder löschen |
+| GET, POST | `/api/plants/<id>/schedules` | Pflegepläne abrufen und verwalten |
+| DELETE | `/api/plants/<id>/schedules/<care_type>` | Pflegeplan löschen |
+| GET, POST | `/api/plants/<id>/logs` | Pflegeprotokolle abrufen und anlegen |
+| GET | `/api/plants/<id>/next-actions` | Nächste Pflegeaktionen berechnen |
+| GET | `/api/overdue` | Überfällige eigene Pflegeaktionen abrufen |
+
+Diese Routen prüfen die JWT-Authentifizierung. Bei fehlendem beziehungsweise ungültigem Token wird die Anfrage mit **401** abgelehnt. Ein Zugriff auf nicht vorhandene oder fremde Pflanzen liefert **404**, um fremde Ressourcenzuordnungen nicht offenzulegen.
+
+### Testkonfiguration
+
+Die Tests verwenden `pytest` und den Flask-Testclient. `tests/conftest.py` stellt unter anderem getrennte authentifizierte Testclients für verschiedene Benutzer bereit. `pytest.ini` aktiviert bereits die Coverage-Messung:
+
+```bash
+python -m pytest
+```
+
+Dabei werden `--cov=src`, ein XML-Coverage-Bericht und die Anzeige nicht abgedeckter Zeilen verwendet. Die in der README genannten **308 erfolgreichen Tests bei 99 % Coverage** sind ein zuvor dokumentierter lokaler Teststand; sie wurden für diese README-Prüfung nicht neu ausgeführt.
 
 ## KI-Unterstützung
 
